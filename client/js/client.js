@@ -1,10 +1,14 @@
 var Client = {};
 Client.socket = io('http://localhost:55000');
-
+//test
 Client.sendTest = function(){
     console.log("test sent");
     Client.socket.emit('test');
 };
+
+
+
+
 
 Client.askNewPlayer = function(){
     Client.socket.emit('newplayer');
@@ -33,3 +37,21 @@ Client.socket.on('allplayers',function(data){
 });
 
 
+
+
+
+Client.socket.on('loglobbies',function(data){
+    console.log(data);
+});
+
+Client.askGetLobbies = function(){
+    Client.socket.emit('getLobbyList');
+};
+
+Client.askCreateLobby = function () {
+    Client.socket.emit('newlobby');
+}
+
+Client.askJoinLobby = function () {
+    Client.socket.emit('joinlobby', [1]);
+}

@@ -10,6 +10,7 @@ Game.preload = function() {
 
 Game.create = function(){
     Game.playerMap = {};
+
     var testKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
     testKey.onDown.add(Client.sendTest, this);
     
@@ -30,7 +31,7 @@ Game.movePlayer = function(id,x,y){
     var player = Game.playerMap[id];
     var distance = Phaser.Math.distance(player.x,player.y,x,y);
     var tween = game.add.tween(player);
-    var duration = distance*10;
+    var duration = distance * 10;
     tween.to({x:x,y:y}, duration);
     tween.start();
 };
