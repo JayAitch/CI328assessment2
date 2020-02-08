@@ -92,16 +92,19 @@ class GameScene extends Phaser.Scene{
     getCoordinates(pointer){
         Client.sendClick(pointer.worldX,pointer.worldY);
     }
+
+
     addNewPlayer(id, x, y){
         Game.playerMap[id] = this.add.sprite(x,y,'sprite');
     }
 
 
+
+
     movePlayer (id,x,y){
-        console.log(id,x,y);
+        // tween player to server calculate player position
         var player = Game.playerMap[id];
         console.log(Phaser.Math);
-
         var distance = Phaser.Math.Distance.Between(player.x,player.y,x,y);
         var duration = distance * 10;
         var tween = this.add.tween(

@@ -39,6 +39,11 @@ Client.sendMove = function (direction){
     Client.socket.emit('move', {direction:direction});
 }
 
+// callback to rotate player based on their position
+// performs css translation to maintain consistant game-server data
+Client.socket.on('setrotation',function(data){
+    rotateCanvas(data["player-number"]);
+});
 
 
 // convert to using this kind of prototype notation
