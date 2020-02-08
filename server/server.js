@@ -15,8 +15,19 @@ io.on('connection', function(client) {
             x: randomInt(100,400),
             y: randomInt(100,400)
         };
+
         client.emit('allplayers',getAllPlayers());
+
         client.broadcast.emit('newplayer',client.player);
+
+        client.on('move',function(data) {
+
+            // could be either direction
+            client.player.x = client.player.x + (10 * data.direction);
+            client.player.y = client.player.y;
+            io.emit('move', client.player);
+        });
+
 
         client.on('click',function(data) {
             console.log('click to '+data.x+', '+data.y);

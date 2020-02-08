@@ -24,6 +24,7 @@ Client.socket.on('allplayers',function(data){
     }
 
     Client.socket.on('move',function(data){
+        console.log(data);
         Game.movePlayer(data.id,data.x,data.y);
     });
 
@@ -33,3 +34,11 @@ Client.socket.on('allplayers',function(data){
 });
 
 
+
+Client.sendMove = function (direction){
+    Client.socket.emit('move', {direction:direction});
+}
+
+
+
+// convert to using this kind of prototype notation

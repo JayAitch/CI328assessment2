@@ -1,4 +1,13 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '');
 
-game.state.add('Game', Game);
-game.state.start('Game');
+const config = {
+    type: Phaser.AUTO,
+    width:800,
+    height: 600,
+    scene: [GameScene],
+}
+
+var game;
+window.addEventListener('load', (event) => {
+    game = new Phaser.Game(config);
+});
+
