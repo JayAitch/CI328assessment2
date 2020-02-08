@@ -35,6 +35,10 @@ io.on('connection', function(client) {
             // restict movement to player goal
             let moveDirection = getMoveDirection(playerNumber);
             let moveSpeed = 10;
+
+            // dont let the client hack the move speed through inputing a higher direction
+            let direction = Math.sign(data.direction);
+
             let xMovement = moveDirection.x * (moveSpeed * data.direction);
             let yMovement = moveDirection.y * (moveSpeed * data.direction);
 
@@ -104,3 +108,4 @@ function getMoveDirection(playerNumber){
         case 3:   return {x: -1, y:0 }
     }
 }
+
