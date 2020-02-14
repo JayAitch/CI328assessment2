@@ -3,7 +3,7 @@ const config = {
     type: Phaser.AUTO,
     width:800,
     height: 800,
-    scene: [GameScene],
+    scene: [LandingScene,LobbySelectionScene, LobbyScene,GameScene],
 }
 
 var game;

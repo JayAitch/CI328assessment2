@@ -103,15 +103,15 @@ class GameScene extends Phaser.Scene{
 
 
     preload(){
-        this.load.image('sprite', 'assets/coin.png');
-        this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
-        this.load.image('green_paddleV', 'assets/green_paddleV.png');
-        this.load.image('red_paddleV', 'assets/red_paddleV.png');
-        this.load.image('yellow_paddleV', 'assets/yellow_paddleV.png');
-        this.load.image('blue_paddleH', 'assets/blue_paddleH.png');
-        this.load.image('green_paddleH', 'assets/green_paddleH.png');
-        this.load.image('red_paddleH', 'assets/red_paddleH.png');
-        this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
+        // this.load.image('sprite', 'assets/coin.png');
+        // this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
+        // this.load.image('green_paddleV', 'assets/green_paddleV.png');
+        // this.load.image('red_paddleV', 'assets/red_paddleV.png');
+        // this.load.image('yellow_paddleV', 'assets/yellow_paddleV.png');
+        // this.load.image('blue_paddleH', 'assets/blue_paddleH.png');
+        // this.load.image('green_paddleH', 'assets/green_paddleH.png');
+        // this.load.image('red_paddleH', 'assets/red_paddleH.png');
+        // this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
     }
 
     getCoordinates(pointer){
