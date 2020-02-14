@@ -3,13 +3,61 @@ const PORT = 55000;
 var server = require('http').createServer();
 var io = require('socket.io')(server);
 
+// here for now as we only have one lobby
+// only the collection needs to be up here in future
+
+
 
 io.on('connection', function(client) {
-    
+
     client.on('test', function() {
         console.log('test received');
     });
-    
+
+
+
+    client.on('joinlobby', function(){
+
+        client.member = {
+            position: server.lastMemberID++,
+            ready: false,
+            socketid : client.id
+        }
+
+        //console.log(client.socket);
+     // /   console.log(client.socket.identifier);
+        lobby.members.push(client.member);
+        // this is currrently broadcasting to everything
+        client.broadcast.emit('newmember', client.member);
+
+        console.log(client.handshake.address);
+        client.on('changecharacter',function(data) {
+            //todo: change the character
+
+            // tell everyone in the lobby the player has changed
+            // this should probably be only the people in the lobby
+            client.broadcast.emit('characterchange', client.player);
+        });
+
+
+
+    });
+
+
+
+    client.on('triggerload', function(data){
+        console.log("triggering loading");
+        // we dont care about the order this happens so we dont need to broadcast
+        // there might be a way of doing this more cleanly by maintaining a list of sockets
+        for(let memberIterator = 0; memberIterator < lobby.members.length; memberIterator++){
+            let member = lobby.members[memberIterator]
+            //if (member.hasOwnProperty(socketid)){
+            io.sockets.to(member.socketid).emit("loadgame");
+            // }
+        }
+    });
+
+
     client.on('newplayer',function() {
         let playerNumber = server.lastPlayerID % 4;
         let startVectors = getStartVectors(playerNumber);
@@ -23,7 +71,7 @@ io.on('connection', function(client) {
 
         client.emit('allplayers',getAllPlayers());
 
-        client.broadcast.emit('newplayer',client.player);
+        client.broadcast.emit('newplayer', client.player);
 
 
         // temp: callback to force rotation of the canvas so the player is at the bottom
@@ -68,7 +116,21 @@ server.listen(PORT, function(){
     console.log('Listening on ' + server.address().port);
 });
 
+//create this somwhere else in the future
+// i can see multiple lobbies being easy if this works
+// we may want to run multiple servers, a lobby server and a game server would make the code significantly cleaner
+
+var lobby = {};
+lobby.members = [];
+
+
+server.lastMemberID = 0;
+
 server.lastPlayerID = 0;
+
+
+
+
 
 function getAllPlayers(){
     var players = [];

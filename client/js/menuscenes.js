@@ -28,7 +28,7 @@ class LandingScene extends Phaser.Scene {
         super({key: 'landing'});
     }
     preload(){
-        this.load.image('sprite', 'assets/coin.png');
+  //      this.load.image('sprite', 'assets/coin.png');
         this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
         this.load.image('green_paddleV', 'assets/green_paddleV.png');
         this.load.image('red_paddleV', 'assets/red_paddleV.png');
@@ -43,10 +43,13 @@ class LandingScene extends Phaser.Scene {
     create() {
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'Best Pong', textStyles.header);
         offsetByWidth(title);
-        this.serveraddress = "http://localhost:55000"; // not current used this should be from an input
-        //Client.socket  = io(this.serveraddress);
+        this.ip = 'localhost';
+        this.socket = '55000';
+        // error handle fained connection in lobby switch make sure this has happended
+        startClient(this.ip, this.socket);
 
         let playBtnAction = () => {
+            // error handle fained connection in lobby switch
             this.scene.start("lobbyselection");
         };
 
@@ -77,7 +80,7 @@ class LobbySelectionScene extends Phaser.Scene {
 
     create() {
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'LobbySelection - Stubbed', textStyles.header);
-
+        offsetByWidth(title);
         let playBtnAction =  () => {
             this.scene.start("lobby");
         };
@@ -99,6 +102,8 @@ class LobbySelectionScene extends Phaser.Scene {
 
     }
 }
+
+var Lobby = {};
 class LobbyScene extends Phaser.Scene {
     constructor() {
         super({key: 'lobby'});
@@ -106,10 +111,27 @@ class LobbyScene extends Phaser.Scene {
     }
 
     create() {
-        this.add.text(gameCenterX(), gameCenterY() - 350, 'Lobby', textStyles.header);
+        Client.askJoinLobby();
+
+        Lobby.newLobbyMember = (function(memberid, address, socketid) {
+            console.log(memberid);
+            console.log(address);
+            console.log(socketid);
+        });
+
+
+        let header = this.add.text(gameCenterX(), gameCenterY() - 350, 'Lobby', textStyles.header);
+
+        offsetByWidth(header);
+
         let playBtnAction = () => {
-            this.scene.start("maingame");
+            // we probably want to have seperate ready buttons or somehting ehr
+           Client.triggerLoad();
         };
+
+        Game.triggerGame = () =>{
+            this.scene.start("maingame");
+        }
 
 
         // create the button object, no need for an icon, or UI text

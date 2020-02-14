@@ -78,12 +78,13 @@ class GameScene extends Phaser.Scene{
 
 
        // this.input.onTap.add(Game.getCoordinates, this);
-
-        Client.askNewPlayer();
-
-        // append methods to game object for client to interact with
         Game.addNewPlayer = ((id,x,y)=>{this.addNewPlayer(id, x, y)})
         Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)})
+
+        Client.askNewPlayer();
+        console.log("game started");
+        // append methods to game object for client to interact with
+
        // Game.setPlayerChar = ((number) => {this.switchPlayerCharacter(number)});
     }
 
