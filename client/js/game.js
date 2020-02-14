@@ -84,9 +84,34 @@ class GameScene extends Phaser.Scene{
         // append methods to game object for client to interact with
         Game.addNewPlayer = ((id,x,y)=>{this.addNewPlayer(id, x, y)})
         Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)})
+       // Game.setPlayerChar = ((number) => {this.switchPlayerCharacter(number)});
     }
+
+    getPlayerCharacter(id){
+      let playerNumber = id % 4;
+        switch(playerNumber){
+          case 0:
+            return 'blue_paddleV'
+          case 1:
+            return 'green_paddleH' 
+          case 2:
+            return 'red_paddleV'
+          case 3:
+            return 'yellow_paddleH'
+        }
+    }
+
+
     preload(){
         this.load.image('sprite', 'assets/coin.png');
+        this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
+        this.load.image('green_paddleV', 'assets/green_paddleV.png');
+        this.load.image('red_paddleV', 'assets/red_paddleV.png');
+        this.load.image('yellow_paddleV', 'assets/yellow_paddleV.png');
+        this.load.image('blue_paddleH', 'assets/blue_paddleH.png');
+        this.load.image('green_paddleH', 'assets/green_paddleH.png');
+        this.load.image('red_paddleH', 'assets/red_paddleH.png');
+        this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
     }
 
     getCoordinates(pointer){
@@ -95,7 +120,7 @@ class GameScene extends Phaser.Scene{
 
 
     addNewPlayer(id, x, y){
-        Game.playerMap[id] = this.add.sprite(x,y,'sprite');
+        Game.playerMap[id] = this.add.sprite(x,y,this.getPlayerCharacter(id));
     }
 
 
