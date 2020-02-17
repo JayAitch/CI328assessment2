@@ -47,12 +47,12 @@ function startClient(ip, socket){
         });
     });
 
-
-// callback to rotate player based on their position
-// performs css translation to maintain consistant game-server data
-    Client.socket.on('setrotation',function(data){
-        rotateCanvas(data["player-number"]);
-    });
+//
+// // callback to rotate player based on their position
+// // performs css translation to maintain consistant game-server data
+//     Client.socket.on('setrotation',function(data){
+//         rotateCanvas(data["player-number"]);
+//     });
 
 
 

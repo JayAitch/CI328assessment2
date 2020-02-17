@@ -51,8 +51,11 @@ io.on('connection', function(client) {
             lobby.members[clientId].isready = isReady;
 
             let isLobbyReady = true;
-            io.sockets.to('lobby').emit('playerready', {key: clientId, isready: isReady});
+          //  io.sockets.to('lobby').emit('playerready', {key: clientId, isready: isReady});
 
+            io.sockets.in('lobby').emit('playerready', {key: clientId, isready: isReady});
+
+            // go through and make sure everyone is ready
             for(let key in lobby.members){
                 // some seriouse jank, deffo move to ood
                 if(!lobby.members[key].isready){
@@ -60,15 +63,17 @@ io.on('connection', function(client) {
                 }
             }
 
+            // if they are all ready clear the lobby and trigger game load
             if(isLobbyReady){
                 setTimeout( function () {
-                    io.sockets.to('lobby').emit("loadgame");
+                    io.sockets.in('lobby').emit("loadgame");
                     lobby = {};
                     lobby.members = {};
                 }, 3000);
             };
         });
     });
+
 
 
 
@@ -85,6 +90,11 @@ io.on('connection', function(client) {
     // });
     //
 
+
+
+    // this logic should now be done when the lobby ready trigger is caused
+    // this also fixes a potential issue with the duplication of players
+    // this encapsulating should be done through loadgame calls
     client.on('newplayer',function() {
         let playerNumber = server.lastPlayerID % 4;
         let startVectors = getStartVectors(playerNumber);
@@ -98,8 +108,8 @@ io.on('connection', function(client) {
             id: server.lastPlayerID++,
             playnumber: server.lastPlayerID % 4,
             x: startVectors.x,
-            y: startVectors.y
-          //  bounds: createBounds(startVectors, )
+            y: startVectors.y,
+            bounds: createBounds(startVectors, width, height, isRotated(playerNumber))
         };
 
 
@@ -109,8 +119,8 @@ io.on('connection', function(client) {
         client.broadcast.emit('newplayer', client.player);
 
 
-        // temp: callback to force rotation of the canvas so the player is at the bottom
-        client.emit('setrotation', {"player-number": playerNumber});
+        // // temp: callback to force rotation of the canvas so the player is at the bottom
+        // client.emit('setrotation', {"player-number": playerNumber});
 
         // we will want to write out own update mechanic, this will allow us to check for collisions after moving and combine movement of player/ball logic
         client.on('move',function(data) {
@@ -157,7 +167,7 @@ server.listen(PORT, function(){
 
 var lobby = {};
 lobby.members = {};
-players = [];
+
 
 server.lastMemberID = 0;
 
@@ -165,7 +175,16 @@ server.lastPlayerID = 0;
 
 
 
+function isRotated(playerNumber){
+    return !playerNumber % 2;
+}
 
+function formPlayers(members){
+    // create a player for each member
+    // add them to the client object?? for instancing
+    // get stats from lobby like position and character to create player objects
+    // return
+}
 
 function getAllPlayers(){
     var players = [];
