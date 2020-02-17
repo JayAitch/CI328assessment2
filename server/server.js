@@ -20,17 +20,18 @@ io.on('connection', function(client) {
 
         client.member = {
             position: server.lastMemberID++,
-            ready: false,
+            isready: false,
             socketid : client.id
         }
 
-        //console.log(client.socket);
-     // /   console.log(client.socket.identifier);
-        lobby.members.push(client.member);
+
+        lobby.members[client.id] = client.member;
+
+        client.emit('alllobbymembers', lobby.members);
         // this is currrently broadcasting to everything
         client.broadcast.emit('newmember', client.member);
 
-        console.log(client.handshake.address);
+
         client.on('changecharacter',function(data) {
             //todo: change the character
 
@@ -40,6 +41,40 @@ io.on('connection', function(client) {
         });
 
 
+        client.on('playerreadytoggle', function(data){
+            console.log('playerreadytoggle');
+            let clientId = client.id;
+            let isReady = !lobby.members[clientId].isready
+
+            lobby.members[clientId].isready = isReady;
+
+            let isLobbyReady = true;
+            for(let key in lobby.members){
+                let member = lobby.members[key];
+                // monkey - there must be a way of storing sockets to send to
+                io.sockets.to(member.socketid).emit('playerready', {key: clientId, isready: isReady});
+                console.log("emitting to:" + member.socketid);
+
+                // some seriouse jank, deffo move to ood
+                if(!member.isready){
+                    isLobbyReady = false;
+                }
+            }
+
+            if(isLobbyReady){
+                setTimeout( function () {
+                    // repeated code :( monkey
+                    for(let key in lobby.members){
+                        let member = lobby.members[key]
+                        //- there must be a way of storing sockets to send to
+                        io.sockets.to(member.socketid).emit("loadgame");
+                    }
+                }, 3000);
+
+
+            };
+
+        });
 
     });
 
@@ -47,10 +82,10 @@ io.on('connection', function(client) {
 
     client.on('triggerload', function(data){
         console.log("triggering loading");
-        // we dont care about the order this happens so we dont need to broadcast
+        // we dont care about the order this happens so we dont need to broadcast - maybe we do who knows
         // there might be a way of doing this more cleanly by maintaining a list of sockets
-        for(let memberIterator = 0; memberIterator < lobby.members.length; memberIterator++){
-            let member = lobby.members[memberIterator]
+        for(let key in lobby.members){
+            let member = lobby.members[key]
             //if (member.hasOwnProperty(socketid)){
             io.sockets.to(member.socketid).emit("loadgame");
             // }
@@ -121,7 +156,7 @@ server.listen(PORT, function(){
 // we may want to run multiple servers, a lobby server and a game server would make the code significantly cleaner
 
 var lobby = {};
-lobby.members = [];
+lobby.members = {};
 
 
 server.lastMemberID = 0;

@@ -104,6 +104,28 @@ class LobbySelectionScene extends Phaser.Scene {
 }
 
 var Lobby = {};
+
+
+class LobbyCard {
+    constructor(x,y, scene) {
+        this.readyText = scene.add.text(x + 150, y, 'not ready', textStyles.header);
+        this.playerText = scene.add.text(x - 150, y, 'playerimage', textStyles.header);
+    }
+    set readyState(val){
+        this.isReady = val;
+        if(val){
+            this.readyText.text = "ready";
+        }
+        else{
+            this.readyText.text = "not ready";
+        }
+    }
+    set character(val){
+        // show an image
+    }
+}
+
+
 class LobbyScene extends Phaser.Scene {
     constructor() {
         super({key: 'lobby'});
@@ -113,10 +135,19 @@ class LobbyScene extends Phaser.Scene {
     create() {
         Client.askJoinLobby();
 
-        Lobby.newLobbyMember = (function(memberid, address, socketid) {
-            console.log(memberid);
-            console.log(address);
-            console.log(socketid);
+        this.lobbyCards =  [];
+        this.listPos = gameCenterY() - 150//temp
+
+        Lobby.newLobbyMember = ((key, isready, position) => {
+            let newCard = new LobbyCard(gameCenterX(), this.listPos, this);
+            this.lobbyCards[key] = newCard;
+            this.listPos += 25;
+        });
+
+        Lobby.memberReadied = ((key, isready, position) => {
+            console.log(this.lobbyCards);
+            let memberCard = this.lobbyCards[key].readyState = isready;
+            console.log(memberCard);
         });
 
 
@@ -126,7 +157,8 @@ class LobbyScene extends Phaser.Scene {
 
         let playBtnAction = () => {
             // we probably want to have seperate ready buttons or somehting ehr
-           Client.triggerLoad();
+           //Client.triggerLoad();
+            Client.memberReadyToggle();
         };
 
         Game.triggerGame = () =>{

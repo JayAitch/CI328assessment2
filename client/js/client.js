@@ -55,6 +55,12 @@ function startClient(ip, socket){
 
 
 
+
+
+
+
+
+
     // not like this
     Client.triggerLoad = function(){
         Client.socket.emit('triggerload');
@@ -68,15 +74,47 @@ function startClient(ip, socket){
 
 
 
+
     Client.askJoinLobby = function(){
         Client.socket.emit('joinlobby');
         // extend this by passing in lobby id or something
     };
 
+
+
+
+
     Client.socket.on('newmember',function(data){
         console.log(data);
         Lobby.newLobbyMember(data.socketid, data.ready, data.position)
     });
-// convert to using this kind of prototype notation
+
+
+
+
+    Client.memberReadyToggle = function(){
+        Client.socket.emit('playerreadytoggle');
+    }
+
+
+
+    Client.socket.on('playerready', function(data){
+        console.log(data);
+        Lobby.memberReadied(data.key, data.isready);
+    });
+
+
+
+    // this could target a specific lobby?
+    Client.socket.on('alllobbymembers',function (data) {
+        console.log('alllobbymemebrs');
+        for(let key in data){
+            let member = data[key];
+            console.log('alllobbymemebrs');
+            Lobby.newLobbyMember(key, member.ready, member.position);
+        }
+    });
+
+    // convert to using this kind of prototype notation
 }
 
