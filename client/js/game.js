@@ -121,7 +121,12 @@ class GameScene extends Phaser.Scene{
 
 
     addNewPlayer(id, x, y){
-        Game.playerMap[id] = this.add.sprite(x,y,this.getPlayerCharacter(id));
+        if(Game.playerMap[id]){
+
+        }else{
+            Game.playerMap[id] = this.add.sprite(x,y,this.getPlayerCharacter(id));
+        }
+
     }
 
 

@@ -18,6 +18,7 @@ io.on('connection', function(client) {
 
     client.on('joinlobby', function(){
 
+        client.join('lobby'); // i think we can have a list of rooms
         client.member = {
             position: server.lastMemberID++,
             isready: false,
@@ -28,6 +29,7 @@ io.on('connection', function(client) {
         lobby.members[client.id] = client.member;
 
         client.emit('alllobbymembers', lobby.members);
+
         // this is currrently broadcasting to everything
         client.broadcast.emit('newmember', client.member);
 
@@ -44,68 +46,66 @@ io.on('connection', function(client) {
         client.on('playerreadytoggle', function(data){
             console.log('playerreadytoggle');
             let clientId = client.id;
-            let isReady = !lobby.members[clientId].isready
+            let isReady = !client.member.isready
 
             lobby.members[clientId].isready = isReady;
 
             let isLobbyReady = true;
-            for(let key in lobby.members){
-                let member = lobby.members[key];
-                // monkey - there must be a way of storing sockets to send to
-                io.sockets.to(member.socketid).emit('playerready', {key: clientId, isready: isReady});
-                console.log("emitting to:" + member.socketid);
+            io.sockets.to('lobby').emit('playerready', {key: clientId, isready: isReady});
 
+            for(let key in lobby.members){
                 // some seriouse jank, deffo move to ood
-                if(!member.isready){
+                if(!lobby.members[key].isready){
                     isLobbyReady = false;
                 }
             }
 
             if(isLobbyReady){
                 setTimeout( function () {
-                    // repeated code :( monkey
-                    for(let key in lobby.members){
-                        let member = lobby.members[key]
-                        //- there must be a way of storing sockets to send to
-                        io.sockets.to(member.socketid).emit("loadgame");
-                    }
+                    io.sockets.to('lobby').emit("loadgame");
+                    lobby = {};
+                    lobby.members = {};
                 }, 3000);
-
-
             };
-
         });
-
     });
 
 
 
-    client.on('triggerload', function(data){
-        console.log("triggering loading");
-        // we dont care about the order this happens so we dont need to broadcast - maybe we do who knows
-        // there might be a way of doing this more cleanly by maintaining a list of sockets
-        for(let key in lobby.members){
-            let member = lobby.members[key]
-            //if (member.hasOwnProperty(socketid)){
-            io.sockets.to(member.socketid).emit("loadgame");
-            // }
-        }
-    });
-
+    // client.on('triggerload', function(data){
+    //     console.log("triggering loading");
+    //     // we dont care about the order this happens so we dont need to broadcast - maybe we do who knows
+    //     // there might be a way of doing this more cleanly by maintaining a list of sockets
+    //     for(let key in lobby.members){
+    //         let member = lobby.members[key]
+    //         //if (member.hasOwnProperty(socketid)){
+    //         io.sockets.to(member.socketid).emit("loadgame");
+    //         // }
+    //     }
+    // });
+    //
 
     client.on('newplayer',function() {
         let playerNumber = server.lastPlayerID % 4;
         let startVectors = getStartVectors(playerNumber);
+
+
+        let width = 5; //temp
+        let height = 2; //temp
+
 
         client.player = {
             id: server.lastPlayerID++,
             playnumber: server.lastPlayerID % 4,
             x: startVectors.x,
             y: startVectors.y
+          //  bounds: createBounds(startVectors, )
         };
 
-        client.emit('allplayers',getAllPlayers());
 
+        client.emit('allplayers', getAllPlayers());
+
+        // called on all clients except the socket this thread is in
         client.broadcast.emit('newplayer', client.player);
 
 
@@ -157,7 +157,7 @@ server.listen(PORT, function(){
 
 var lobby = {};
 lobby.members = {};
-
+players = [];
 
 server.lastMemberID = 0;
 
@@ -179,6 +179,48 @@ function getAllPlayers(){
 function randomInt(low, high) {
     return Math.floor(Math.random() * (high - low) + low);
 }
+
+
+
+
+
+
+
+
+
+
+function createPoint(x,y){
+    return {x: x, y:y};
+}
+
+
+function createBounds(position, width, height, isRotated){
+
+    let topLeft, topRight, bottomLeft, bottomRight
+
+
+    // bounds on a rotated paddle use the width as the height
+    if(isRotated){
+        topLeft = position;
+        topRight = createPoint(position.x + height, position.y);
+        bottomLeft = createPoint(position.x, position.y + width);
+        bottomRight = createPoint(position.x + height, position.y + width);
+    }
+    else{
+        topLeft = position;
+        topRight = createPoint(position.x + width, position.y);
+        bottomLeft = createPoint(position.x, position.y + height);
+        bottomRight = createPoint(position.x + width, position.y + height);
+    }
+
+
+    let bounds = {topLeft:topLeft, topRight:topRight, bottomLeft:bottomLeft, bottomRight:bottomRight};
+    return bounds;
+}
+
+
+
+
 
 
 // get where the player should start

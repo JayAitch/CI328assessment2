@@ -162,6 +162,7 @@ class LobbyScene extends Phaser.Scene {
         };
 
         Game.triggerGame = () =>{
+            Game.triggerGame = null;
             this.scene.start("maingame");
         }
 

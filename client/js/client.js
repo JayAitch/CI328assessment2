@@ -28,12 +28,13 @@ function startClient(ip, socket){
     }
 
     Client.socket.on('newplayer',function(data){
-        Game.addNewPlayer(data.id,data.x,data.y);
+         Game.addNewPlayer(data.id,data.x,data.y);
     });
 
     Client.socket.on('allplayers',function(data){
         for(var i = 0; i < data.length; i++){
-            Game.addNewPlayer(data[i].id,data[i].x,data[i].y);
+            console.log(data[i]);
+           Game.addNewPlayer(data[i].id,data[i].x,data[i].y);
         }
 
         Client.socket.on('move',function(data){
