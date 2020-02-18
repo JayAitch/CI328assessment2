@@ -300,10 +300,6 @@ class PhysicsObject{
         console.log(otherObject);
     }
 
-    // getBounds(){
-    //     return false;
-    // }
-
     intersects(a, b){
         return false;
     }
@@ -333,35 +329,10 @@ class PhysicsObject{
     //https://www.sevenson.com.au/actionscript/sat/
     //https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
     isOutOfBounds(){
-        // let bounds = this.getBounds();
-        // let isOutOfBounds = false;
-        // for(let thisBoundsKey in bounds){
-        //     if(isOutOfBounds) return isOutOfBounds;
-        //     let thisBound = bounds[thisBoundsKey];
-        //
-        //     for(let gameBoundsKey in gameBounds){
-        //         let gameBound = gameBounds[gameBoundsKey];
-        //         isOutOfBounds = this.intersects(thisBound, gameBound);
-        //     }
-        // };
-        // return isOutOfBounds;
         return false;
     }
-
-    // simple - wrong somewhere
     isOverlapping(a, b){
-        // let aBounds = a.getBounds();
-        // let bBounds = b.getBounds();
-        // let isOverLapping = false;
-        // for(let aBoundsKey in aBounds){
-        //     if(isOverLapping) return isOverLapping;
-        //
-        //     let aBound = bounds[aBoundsKey];
-        //     for(let bBoundsKey in bBounds){
-        //         let bBound = bBounds[bBoundsKey];
-        //         isOverLapping = this.intersects(aBound, bBound);
-        //     }
-        // };
+        return false;
     }
 
     setVelocity(x, y){
