@@ -95,22 +95,21 @@ io.on('connection', function(client) {
     // this logic should now be done when the lobby ready trigger is caused
     // this also fixes a potential issue with the duplication of players
     // this encapsulating should be done through loadgame calls
-    client.on('newplayer',function() {
+    client.on('newplayer', function() {
         let playerNumber = server.lastPlayerID % 4;
         let startVectors = getStartVectors(playerNumber);
 
 
-        let width = 5; //temp
-        let height = 2; //temp
+        let width = 190; //temp
+        let height = 49; //temp
 
-
-        client.player = {
-            id: server.lastPlayerID++,
-            playnumber: server.lastPlayerID % 4,
-            x: startVectors.x,
-            y: startVectors.y,
-            bounds: createBounds(startVectors, width, height, isRotated(playerNumber))
-        };
+        client.player = new Player(server.lastPlayerID++,
+            playerNumber,
+            startVectors.x,
+            startVectors.y,
+            width,
+            height,
+            isRotated(playerNumber));
 
 
         client.emit('allplayers', getAllPlayers());
@@ -119,26 +118,15 @@ io.on('connection', function(client) {
         client.broadcast.emit('newplayer', client.player);
 
 
-        // // temp: callback to force rotation of the canvas so the player is at the bottom
-        // client.emit('setrotation', {"player-number": playerNumber});
+        client.on('stopmove',function(data) {
+            client.player.stop();
+        });
+
 
         // we will want to write out own update mechanic, this will allow us to check for collisions after moving and combine movement of player/ball logic
         client.on('move',function(data) {
-
-            // restict movement to player goal
-            let moveDirection = getMoveDirection(playerNumber);
-            let moveSpeed = 10;
-
-            // dont let the client hack the move speed through inputing a higher direction
             let direction = Math.sign(data.direction);
-
-            let xMovement = moveDirection.x * (moveSpeed * data.direction);
-            let yMovement = moveDirection.y * (moveSpeed * data.direction);
-
-
-            client.player.x += xMovement;
-            client.player.y += yMovement;
-            io.emit('move', client.player);
+            client.player.move(direction);
         });
 
 
@@ -189,6 +177,7 @@ function formPlayers(members){
 function getAllPlayers(){
     var players = [];
     Object.keys(io.sockets.connected).forEach(function(socketID){
+        console.log(io.sockets.connected[socketID].player);
         var player = io.sockets.connected[socketID].player;
         if(player) players.push(player);
     });
@@ -212,40 +201,57 @@ function createPoint(x,y){
     return {x: x, y:y};
 }
 
-
+// this should probably be inside a physics object
+// let the ball override so that it can be a circle
+// this version is probably for the player only
 function createBounds(position, width, height, isRotated){
 
     let topLeft, topRight, bottomLeft, bottomRight
 
 
     // bounds on a rotated paddle use the width as the height
+    // if(isRotated){
+    //     topLeft = position;
+    //     topRight = createPoint(position.x + height, position.y);
+    //     bottomLeft = createPoint(position.x, position.y + width);
+    //     bottomRight = createPoint(position.x + height, position.y + width);
+    // }
+    // else{
+    //     topLeft = position;
+    //     topRight = createPoint(position.x + width, position.y);
+    //     bottomLeft = createPoint(position.x, position.y + height);
+    //     bottomRight = createPoint(position.x + width, position.y + height);
+    // }
+    //oops
     if(isRotated){
-        topLeft = position;
-        topRight = createPoint(position.x + height, position.y);
-        bottomLeft = createPoint(position.x, position.y + width);
-        bottomRight = createPoint(position.x + height, position.y + width);
+        topLeft = createPoint(position.x - (height / 2), position.y - (width / 2));
+        topRight = createPoint(position.x + (height /2), position.y);
+        bottomLeft = createPoint(position.x, position.y + (width/2));
+        bottomRight = createPoint(position.x + height, position.y + (width/2));
     }
     else{
-        topLeft = position;
-        topRight = createPoint(position.x + width, position.y);
-        bottomLeft = createPoint(position.x, position.y + height);
-        bottomRight = createPoint(position.x + width, position.y + height);
+        topLeft = createPoint(position.x + (height / 2), position.y + (width / 2));;
+        topRight = createPoint(position.x + (width/2), position.y);
+        bottomLeft = createPoint(position.x, position.y + (height /2));
+        bottomRight = createPoint(position.x + (width/2), position.y + (height /2));
     }
-
 
     let bounds = {topLeft:topLeft, topRight:topRight, bottomLeft:bottomLeft, bottomRight:bottomRight};
     return bounds;
 }
 
-
-
-
-
-
+const gameWidth = 800;
+const gameHeight = 800;
+const gameBounds = {
+    topLeft: createPoint(0,0),
+    topRight: createPoint(gameWidth, 0),
+    bottomLeft: createPoint(0, gameHeight),
+    bottomRight: createPoint(gameWidth,gameHeight)
+}
 // get where the player should start
 function getStartVectors(playnumber){
-    const width = 800;
-    const height = 800;
+    const width = gameWidth;
+    const height = gameHeight;
     const playerWidth = 30;
     const playerHeight = 30
     switch (playnumber) {
@@ -267,3 +273,158 @@ function getMoveDirection(playerNumber){
     }
 }
 
+//https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection AABB
+// generic physics object, adds itself to updater
+class PhysicsObject{
+    constructor(x, y){
+        this.x = x;
+        this.y = y;
+        this.velocity = createPoint(0,0)
+        Updater.addToUpdate(this);
+    }
+
+    getBounds(){
+    }
+
+    intersects(a, b){
+        console.log();
+        return (a.x <= b.x && a.x >= b.x) &&
+            (a.y <= b.y && a.y >= b.y);
+    }
+
+    outside(a, b){
+        return !this.intersects(a,b);
+    }
+
+
+    // apply velocity changes
+    update(){
+        let previousX = this.x;
+        let previousY = this.y;
+        this.x = previousX + this.velocity.x;
+        this.y = previousY + this.velocity.y;
+        console.log(this.getBounds());
+        console.log(gameBounds);
+        if(this.isOutOfBounds()){
+            console.log("outofbound");
+
+         //   this.x = previousX;
+          //  this.y = previousY;
+        }
+    }
+
+    isOutOfBounds(){
+        let bounds = this.getBounds();
+        let isOutOfBounds = false;
+        for(let thisBoundsKey in bounds){
+            if(isOutOfBounds) return isOutOfBounds;
+            let thisBound = bounds[thisBoundsKey];
+
+            for(let gameBoundsKey in gameBounds){
+                let gameBound = gameBounds[gameBoundsKey];
+                isOutOfBounds = this.intersects(thisBound, gameBound);
+            }
+        };
+        return isOutOfBounds;
+
+    }
+
+    // simple - wrong somewhere
+    isOverlapping(a, b){
+        let aBounds = a.getBounds();
+        let bBounds = b.getBounds();
+        let isOverLapping = false;
+        for(let aBoundsKey in aBounds){
+            if(isOverLapping) return isOverLapping;
+
+            let aBound = bounds[aBoundsKey];
+            for(let bBoundsKey in bBounds){
+                let bBound = bBounds[bBoundsKey];
+                isOverLapping = this.intersects(aBound, bBound);
+            }
+        };
+    }
+
+    setVelocity(x, y){
+        this.velocity = createPoint(x,y);
+    }
+    stop(){
+        this.velocity = createPoint(0,0);
+    }
+}
+
+class Ball extends PhysicsObject{
+
+}
+
+// player class understands how to move and stop
+class Player extends PhysicsObject{
+
+    constructor(id,playNumber ,x, y, width, height, isRotated){
+        super(x, y);
+        this.id = id;
+        this.playNumber = playNumber;
+        this.pos = {x:x,y:y}; // this value isnt being updates
+        this.width = width;
+        this.height = height;
+        this.isRotated = isRotated;
+    }
+
+    move(input){
+        let moveDirection = getMoveDirection(this.playNumber);
+        let moveSpeed = 10;
+
+        let xMovement = moveDirection.x * (moveSpeed * input);
+        let yMovement = moveDirection.y * (moveSpeed * input);
+        this.setVelocity(xMovement, yMovement);
+    }
+    stop(){
+        this.setVelocity(0,0);
+    }
+    // something like this to restrict the amount of data being pushed down the wire
+    getData(){
+        let data = {
+            id: this.id,
+            playnumber: this.playNumber,
+            x: this.pos.x,
+            y: this.pos.y,
+        }
+        return data;
+    }
+    // we can do bounds like this now
+    getBounds() {
+        //super.getBounds();
+        return createBounds({x:this.x,y:this.y}, this.width, this.height, this.isRotated);
+    }
+    update() {
+        super.update();
+        // tell everyone the player has been updated
+        io.emit('move', this);
+    }
+}
+
+
+const Updater = {
+    updateables:[],
+    addToUpdate: function (object) {
+        this.updateables.push(object);
+    },
+    update: function () {
+        console.log("update tick");
+        for(let key in this.updateables){
+            let object = this.updateables[key]
+            object.update();
+        }
+    }
+}
+
+
+// trigger update when it starts this will recall the update
+// this should be done in the inards of a game class
+update();
+function update(){
+    setTimeout(function () {
+        Updater.update();
+        update();
+    }, 100)
+}

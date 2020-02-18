@@ -25,6 +25,10 @@ function startClient(ip, socket){
     };
     Client.sendMove = function (direction){
         Client.socket.emit('move', {direction:direction});
+    };
+
+    Client.sendStopMove = function(){
+        Client.socket.emit('stopmove');
     }
 
     Client.socket.on('newplayer',function(data){
@@ -33,12 +37,10 @@ function startClient(ip, socket){
 
     Client.socket.on('allplayers',function(data){
         for(var i = 0; i < data.length; i++){
-            console.log(data[i]);
            Game.addNewPlayer(data[i].id,data[i].x,data[i].y);
         }
 
         Client.socket.on('move',function(data){
-            console.log(data);
             Game.movePlayer(data.id,data.x,data.y);
         });
 

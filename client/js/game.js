@@ -76,6 +76,12 @@ class GameScene extends Phaser.Scene{
             console.log("move +");
         });
 
+        leftKey.on('up', function(event) {
+            Client.sendStopMove();
+        });
+        rightKey.on('up', function(event) {
+            Client.sendStopMove();
+        });
 
        // this.input.onTap.add(Game.getCoordinates, this);
         Game.addNewPlayer = ((id,x,y)=>{this.addNewPlayer(id, x, y)})
