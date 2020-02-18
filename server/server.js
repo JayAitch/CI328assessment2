@@ -100,7 +100,6 @@ io.on('connection', function(client) {
     client.on('newplayer', function() {
         let playerNumber = server.lastPlayerID % 4;
         let startVectors = getStartVectors(playerNumber);
-        client.join('game')
 
         let width = 190; //temp
         let height = 49; //temp
@@ -120,7 +119,7 @@ io.on('connection', function(client) {
             ball.setVelocity(0, 10)
 
             // this will contain a lot more information then we need
-            io.sockets.in('game').emit("newball", ball); // we may be able to contain this transisition inside a game object to parsel sockets together
+            io.emit("newball", ball); // we may be able to contain this transisition inside a game object to parsel sockets together
         }
 
 
