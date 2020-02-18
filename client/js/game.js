@@ -104,7 +104,7 @@ class GameScene extends Phaser.Scene{
         let ball = this.ball;
         console.log(ball);
         let distance = Phaser.Math.Distance.Between(ball.x,ball.y, x, y);
-        let duration = distance * 10;
+        let duration = distance * 5;
         let tween = this.add.tween(
             {
                 targets: [ball],
@@ -163,7 +163,7 @@ class GameScene extends Phaser.Scene{
         let player = Game.playerMap[id];
 
         let distance = Phaser.Math.Distance.Between(player.x,player.y,x,y);
-        let duration = distance * 10;
+        let duration = distance * 5;
         let tween = this.add.tween(
             {
                 targets: [player],

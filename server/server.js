@@ -216,41 +216,41 @@ function createPoint(x,y){
 // this should probably be inside a physics object
 // let the ball override so that it can be a circle
 // this version is probably for the player only
-function createBounds(position, width, height, isRotated){
-
-    let topLeft, topRight, bottomLeft, bottomRight
-
-
-    // bounds on a rotated paddle use the width as the height
-    // if(isRotated){
-    //     topLeft = position;
-    //     topRight = createPoint(position.x + height, position.y);
-    //     bottomLeft = createPoint(position.x, position.y + width);
-    //     bottomRight = createPoint(position.x + height, position.y + width);
-    // }
-    // else{
-    //     topLeft = position;
-    //     topRight = createPoint(position.x + width, position.y);
-    //     bottomLeft = createPoint(position.x, position.y + height);
-    //     bottomRight = createPoint(position.x + width, position.y + height);
-    // }
-    //oops
-    if(isRotated){
-        topLeft = createPoint(position.x - (height / 2), position.y - (width / 2));
-        topRight = createPoint(position.x + (height /2), position.y);
-        bottomLeft = createPoint(position.x, position.y + (width/2));
-        bottomRight = createPoint(position.x + height, position.y + (width/2));
-    }
-    else{
-        topLeft = createPoint(position.x + (height / 2), position.y + (width / 2));;
-        topRight = createPoint(position.x + (width/2), position.y);
-        bottomLeft = createPoint(position.x, position.y + (height /2));
-        bottomRight = createPoint(position.x + (width/2), position.y + (height /2));
-    }
-
-    let bounds = {topLeft:topLeft, topRight:topRight, bottomLeft:bottomLeft, bottomRight:bottomRight};
-    return bounds;
-}
+// function createBounds(position, width, height, isRotated){
+//
+//     let topLeft, topRight, bottomLeft, bottomRight
+//
+//
+//     // bounds on a rotated paddle use the width as the height
+//     // if(isRotated){
+//     //     topLeft = position;
+//     //     topRight = createPoint(position.x + height, position.y);
+//     //     bottomLeft = createPoint(position.x, position.y + width);
+//     //     bottomRight = createPoint(position.x + height, position.y + width);
+//     // }
+//     // else{
+//     //     topLeft = position;
+//     //     topRight = createPoint(position.x + width, position.y);
+//     //     bottomLeft = createPoint(position.x, position.y + height);
+//     //     bottomRight = createPoint(position.x + width, position.y + height);
+//     // }
+//     //oops
+//     if(isRotated){
+//         topLeft = createPoint(position.x - (height / 2), position.y - (width / 2));
+//         topRight = createPoint(position.x + (height /2), position.y);
+//         bottomLeft = createPoint(position.x, position.y + (width/2));
+//         bottomRight = createPoint(position.x + height, position.y + (width/2));
+//     }
+//     else{
+//         topLeft = createPoint(position.x + (height / 2), position.y + (width / 2));;
+//         topRight = createPoint(position.x + (width/2), position.y);
+//         bottomLeft = createPoint(position.x, position.y + (height /2));
+//         bottomRight = createPoint(position.x + (width/2), position.y + (height /2));
+//     }
+//
+//     let bounds = {topLeft:topLeft, topRight:topRight, bottomLeft:bottomLeft, bottomRight:bottomRight};
+//     return bounds;
+// }
 
 const gameWidth = 800;
 const gameHeight = 800
@@ -301,9 +301,9 @@ class PhysicsObject{
         console.log(otherObject);
     }
 
-    getBounds(){
-        return false;
-    }
+    // getBounds(){
+    //     return false;
+    // }
 
     intersects(a, b){
         return false;
@@ -496,11 +496,11 @@ class Player extends RectanglePhysicsObject{
         return data;
     }
     // we can do bounds like this now
-    getBounds() {
-        //super.getBounds();
-        // bounds are useless now!!!!
-        return createBounds({x:this.x,y:this.y}, this.width, this.height)//, this.isRotated);
-    }
+    // getBounds() {
+    //     //super.getBounds();
+    //     // bounds are useless now!!!!
+    //     //return createBounds({x:this.x,y:this.y}, this.width, this.height)//, this.isRotated);
+    // }
     update() {
         super.update();
         // tell everyone the player has been updated - do this somewhere else
@@ -531,5 +531,5 @@ function update(){
     setTimeout(function () {
         Updater.update();
         update();
-    }, 100)
+    }, 50)
 }
