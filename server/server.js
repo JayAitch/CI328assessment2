@@ -69,6 +69,8 @@ io.on('connection', function(client) {
                     io.sockets.in('lobby').emit("loadgame");
                     lobby = {};
                     lobby.members = {};
+
+
                 }, 3000);
             };
         });
@@ -98,7 +100,7 @@ io.on('connection', function(client) {
     client.on('newplayer', function() {
         let playerNumber = server.lastPlayerID % 4;
         let startVectors = getStartVectors(playerNumber);
-
+        client.join('game')
 
         let width = 190; //temp
         let height = 49; //temp
@@ -110,6 +112,16 @@ io.on('connection', function(client) {
             width,
             height,
             isRotated(playerNumber));
+
+        // this isnt good!!
+        if(!ball){
+            // we want to have a game intiation method to call this stuff with
+            ball = new Ball( gameHeight/2, gameWidth/2, ballWidth/2)
+            ball.setVelocity(0, 10)
+
+            // this will contain a lot more information then we need
+            io.sockets.in('game').emit("newball", ball); // we may be able to contain this transisition inside a game object to parsel sockets together
+        }
 
 
         client.emit('allplayers', getAllPlayers());
@@ -153,10 +165,10 @@ server.listen(PORT, function(){
 // i can see multiple lobbies being easy if this works
 // we may want to run multiple servers, a lobby server and a game server would make the code significantly cleaner
 
-var lobby = {};
+let lobby = {}; //temp
 lobby.members = {};
 
-
+let ball;//temp
 server.lastMemberID = 0;
 
 server.lastPlayerID = 0;
@@ -241,7 +253,8 @@ function createBounds(position, width, height, isRotated){
 }
 
 const gameWidth = 800;
-const gameHeight = 800;
+const gameHeight = 800
+const ballWidth = 94;
 const gameBounds = {
     topLeft: createPoint(0,0),
     topRight: createPoint(gameWidth, 0),
@@ -275,6 +288,7 @@ function getMoveDirection(playerNumber){
 
 //https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection AABB
 // generic physics object, adds itself to updater
+// abstract
 class PhysicsObject{
     constructor(x, y){
         this.x = x;
@@ -283,66 +297,72 @@ class PhysicsObject{
         Updater.addToUpdate(this);
     }
 
+    onCollision(otherObject){
+        console.log(otherObject);
+    }
+
     getBounds(){
+        return false;
     }
 
     intersects(a, b){
-        console.log();
-        return (a.x <= b.x && a.x >= b.x) &&
-            (a.y <= b.y && a.y >= b.y);
+        return false;
     }
 
     outside(a, b){
-        return !this.intersects(a,b);
+        return false;
     }
 
 
     // apply velocity changes
     update(){
+
         let previousX = this.x;
         let previousY = this.y;
         this.x = previousX + this.velocity.x;
         this.y = previousY + this.velocity.y;
-        console.log(this.getBounds());
-        console.log(gameBounds);
+        // undo velocity changes if they have collided, client will not see this
+        // TODO: need to create a collision handler
+        //       need to create a circle based physics object
         if(this.isOutOfBounds()){
-            console.log("outofbound");
-
-         //   this.x = previousX;
-          //  this.y = previousY;
+            this.onCollision("bounds"); //temp
+            this.x = previousX;
+            this.y = previousY;
         }
     }
-
+    //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection AABB
+    //https://www.sevenson.com.au/actionscript/sat/
+    //https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
     isOutOfBounds(){
-        let bounds = this.getBounds();
-        let isOutOfBounds = false;
-        for(let thisBoundsKey in bounds){
-            if(isOutOfBounds) return isOutOfBounds;
-            let thisBound = bounds[thisBoundsKey];
-
-            for(let gameBoundsKey in gameBounds){
-                let gameBound = gameBounds[gameBoundsKey];
-                isOutOfBounds = this.intersects(thisBound, gameBound);
-            }
-        };
-        return isOutOfBounds;
-
+        // let bounds = this.getBounds();
+        // let isOutOfBounds = false;
+        // for(let thisBoundsKey in bounds){
+        //     if(isOutOfBounds) return isOutOfBounds;
+        //     let thisBound = bounds[thisBoundsKey];
+        //
+        //     for(let gameBoundsKey in gameBounds){
+        //         let gameBound = gameBounds[gameBoundsKey];
+        //         isOutOfBounds = this.intersects(thisBound, gameBound);
+        //     }
+        // };
+        // return isOutOfBounds;
+        return false;
     }
 
     // simple - wrong somewhere
     isOverlapping(a, b){
-        let aBounds = a.getBounds();
-        let bBounds = b.getBounds();
-        let isOverLapping = false;
-        for(let aBoundsKey in aBounds){
-            if(isOverLapping) return isOverLapping;
-
-            let aBound = bounds[aBoundsKey];
-            for(let bBoundsKey in bBounds){
-                let bBound = bBounds[bBoundsKey];
-                isOverLapping = this.intersects(aBound, bBound);
-            }
-        };
+        // let aBounds = a.getBounds();
+        // let bBounds = b.getBounds();
+        // let isOverLapping = false;
+        // for(let aBoundsKey in aBounds){
+        //     if(isOverLapping) return isOverLapping;
+        //
+        //     let aBound = bounds[aBoundsKey];
+        //     for(let bBoundsKey in bBounds){
+        //         let bBound = bBounds[bBoundsKey];
+        //         isOverLapping = this.intersects(aBound, bBound);
+        //     }
+        // };
     }
 
     setVelocity(x, y){
@@ -353,20 +373,104 @@ class PhysicsObject{
     }
 }
 
-class Ball extends PhysicsObject{
+
+class RectanglePhysicsObject extends PhysicsObject{
+    constructor(x, y, width, height){
+        super(x,y);
+        this.width = width;
+        this.height = height;
+    }
+
+    // this only detects rectangle with rectangle we should have a collision handling object instead to allow for cir - squ and cir-cir and sqr-sqr
+    intersects(a, b) {
+        return (a.x < b.x + b.width &&
+            a.x + a.width > b.x &&
+            a.y < b.y + b.height &&
+            a.y + a.height > b.y)
+    }
+
+    isOutOfBounds() {
+        let hWidth = this.width / 2;
+        let hHeight = this.height / 2;
+
+        let lx = this.x;
+        let ly = this.y;
+
+        return (lx  - hWidth < 0 ||
+                lx + hWidth > gameWidth ||
+                ly - hHeight < 0 ||
+                ly + hHeight > gameHeight
+        )
+    }
 
 }
 
+//  relivant interection logic https://jsfiddle.net/SalixAlba/54Fb2/
+class CirclePhysicsObject extends PhysicsObject{
+    constructor(x, y, radius) {
+        super(x,y);
+        this.radius = radius;
+    }
+
+    isOutOfBounds() {
+        const radius = this.radius;
+        let x = this.x;
+        let y = this.y;
+        return(x - radius < 0 ||
+                x + radius > gameWidth ||
+                y - radius < 0 ||
+                y + radius > gameHeight
+            )
+    }
+}
+
+class Ball extends CirclePhysicsObject{
+    constructor(x,y,radius){
+        super(x,y,radius);
+    }
+//https://stackoverflow.com/questions/13455042/random-number-between-negative-and-positive-value
+    onCollision(otherObject) {
+        // only beingcalled by hitting round bounds
+        super.onCollision(otherObject);
+
+        console.log("ball out of bounds");
+        console.log("x" + this.x )
+        console.log("y" + this.y )
+        //console.log(this.velocity);
+        let xVel = this.velocity.x;
+        let yVel = this.velocity.y;
+        let newXVeloctity = xVel  * -1;
+        let newYVeloctity = yVel * -1;
+        // let newXVeloctity = Math.floor((Math.random() * 50)) -100; //role between -50  and 50
+        // let newYVeloctity = Math.floor((Math.random() * 50)) -100;
+        this.setVelocity(newXVeloctity, newYVeloctity);
+    }
+    update() {
+        super.update();
+        io.emit("moveball",this)
+    }
+}
+
 // player class understands how to move and stop
-class Player extends PhysicsObject{
+class Player extends RectanglePhysicsObject{
 
     constructor(id,playNumber ,x, y, width, height, isRotated){
-        super(x, y);
+        super(x, y, width, height);
         this.id = id;
         this.playNumber = playNumber;
         this.pos = {x:x,y:y}; // this value isnt being updates
-        this.width = width;
-        this.height = height;
+
+        // changed to use aabb
+        if(isRotated){
+            this.width = height;
+            this.height = width;
+        }
+        else{
+            this.height = height;
+            this.width = width;
+        }
+
+
         this.isRotated = isRotated;
     }
 
@@ -394,11 +498,12 @@ class Player extends PhysicsObject{
     // we can do bounds like this now
     getBounds() {
         //super.getBounds();
-        return createBounds({x:this.x,y:this.y}, this.width, this.height, this.isRotated);
+        // bounds are useless now!!!!
+        return createBounds({x:this.x,y:this.y}, this.width, this.height)//, this.isRotated);
     }
     update() {
         super.update();
-        // tell everyone the player has been updated
+        // tell everyone the player has been updated - do this somewhere else
         io.emit('move', this);
     }
 }

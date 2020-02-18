@@ -35,6 +35,8 @@ function startClient(ip, socket){
          Game.addNewPlayer(data.id,data.x,data.y);
     });
 
+
+
     Client.socket.on('allplayers',function(data){
         for(var i = 0; i < data.length; i++){
            Game.addNewPlayer(data[i].id,data[i].x,data[i].y);
@@ -49,6 +51,16 @@ function startClient(ip, socket){
         });
     });
 
+
+    Client.socket.on('newball',function(data){
+        Game.addNewBall(data.x,data.y);
+    });
+
+
+    Client.socket.on('moveball',function(data){
+        Game.moveBall(data.x,data.y);
+        console.log(data);
+    });
 //
 // // callback to rotate player based on their position
 // // performs css translation to maintain consistant game-server data

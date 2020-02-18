@@ -37,6 +37,7 @@ class LandingScene extends Phaser.Scene {
         this.load.image('green_paddleH', 'assets/green_paddleH.png');
         this.load.image('red_paddleH', 'assets/red_paddleH.png');
         this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
+        this.load.image('ball', 'assets/balltest.png');
     }
 
 

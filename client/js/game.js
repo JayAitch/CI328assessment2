@@ -86,12 +86,32 @@ class GameScene extends Phaser.Scene{
        // this.input.onTap.add(Game.getCoordinates, this);
         Game.addNewPlayer = ((id,x,y)=>{this.addNewPlayer(id, x, y)})
         Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)})
-
+        Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
+        Game.moveBall = ((x,y) => {this.moveBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
         Client.askNewPlayer();
         console.log("game started");
         // append methods to game object for client to interact with
 
        // Game.setPlayerChar = ((number) => {this.switchPlayerCharacter(number)});
+    }
+
+
+    spawnBall(x,y){
+        this.ball = this.add.sprite( x, y,"ball");
+    }
+
+    moveBall(x, y){
+        let ball = this.ball;
+        console.log(ball);
+        let distance = Phaser.Math.Distance.Between(ball.x,ball.y, x, y);
+        let duration = distance * 10;
+        let tween = this.add.tween(
+            {
+                targets: [ball],
+                duration: duration,
+                x: x,
+                y : y
+            });
     }
 
     getPlayerCharacter(id){
@@ -140,11 +160,11 @@ class GameScene extends Phaser.Scene{
 
     movePlayer (id,x,y){
         // tween player to server calculate player position
-        var player = Game.playerMap[id];
-        console.log(Phaser.Math);
-        var distance = Phaser.Math.Distance.Between(player.x,player.y,x,y);
-        var duration = distance * 10;
-        var tween = this.add.tween(
+        let player = Game.playerMap[id];
+
+        let distance = Phaser.Math.Distance.Between(player.x,player.y,x,y);
+        let duration = distance * 10;
+        let tween = this.add.tween(
             {
                 targets: [player],
                 duration: duration,
