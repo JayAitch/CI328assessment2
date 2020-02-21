@@ -76,15 +76,42 @@ class GameScene extends Phaser.Scene{
             console.log("move +");
         });
 
+        leftKey.on('up', function(event) {
+            Client.sendStopMove();
+        });
+        rightKey.on('up', function(event) {
+            Client.sendStopMove();
+        });
 
        // this.input.onTap.add(Game.getCoordinates, this);
-
-        Client.askNewPlayer();
-
-        // append methods to game object for client to interact with
         Game.addNewPlayer = ((id,x,y)=>{this.addNewPlayer(id, x, y)})
         Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)})
+        Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
+        Game.moveBall = ((x,y) => {this.moveBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
+        Client.askNewPlayer();
+        console.log("game started");
+        // append methods to game object for client to interact with
+
        // Game.setPlayerChar = ((number) => {this.switchPlayerCharacter(number)});
+    }
+
+
+    spawnBall(x,y){
+        this.ball = this.add.sprite( x, y,"ball");
+    }
+
+    moveBall(x, y){
+        let ball = this.ball;
+        console.log(ball);
+        let distance = Phaser.Math.Distance.Between(ball.x,ball.y, x, y);
+        let duration = distance * 5;
+        let tween = this.add.tween(
+            {
+                targets: [ball],
+                duration: duration,
+                x: x,
+                y : y
+            });
     }
 
     getPlayerCharacter(id){
@@ -103,15 +130,15 @@ class GameScene extends Phaser.Scene{
 
 
     preload(){
-        this.load.image('sprite', 'assets/coin.png');
-        this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
-        this.load.image('green_paddleV', 'assets/green_paddleV.png');
-        this.load.image('red_paddleV', 'assets/red_paddleV.png');
-        this.load.image('yellow_paddleV', 'assets/yellow_paddleV.png');
-        this.load.image('blue_paddleH', 'assets/blue_paddleH.png');
-        this.load.image('green_paddleH', 'assets/green_paddleH.png');
-        this.load.image('red_paddleH', 'assets/red_paddleH.png');
-        this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
+        // this.load.image('sprite', 'assets/coin.png');
+        // this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
+        // this.load.image('green_paddleV', 'assets/green_paddleV.png');
+        // this.load.image('red_paddleV', 'assets/red_paddleV.png');
+        // this.load.image('yellow_paddleV', 'assets/yellow_paddleV.png');
+        // this.load.image('blue_paddleH', 'assets/blue_paddleH.png');
+        // this.load.image('green_paddleH', 'assets/green_paddleH.png');
+        // this.load.image('red_paddleH', 'assets/red_paddleH.png');
+        // this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
     }
 
     getCoordinates(pointer){
@@ -120,7 +147,12 @@ class GameScene extends Phaser.Scene{
 
 
     addNewPlayer(id, x, y){
-        Game.playerMap[id] = this.add.sprite(x,y,this.getPlayerCharacter(id));
+        if(Game.playerMap[id]){
+
+        }else{
+            Game.playerMap[id] = this.add.sprite(x,y,this.getPlayerCharacter(id));
+        }
+
     }
 
 
@@ -128,11 +160,11 @@ class GameScene extends Phaser.Scene{
 
     movePlayer (id,x,y){
         // tween player to server calculate player position
-        var player = Game.playerMap[id];
-        console.log(Phaser.Math);
-        var distance = Phaser.Math.Distance.Between(player.x,player.y,x,y);
-        var duration = distance * 10;
-        var tween = this.add.tween(
+        let player = Game.playerMap[id];
+
+        let distance = Phaser.Math.Distance.Between(player.x,player.y,x,y);
+        let duration = distance * 5;
+        let tween = this.add.tween(
             {
                 targets: [player],
                 duration: duration,
