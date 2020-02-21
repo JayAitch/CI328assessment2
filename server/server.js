@@ -10,6 +10,10 @@ var io = require('socket.io')(server);
 
 io.on('connection', function(client) {
 
+    // JACK - collision shizzz
+    let collisionManager = {};
+    collisionManager = new CollisionManager();
+
     client.on('test', function() {
         console.log('test received');
     });
@@ -154,6 +158,10 @@ io.on('connection', function(client) {
             io.emit('remove', client.player.id);
             console.log('disconnecting: ' + client.player.id);
         });
+
+        // JACK - collision shiz
+        console.log('HEY', client.player, ball);
+        collisionManager.addCollision(client.player, ball, ()=> {onCollisionPlayerBall(client.player, ball)})
     });
     
 });
@@ -320,7 +328,7 @@ class PhysicsObject{
         // TODO: need to create a collision handler
         //       need to create a circle based physics object
         if(this.isOutOfBounds()){
-            this.onCollision("bounds"); //temp
+            // this.onCollision("bounds"); //temp
             this.x = previousX;
             this.y = previousY;
         }
@@ -397,11 +405,14 @@ class CirclePhysicsObject extends PhysicsObject{
 class Ball extends CirclePhysicsObject{
     constructor(x,y,radius){
         super(x,y,radius);
+        let diameter = radius * 2;
+        this.height = diameter;
+        this.width = diameter;
     }
 //https://stackoverflow.com/questions/13455042/random-number-between-negative-and-positive-value
     onCollision(otherObject) {
         // only beingcalled by hitting round bounds
-        super.onCollision(otherObject);
+        // super.onCollision(otherObject);
 
         console.log("ball out of bounds");
         console.log("x" + this.x )
@@ -500,4 +511,64 @@ function update(){
         Updater.update();
         update();
     }, 50)
+}
+
+
+// JACK - testing collision manager
+class CollisionManager {
+    constructor(){
+        this.colliders = [];
+        Updater.addToUpdate(this)
+    }
+
+    addCollision(a, b, callback) {
+        let collisionObject = {};
+        collisionObject.objA = a;
+        collisionObject.objB = b;
+        collisionObject.onCollision = callback;
+
+        this.colliders.push(collisionObject);
+    }
+
+    update() {
+        this.colliders.forEach((obj)=> {
+            if (this.collides(obj.objA, obj.objB)) {
+                obj.onCollision();
+            }
+        })
+    }
+
+    // not sure yet - circular
+    collides (a,b) {
+        if(a != undefined) {
+            return !(((a.y + a.height) < (b.y)) || (a.y > (b.y + b.height)) || ((a.x + a.width) < b.x) || (a.x > (b.x + b.width)));
+        }
+    }
+
+    // wedge this in somewhere to check if no longer overlapping - if needed
+    /* 
+    // periodically check player is still overlapping exit
+    checkOverlap(world.player, game.exit, function () {
+        if (!game.objectiveComplete) {
+            world.player.reachedExit = false;
+        }
+    });
+
+    // recursive function to check overlap between 2 objects each frame - executes callback on separation
+    checkOverlap(object1, object2, callback) {
+        requestAnimationFrame(() => {
+            var overlapping = game.physics.overlap(object1, object2);
+            if (!overlapping) {
+                callback();
+            } else {
+                checkOverlap(object1, object2, callback);
+            }
+        });
+    }
+    */
+}
+
+// TBD -- add velocity from moving paddles
+function onCollisionPlayerBall(player, ball) {
+    ball.onCollision()
 }
