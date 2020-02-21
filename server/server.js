@@ -275,13 +275,11 @@ function getStartVectors(playnumber){
 }
 
 // which direction does the player move in
-function getMoveDirection(playerNumber){
+function getMoveDirection(isRotated){
     // invert inputs for opersite players, restrict movement to 1 axis
-    switch (playerNumber) {
-        case 0:   return {x: 0, y:1 }
-        case 1:   return {x: 1, y:0 }
-        case 2:   return {x: 0, y:-1 }
-        case 3:   return {x: -1, y:0 }
+    switch (isRotated) {
+      case 0:  return {x: 1, y:0 }
+      case 1:  return {x: 0, y:1 }
     }
 }
 
@@ -440,16 +438,14 @@ class Player extends RectanglePhysicsObject{
             this.width = width;
         }
 
-
-        this.isRotated = isRotated;
+        this.moveDirection = getMoveDirection(isRotated);
     }
 
     move(input){
-        let moveDirection = getMoveDirection(this.playNumber);
         let moveSpeed = 10;
 
-        let xMovement = moveDirection.x * (moveSpeed * input);
-        let yMovement = moveDirection.y * (moveSpeed * input);
+        let xMovement = this.moveDirection.x * (moveSpeed * input);
+        let yMovement = this.moveDirection.y * (moveSpeed * input);
         this.setVelocity(xMovement, yMovement);
     }
     stop(){
@@ -485,7 +481,7 @@ const Updater = {
         this.updateables.push(object);
     },
     update: function () {
-        console.log("update tick");
+        // console.log("update tick");
         for(let key in this.updateables){
             let object = this.updateables[key]
             object.update();
