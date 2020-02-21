@@ -3,7 +3,7 @@ const config = {
     type: Phaser.AUTO,
     width:800,
     height: 800,
-    scene: [GameScene],
+    scene: [LandingScene,LobbySelectionScene, LobbyScene,GameScene],
 }
 
 var game;
@@ -15,8 +15,8 @@ window.addEventListener('load', (event) => {
     canvasContext = canvas.getContext('2d');
 });
 
-//temp: invert canvas to make the player being played at the bottom
-// this will break click events as the location of clicks doesnt change!!!!
-function rotateCanvas(playerNumber){
-    canvas.style = "transform: rotate(" + (playerNumber - 1) * 90 + "deg)";
-}
+// //temp: invert canvas to make the player being played at the bottom
+// // this will break click events as the location of clicks doesnt change!!!!
+// function rotateCanvas(playerNumber){
+//     canvas.style = "transform: rotate(" + (playerNumber - 1) * 90 + "deg)";
+// }
