@@ -177,7 +177,7 @@ server.lastPlayerID = 0;
 
 
 function isRotated(playerNumber){
-    return !playerNumber % 2;
+    return !(playerNumber % 2);
 }
 
 function formPlayers(members){
@@ -280,8 +280,8 @@ function getStartVectors(playnumber){
 function getMoveDirection(isRotated){
     // invert inputs for opersite players, restrict movement to 1 axis
     switch (isRotated) {
-      case 0:  return {x: 1, y:0 }
-      case 1:  return {x: 0, y:1 }
+      case false:  return {x: 1, y:0 }
+      case true:  return {x: 0, y:1 }
     }
 }
 
@@ -447,6 +447,7 @@ class Player extends RectanglePhysicsObject{
 
         let xMovement = this.moveDirection.x * (moveSpeed * input);
         let yMovement = this.moveDirection.y * (moveSpeed * input);
+        console.log("moving player:" + this.id + " X: "+xMovement + " Y: "+yMovement);
         this.setVelocity(xMovement, yMovement);
     }
 
