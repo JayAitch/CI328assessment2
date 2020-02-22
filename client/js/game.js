@@ -102,7 +102,7 @@ class GameScene extends Phaser.Scene{
 
     moveBall(x, y){
         let ball = this.ball;
-        console.log(ball);
+        //console.log(ball);
         let distance = Phaser.Math.Distance.Between(ball.x,ball.y, x, y);
         let duration = distance * 5;
         let tween = this.add.tween(
