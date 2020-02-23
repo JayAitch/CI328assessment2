@@ -165,8 +165,8 @@ io.on('connection', function(client) {
 
 
         // testing a goal
-//        let goal = new PlayerGoal(startVectors.x, startVectors.y, 10, 1000, isRotated(playerNumber));
-//        collisionManager.addCollision(goal, ball, () => { goal.onCollision()})
+        let goal = new PlayerGoal(startVectors.x, startVectors.y, 1000, 10, isRotated(playerNumber));
+        collisionManager.addCollision(goal, ball, () => { goal.onCollision()})
     });
     
 });
@@ -572,7 +572,6 @@ class CollisionManager {
             if (this.collides(obj.objA, obj.objB)) {
                //obj.objA.backstep();
               // obj.objB.backstep();
-                console.log("collision");
                 obj.onCollision();
             }
         })
