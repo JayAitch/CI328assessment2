@@ -108,15 +108,13 @@ io.on('connection', function(client) {
         let width = 190; //temp
         let height = 49; //temp
 
-        client.player = new Player(
+        client.player = new Player(server.lastPlayerID++,
             playerNumber,
             startVectors.x,
             startVectors.y,
             width,
             height,
             isRotated(playerNumber));
-
-        server.lastPlayerID++;
 
         // this isnt good!!
         if(!ball){
@@ -294,11 +292,13 @@ function getStartVectors(playnumber){
 }
 
 // which direction does the player move in
-function getMoveDirection(isRotated){
+function getMoveDirection(playerNumber){
     // invert inputs for opersite players, restrict movement to 1 axis
-    switch (isRotated) {
-      case false:  return {x: 1, y:0 }
-      case true:  return {x: 0, y:1 }
+    switch (playerNumber) {
+        case 0:   return {x: 0, y:1 }
+        case 1:   return {x: 1, y:0 }
+        case 2:   return {x: 0, y:-1 }
+        case 3:   return {x: -1, y:0 }
     }
 }
 
@@ -447,9 +447,10 @@ class Ball extends CirclePhysicsObject{
 // player class understands how to move and stop
 class Player extends RectanglePhysicsObject{
 
-    constructor(id,x, y, width, height, isRotated){
+    constructor(id,playNumber ,x, y, width, height, isRotated){
         super(x, y, width, height);
         this.id = id;
+        this.playNumber = playNumber;
         this.pos = {x:x,y:y}; // this value isnt being updates
 
         // changed to use aabb
@@ -462,29 +463,34 @@ class Player extends RectanglePhysicsObject{
             this.width = width;
         }
 
-        this.moveDirection = getMoveDirection(isRotated);
+
+        this.isRotated = isRotated;
     }
 
     move(input){
+        let moveDirection = getMoveDirection(this.playNumber);
         let moveSpeed = 10;
 
-        let xMovement = this.moveDirection.x * (moveSpeed * input);
-        let yMovement = this.moveDirection.y * (moveSpeed * input);
-        console.log("moving player:" + this.id + " X: "+xMovement + " Y: "+yMovement);
+        let xMovement = moveDirection.x * (moveSpeed * input);
+        let yMovement = moveDirection.y * (moveSpeed * input);
         this.setVelocity(xMovement, yMovement);
     }
+
 
     stop(){
         this.setVelocity(0,0);
     }
 
+
     // something like this to restrict the amount of data being pushed down the wire
     getData(){
-        return {
+        let data = {
             id: this.id,
+            playnumber: this.playNumber,
             x: this.pos.x,
             y: this.pos.y,
-        };
+        }
+        return data;
     }
     // we can do bounds like this now
     // getBounds() {
