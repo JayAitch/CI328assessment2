@@ -122,7 +122,7 @@ io.on('connection', function(client) {
         if(!ball){
             // we want to have a game intiation method to call this stuff with
             ball = new Ball( gameHeight/2, gameWidth/2, ballWidth/2)
-            ball.setVelocity(0, 10)
+            ball.setVelocity(-8, 0)
 
             // this will contain a lot more information then we need
             io.emit("newball", ball); // we may be able to contain this transisition inside a game object to parsel sockets together
@@ -161,7 +161,14 @@ io.on('connection', function(client) {
 
         // JACK - collision shiz
         console.log('HEY', client.player, ball);
-        collisionManager.addCollision(client.player, ball, ()=> {onCollisionPlayerBall(client.player, ball)})
+        collisionManager.addCollision(client.player, ball, () => { onCollisionPlayerBall(client.player, ball) })
+
+
+
+
+        // testing a goal
+//        let goal = new PlayerGoal(startVectors.x, startVectors.y, 10, 1000, isRotated(playerNumber));
+//        collisionManager.addCollision(goal, ball, () => { goal.onCollision()})
     });
     
 });
@@ -263,13 +270,15 @@ function createPoint(x,y){
 
 const gameWidth = 800;
 const gameHeight = 800
-const ballWidth = 94;
+const ballWidth = 64;
 const gameBounds = {
     topLeft: createPoint(0,0),
     topRight: createPoint(gameWidth, 0),
     bottomLeft: createPoint(0, gameHeight),
     bottomRight: createPoint(gameWidth,gameHeight)
 }
+
+
 // get where the player should start
 function getStartVectors(playnumber){
     const width = gameWidth;
@@ -296,6 +305,7 @@ function getMoveDirection(isRotated){
 //https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection AABB
 // generic physics object, adds itself to updater
 // abstract
+// we might want capacity to have trigger based collsions aswell
 class PhysicsObject{
     constructor(x, y){
         this.x = x;
@@ -305,7 +315,6 @@ class PhysicsObject{
     }
 
     onCollision(otherObject){
-        console.log(otherObject);
     }
 
     intersects(a, b){
@@ -316,21 +325,27 @@ class PhysicsObject{
         return false;
     }
 
-
+    backstep(){
+        this.x = this.previousX;
+        this.y = this.previousY
+    }
     // apply velocity changes
     update(){
 
-        let previousX = this.x;
-        let previousY = this.y;
-        this.x = previousX + this.velocity.x;
-        this.y = previousY + this.velocity.y;
+        this.previousX = this.x;
+        this.previousY = this.y;
+        this.x = this.previousX + this.velocity.x;
+        this.y = this.previousY + this.velocity.y;
         // undo velocity changes if they have collided, client will not see this
         // TODO: need to create a collision handler
         //       need to create a circle based physics object
-        if(this.isOutOfBounds()){
+
+        if(this.isOutOfBounds()){ // do we move this to the collision manager???
+          //  this.backstep();
+            this.onCollision();
             // this.onCollision("bounds"); //temp
-            this.x = previousX;
-            this.y = previousY;
+        //    this.x = previousX;
+       //     this.y = previousY;
         }
     }
     //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection AABB
@@ -411,24 +426,21 @@ class Ball extends CirclePhysicsObject{
     }
 //https://stackoverflow.com/questions/13455042/random-number-between-negative-and-positive-value
     onCollision(otherObject) {
-        // only beingcalled by hitting round bounds
-        // super.onCollision(otherObject);
 
-        console.log("ball out of bounds");
-        console.log("x" + this.x )
-        console.log("y" + this.y )
-        //console.log(this.velocity);
         let xVel = this.velocity.x;
         let yVel = this.velocity.y;
         let newXVeloctity = xVel  * -1;
         let newYVeloctity = yVel * -1;
-        // let newXVeloctity = Math.floor((Math.random() * 50)) -100; //role between -50  and 50
-        // let newYVeloctity = Math.floor((Math.random() * 50)) -100;
+        if(otherObject){
+            newXVeloctity = newXVeloctity + otherObject.velocity.x;
+            newYVeloctity = newYVeloctity + otherObject.velocity.y;
+        }
         this.setVelocity(newXVeloctity, newYVeloctity);
     }
+
     update() {
         super.update();
-        io.emit("moveball",this)
+        io.emit("moveball",this); // not here
     }
 }
 
@@ -445,7 +457,7 @@ class Player extends RectanglePhysicsObject{
             this.width = height;
             this.height = width;
         }
-        else{
+        else {
             this.height = height;
             this.width = width;
         }
@@ -462,10 +474,18 @@ class Player extends RectanglePhysicsObject{
         this.setVelocity(xMovement, yMovement);
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> fixed collision logic
     stop(){
         this.setVelocity(0,0);
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> fixed collision logic
     // something like this to restrict the amount of data being pushed down the wire
     getData(){
         return {
@@ -487,6 +507,25 @@ class Player extends RectanglePhysicsObject{
     }
 }
 
+class PlayerGoal{
+    constructor(x, y, width, height, isRotated){
+
+        this.x = x;
+        this.y = y;
+        if(isRotated){
+            this.width = height;
+            this.height = width;
+        }
+        else{
+            this.width = width;
+            this.height = height;
+        }
+
+    }
+    onCollision(){
+        console.log("goal scored");
+    }
+}
 
 const Updater = {
     updateables:[],
@@ -494,7 +533,10 @@ const Updater = {
         this.updateables.push(object);
     },
     update: function () {
+<<<<<<< HEAD
         // console.log("update tick");
+=======
+>>>>>>> fixed collision logic
         for(let key in this.updateables){
             let object = this.updateables[key]
             object.update();
@@ -510,6 +552,7 @@ function update(){
     setTimeout(function () {
         Updater.update();
         update();
+
     }, 50)
 }
 
@@ -531,17 +574,34 @@ class CollisionManager {
     }
 
     update() {
-        this.colliders.forEach((obj)=> {
+        this.colliders.forEach((obj) => {
             if (this.collides(obj.objA, obj.objB)) {
+               //obj.objA.backstep();
+              // obj.objB.backstep();
+                console.log("collision");
                 obj.onCollision();
             }
         })
     }
 
     // not sure yet - circular
-    collides (a,b) {
+    collides (a, b) {
         if(a != undefined) {
-            return !(((a.y + a.height) < (b.y)) || (a.y > (b.y + b.height)) || ((a.x + a.width) < b.x) || (a.x > (b.x + b.width)));
+            //return !(((a.y + a.height /2) < (b.y))|| (a.y > (b.y + b.height)) || ((a.x + a.width) < b.x) || (a.x > (b.x + b.width)));
+
+
+            let aWidth = (a.radius || a.width) / 2;
+            let bWidth = (b.radius || b.width) / 2;
+            let aHeight  = (a.radius || a.height)/ 2;
+            let bHeight = (b.radius || b.height)/ 2;
+
+
+            return (a.x - aWidth < b.x + bWidth  &&
+                a.x + aWidth > b.x - bWidth &&
+                a.y - aHeight < b.y + bHeight &&
+                a.y + aHeight > b.y - bHeight)
+
+
         }
     }
 
@@ -570,5 +630,5 @@ class CollisionManager {
 
 // TBD -- add velocity from moving paddles
 function onCollisionPlayerBall(player, ball) {
-    ball.onCollision()
+    ball.onCollision(player);
 }
