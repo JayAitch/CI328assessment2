@@ -167,8 +167,8 @@ io.on('connection', function(client) {
 
 
         // testing a goal
-        let goal = new PlayerGoal(startVectors.x, startVectors.y, 1000, 10, isRotated(playerNumber));
-        collisionManager.addCollision(goal, ball, () => { goal.onCollision()})
+//        let goal = new PlayerGoal(startVectors.x, startVectors.y, 10, 1000, isRotated(playerNumber));
+//        collisionManager.addCollision(goal, ball, () => { goal.onCollision()})
     });
     
 });
@@ -474,18 +474,10 @@ class Player extends RectanglePhysicsObject{
         this.setVelocity(xMovement, yMovement);
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> fixed collision logic
     stop(){
         this.setVelocity(0,0);
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> fixed collision logic
     // something like this to restrict the amount of data being pushed down the wire
     getData(){
         return {
@@ -533,10 +525,6 @@ const Updater = {
         this.updateables.push(object);
     },
     update: function () {
-<<<<<<< HEAD
-        // console.log("update tick");
-=======
->>>>>>> fixed collision logic
         for(let key in this.updateables){
             let object = this.updateables[key]
             object.update();
@@ -578,6 +566,7 @@ class CollisionManager {
             if (this.collides(obj.objA, obj.objB)) {
                //obj.objA.backstep();
               // obj.objB.backstep();
+                console.log("collision");
                 obj.onCollision();
             }
         })
