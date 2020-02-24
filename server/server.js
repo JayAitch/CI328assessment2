@@ -1,3 +1,4 @@
+var systems = require('./systems.js');
 const PORT = 55000;
 
 var server = require('http').createServer();
@@ -82,22 +83,6 @@ io.on('connection', function(client) {
 
 
 
-
-    // client.on('triggerload', function(data){
-    //     console.log("triggering loading");
-    //     // we dont care about the order this happens so we dont need to broadcast - maybe we do who knows
-    //     // there might be a way of doing this more cleanly by maintaining a list of sockets
-    //     for(let key in lobby.members){
-    //         let member = lobby.members[key]
-    //         //if (member.hasOwnProperty(socketid)){
-    //         io.sockets.to(member.socketid).emit("loadgame");
-    //         // }
-    //     }
-    // });
-    //
-
-
-
     // this logic should now be done when the lobby ready trigger is caused
     // this also fixes a potential issue with the duplication of players
     // this encapsulating should be done through loadgame calls
@@ -165,8 +150,8 @@ io.on('connection', function(client) {
 
 
         // testing a goal
-//        let goal = new PlayerGoal(startVectors.x, startVectors.y, 10, 1000, isRotated(playerNumber));
-//        collisionManager.addCollision(goal, ball, () => { goal.onCollision()})
+        let goal = new PlayerGoal(startVectors.x, startVectors.y, 1000, 10, isRotated(playerNumber));
+        collisionManager.addCollision(goal, ball, () => { goal.onCollision()})
     });
     
 });
@@ -215,66 +200,14 @@ function randomInt(low, high) {
 }
 
 
-
-
-
-
-
-
-
-
 function createPoint(x,y){
     return {x: x, y:y};
 }
 
-// this should probably be inside a physics object
-// let the ball override so that it can be a circle
-// this version is probably for the player only
-// function createBounds(position, width, height, isRotated){
-//
-//     let topLeft, topRight, bottomLeft, bottomRight
-//
-//
-//     // bounds on a rotated paddle use the width as the height
-//     // if(isRotated){
-//     //     topLeft = position;
-//     //     topRight = createPoint(position.x + height, position.y);
-//     //     bottomLeft = createPoint(position.x, position.y + width);
-//     //     bottomRight = createPoint(position.x + height, position.y + width);
-//     // }
-//     // else{
-//     //     topLeft = position;
-//     //     topRight = createPoint(position.x + width, position.y);
-//     //     bottomLeft = createPoint(position.x, position.y + height);
-//     //     bottomRight = createPoint(position.x + width, position.y + height);
-//     // }
-//     //oops
-//     if(isRotated){
-//         topLeft = createPoint(position.x - (height / 2), position.y - (width / 2));
-//         topRight = createPoint(position.x + (height /2), position.y);
-//         bottomLeft = createPoint(position.x, position.y + (width/2));
-//         bottomRight = createPoint(position.x + height, position.y + (width/2));
-//     }
-//     else{
-//         topLeft = createPoint(position.x + (height / 2), position.y + (width / 2));;
-//         topRight = createPoint(position.x + (width/2), position.y);
-//         bottomLeft = createPoint(position.x, position.y + (height /2));
-//         bottomRight = createPoint(position.x + (width/2), position.y + (height /2));
-//     }
-//
-//     let bounds = {topLeft:topLeft, topRight:topRight, bottomLeft:bottomLeft, bottomRight:bottomRight};
-//     return bounds;
-// }
 
 const gameWidth = 800;
 const gameHeight = 800
 const ballWidth = 64;
-const gameBounds = {
-    topLeft: createPoint(0,0),
-    topRight: createPoint(gameWidth, 0),
-    bottomLeft: createPoint(0, gameHeight),
-    bottomRight: createPoint(gameWidth,gameHeight)
-}
 
 
 // get where the player should start
@@ -525,102 +458,18 @@ class PlayerGoal{
     }
 }
 
-const Updater = {
-    updateables:[],
-    addToUpdate: function (object) {
-        this.updateables.push(object);
-    },
-    update: function () {
-        for(let key in this.updateables){
-            let object = this.updateables[key]
-            object.update();
-        }
-    }
-}
-
 
 // trigger update when it starts this will recall the update
 // this should be done in the inards of a game class
 update();
 function update(){
     setTimeout(function () {
-        Updater.update();
+        systems.Updater.update();
         update();
 
     }, 50)
 }
 
-
-// JACK - testing collision manager
-class CollisionManager {
-    constructor(){
-        this.colliders = [];
-        Updater.addToUpdate(this)
-    }
-
-    addCollision(a, b, callback) {
-        let collisionObject = {};
-        collisionObject.objA = a;
-        collisionObject.objB = b;
-        collisionObject.onCollision = callback;
-
-        this.colliders.push(collisionObject);
-    }
-
-    update() {
-        this.colliders.forEach((obj) => {
-            if (this.collides(obj.objA, obj.objB)) {
-               //obj.objA.backstep();
-              // obj.objB.backstep();
-                console.log("collision");
-                obj.onCollision();
-            }
-        })
-    }
-
-    // not sure yet - circular
-    collides (a, b) {
-        if(a != undefined) {
-            //return !(((a.y + a.height /2) < (b.y))|| (a.y > (b.y + b.height)) || ((a.x + a.width) < b.x) || (a.x > (b.x + b.width)));
-
-
-            let aWidth = (a.radius || a.width) / 2;
-            let bWidth = (b.radius || b.width) / 2;
-            let aHeight  = (a.radius || a.height)/ 2;
-            let bHeight = (b.radius || b.height)/ 2;
-
-
-            return (a.x - aWidth < b.x + bWidth  &&
-                a.x + aWidth > b.x - bWidth &&
-                a.y - aHeight < b.y + bHeight &&
-                a.y + aHeight > b.y - bHeight)
-
-
-        }
-    }
-
-    // wedge this in somewhere to check if no longer overlapping - if needed
-    /* 
-    // periodically check player is still overlapping exit
-    checkOverlap(world.player, game.exit, function () {
-        if (!game.objectiveComplete) {
-            world.player.reachedExit = false;
-        }
-    });
-
-    // recursive function to check overlap between 2 objects each frame - executes callback on separation
-    checkOverlap(object1, object2, callback) {
-        requestAnimationFrame(() => {
-            var overlapping = game.physics.overlap(object1, object2);
-            if (!overlapping) {
-                callback();
-            } else {
-                checkOverlap(object1, object2, callback);
-            }
-        });
-    }
-    */
-}
 
 // TBD -- add velocity from moving paddles
 function onCollisionPlayerBall(player, ball) {
