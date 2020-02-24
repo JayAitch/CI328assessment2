@@ -61,22 +61,8 @@ function startClient(ip, socket){
         Game.moveBall(data.x,data.y);
         console.log(data);
     });
-//
-// // callback to rotate player based on their position
-// // performs css translation to maintain consistant game-server data
-//     Client.socket.on('setrotation',function(data){
-//         rotateCanvas(data["player-number"]);
-//     });
 
 
-
-
-
-
-
-
-
-    // not like this
     Client.triggerLoad = function(){
         Client.socket.emit('triggerload');
     }
