@@ -1,3 +1,25 @@
+let updateTimeout;
+
+
+
+function addToUpdate(obj){
+    Updater.addToUpdate(obj);
+}
+
+function startUpdate(){
+    update();
+}
+function stopUpdate() {
+    updateTimeout = null;
+}
+function update(){
+    updateTimeout = setTimeout(function () {
+        Updater.update();
+        update();
+
+    }, 50)
+}
+
 
 
 const Updater = {
@@ -84,4 +106,5 @@ class CollisionManager {
     }
     */
 }
-module.exports = {Updater, CollisionManager};
+//maybe split into 2?
+module.exports = {startUpdate, stopUpdate, addToUpdate, CollisionManager};
