@@ -6,17 +6,18 @@ const PORT = 55000;
 var server = require('http').createServer();
 global.io = require('socket.io')(server);
 io = global.io;
+var game;
+let lobby = {}; //temp
+lobby.members = {};
 
+let ball;//temp
+server.lastMemberID = 0;
+
+server.lastPlayerID = 0;
 // here for now as we only have one lobby
 // only the collection needs to be up here in future
 
-//physObjects.setIO(io)
-
 io.on('connection', function(client) {
-
-    // JACK - collision shizzz
-    let collisionManager = {};
-    collisionManager = new systems.CollisionManager();
 
     client.on('test', function() {
         console.log('test received');
@@ -28,18 +29,19 @@ io.on('connection', function(client) {
 
         client.join('lobby'); // i think we can have a list of rooms
         client.member = {
-            position: server.lastMemberID++,
+            position: server.lastMemberID,
             isready: false,
             socketid : client.id
         }
 
-
+        server.lastMemberID++;
         lobby.members[client.id] = client.member;
 
+        // just the connecting client
         client.emit('alllobbymembers', lobby.members);
 
-        // this is currrently broadcasting to everything
-        client.broadcast.emit('newmember', client.member);
+        // all lobby members that arnt the connecting client
+        client.broadcast.to('lobby').emit('newmember', client.member);
 
 
         client.on('changecharacter',function(data) {
@@ -59,8 +61,6 @@ io.on('connection', function(client) {
             lobby.members[clientId].isready = isReady;
 
             let isLobbyReady = true;
-          //  io.sockets.to('lobby').emit('playerready', {key: clientId, isready: isReady});
-
             io.sockets.in('lobby').emit('playerready', {key: clientId, isready: isReady});
 
             // go through and make sure everyone is ready
@@ -74,10 +74,11 @@ io.on('connection', function(client) {
             // if they are all ready clear the lobby and trigger game load
             if(isLobbyReady){
                 setTimeout( function () {
+                    game = new Game(lobby.members);
                     io.sockets.in('lobby').emit("loadgame");
                     lobby = {};
                     lobby.members = {};
-
+                    server.lastMemberID = 0;
 
                 }, 3000);
             };
@@ -87,45 +88,17 @@ io.on('connection', function(client) {
     // this logic should now be done when the lobby ready trigger is caused
     // this also fixes a potential issue with the duplication of players
     // this encapsulating should be done through loadgame calls
-    client.on('newplayer', function() {
-        let playerNumber = server.lastPlayerID % 4;
-        let startVectors = getStartVectors(playerNumber);
+    client.on('gameconnect', function() {
 
-        let width = 190; //temp
-        let height = 49; //temp
-        let ballWidth = 96;
-        client.player =  new physObjects.Player(
-            playerNumber,
-            startVectors.x,
-            startVectors.y,
-            width,
-            height,
-            isRotated(playerNumber));
+        client.player = game.players[client.id];
+        let gameBall = game.balls[game.lastBallID];
 
-        server.lastPlayerID++;
-        systems.addToUpdate(client.player)
-
-        if(!ball){
-            // we want to have a game intiation method to call this stuff with
-            ball = new physObjects.Ball( physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2)
-            systems.addToUpdate(ball);
-            ball.setVelocity(-8, 0)
-
-            // this will contain a lot more information then we need
-
-        }
-        client.emit("newball", ball); // we may be able to contain this transisition inside a game object to parsel sockets together
-
-        client.emit('allplayers', getAllPlayers());
-
-        // called on all clients except the socket this thread is in
-        client.broadcast.emit('newplayer', client.player);
-
+        client.emit("newball", gameBall); // we may be able to contain this transisition inside a game object to parsel sockets together
+        client.emit('allplayers', getAllPlayers()); // probably want this bundled as an init
 
         client.on('stopmove',function(data) {
             client.player.stop();
         });
-
 
         // we will want to write out own update mechanic, this will allow us to check for collisions after moving and combine movement of player/ball logic
         client.on('move',function(data) {
@@ -146,16 +119,6 @@ io.on('connection', function(client) {
             console.log('disconnecting: ' + client.player.id);
         });
 
-        // JACK - collision shiz
-        console.log('HEY', client.player, ball);
-        collisionManager.addCollision(client.player, ball, () => { onCollisionPlayerBall(client.player, ball) })
-
-
-
-
-        // testing a goal
-        let goal = new physObjects.PlayerGoal(startVectors.x, startVectors.y, 1000, 10, isRotated(playerNumber));
-        collisionManager.addCollision(goal, ball, () => { goal.onCollision()})    
     });
 });
 
@@ -163,38 +126,19 @@ server.listen(PORT, function(){
     console.log('Listening on ' + server.address().port);
 });
 
-//create this somwhere else in the future
-// i can see multiple lobbies being easy if this works
-// we may want to run multiple servers, a lobby server and a game server would make the code significantly cleaner
 
-let lobby = {}; //temp
-lobby.members = {};
-
-let ball;//temp
-server.lastMemberID = 0;
-
-server.lastPlayerID = 0;
-
-
-
-function isRotated(playerNumber){
-    return !(playerNumber % 2);
-}
-
-function formPlayers(members){
-    // create a player for each member
-    // add them to the client object?? for instancing
-    // get stats from lobby like position and character to create player objects
-    // return
-}
 
 function getAllPlayers(){
     var players = [];
-    Object.keys(io.sockets.connected).forEach(function(socketID){
-        console.log(io.sockets.connected[socketID].player);
-        var player = io.sockets.connected[socketID].player;
+    Object.keys(game.players).forEach(function(socketID){
+        var player = game.players[socketID];//io.sockets.connected[socketID].player;
         if(player) players.push(player);
     });
+    // Object.keys(io.sockets.connected).forEach(function(socketID){
+    //     console.log(io.sockets.connected[socketID].player);
+    //     var player = io.sockets.connected[socketID].player;
+    //     if(player) players.push(player);
+    // });
     return players;
 }
 
@@ -202,37 +146,120 @@ function randomInt(low, high) {
     return Math.floor(Math.random() * (high - low) + low);
 }
 
-class ServerTickUpdate{
-    constructor(io){
-        this.io = io;
-        this.balls = [];
-        this.player = []
-    }
-    addToBallUpdates(ball){
-        this.ball.push(ball);
-    }
-    addToPlayerupdates(player){
-        this.player.push(player);
-    }
-    updateClients(){
-        this.updateBallPosition();
-        this.updatePlayerPosition();
-    }
-    updateBallPosition(obj){
-        this.balls.forEach((obj) => {
-            this.io.emit("moveball", obj);
-        });
+// class ServerTickUpdate{
+//     constructor(io){
+//         this.io = io;
+//         this.balls = [];
+//         this.player = []
+//     }
+//     addToBallUpdates(ball){
+//         this.ball.push(ball);
+//     }
+//     addToPlayerupdates(player){
+//         this.player.push(player);
+//     }
+//     updateClients(){
+//         this.updateBallPosition();
+//         this.updatePlayerPosition();
+//     }
+//     updateBallPosition(obj){
+//         this.balls.forEach((obj) => {
+//             this.io.emit("moveball", obj);
+//         });
+//     }
+//
+//     updatePlayerPosition(obj){
+//         this.player.forEach((obj) => {
+//             this.io.emit('move', obj);
+//         });
+//
+//     }
+// }
+
+class Game {
+    constructor(membersList){
+        this.lastBallID = 0;
+        this.players = {};
+        this.goals = {};
+        this.balls = {};
+        this.collisionManager = new systems.CollisionManager();
+        this.createPlayers(membersList);
+        this.createBall();
+        systems.addToUpdate(this);
     }
 
-    updatePlayerPosition(obj){
-        this.player.forEach((obj) => {
-            this.io.emit('move', obj);
-        });
+    destroyGame(){
+        // remove this object from the updater
+    }
+    createPlayers(membersList){
+        for(let memberkey in membersList){
+            let member = membersList[memberkey];
+            this.createPlayer(member);
+        }
+    }
 
+    createPlayer(member){
+        let startVectors = getStartVectors(member.position);
+        let width = 190; //temp
+        let height = 49; //temp
+        let xPos = startVectors.x;
+        let yPos = startVectors.y;
+        let isRotated = this.getIsRotated(member.position)
+        let newPlayer = new physObjects.Player(member.position, xPos , yPos, width, height, isRotated);
+        this.players[member.socketid] = newPlayer;
+        this.createGoal(member.position,xPos,yPos,isRotated);
+    }
+
+    createGoal(memberid, x, y, isRotated){
+        let goalWidth = 1000;
+        let goalHeight = 20;
+        let newGoal = new physObjects.PlayerGoal(x, y, goalWidth, goalHeight, isRotated);
+        this.goals[memberid] = newGoal;
+    }
+
+    createBall(){
+
+        let ballWidth = 48;
+        let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2);
+        newBall.setVelocity(10,0)
+        this.balls[this.lastBallID] = newBall;
+        this.addBallCollisions(newBall);
+        this.lastBallID++;
+    }
+
+    addBallCollisions(ball){
+        for(let playerKey in this.players) {
+            let player = this.players[playerKey];
+            this.collisionManager.addCollision(player, ball, () => { onCollisionPlayerBall(player, ball) });
+        }
+        for(let goalKey in this.goals) {
+            let goal = this.goals[goalKey];
+            this.collisionManager.addCollision(goal, ball, () => { goal.onCollision()});
+        }
+    }
+
+    update(){
+        this.updatePlayerPositions();
+        this.updateBallPositions();
+    }
+
+    updateBallPositions(){
+        for(let ballKey in this.balls) {
+            let ball = this.balls[ballKey];
+            ball.update();
+        }
+    }
+
+    updatePlayerPositions(){
+        for(let playerKey in this.players) {
+            let player = this.players[playerKey];
+            player.update();
+        }
+    }
+    getIsRotated(playerNumber){
+        return !(playerNumber % 2);
     }
 }
-
-
 
 
 // trigger update when it starts this will recall the update

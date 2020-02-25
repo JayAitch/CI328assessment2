@@ -58,7 +58,7 @@ class CollisionManager {
             if (this.collides(obj.objA, obj.objB)) {
                 //obj.objA.backstep();
                 // obj.objB.backstep();
-                obj.onCollision();
+                obj.onCollision(obj.objB);
             }
         })
     }

@@ -16,8 +16,8 @@ function startClient(ip, socket){
 
 
 
-    Client.askNewPlayer = function(){
-        Client.socket.emit('newplayer');
+    Client.askGameConnect = function(){
+        Client.socket.emit('gameconnect');
     };
 
     Client.sendClick = function(x,y){
