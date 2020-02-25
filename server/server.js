@@ -213,7 +213,7 @@ class Game {
         }
         for(let goalKey in this.goals) {
             let goal = this.goals[goalKey];
-            this.collisionManager.addCollision(goal, ball, () => { goal.onCollision()});
+            this.collisionManager.addCollision(goal, ball, () => { this.onCollisionGoalBall(goal, ball)});
         }
     }
 
@@ -259,6 +259,10 @@ class Game {
 
     onCollisionPlayerBall(player, ball) {
         ball.onCollision(player);
+    }
+
+    onCollisionGoalBall(goal, ball){
+        goal.onCollision();
     }
 
     sendUpdateMessage(){
