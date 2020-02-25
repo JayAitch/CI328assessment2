@@ -93,8 +93,8 @@ io.on('connection', function(client) {
 
         let width = 190; //temp
         let height = 49; //temp
-
-        client.player = new new physObjects.Player(
+        let ballWidth = 96;
+        client.player =  new physObjects.Player(
             playerNumber,
             startVectors.x,
             startVectors.y,
@@ -112,9 +112,9 @@ io.on('connection', function(client) {
             ball.setVelocity(-8, 0)
 
             // this will contain a lot more information then we need
-            io.emit("newball", ball); // we may be able to contain this transisition inside a game object to parsel sockets together
-        }
 
+        }
+        client.emit("newball", ball); // we may be able to contain this transisition inside a game object to parsel sockets together
 
         client.emit('allplayers', getAllPlayers());
 
