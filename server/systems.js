@@ -6,6 +6,10 @@ function addToUpdate(obj){
     Updater.addToUpdate(obj);
 }
 
+function clearUpdater(){
+    Updater.clearUpdater();
+}
+
 function startUpdate(){
     update();
 }
@@ -26,6 +30,10 @@ const Updater = {
     updateables:[],
     addToUpdate: function (object) {
         this.updateables.push(object);
+    },
+    // bodge for now to stop us needing to restart the server everytime
+    clearUpdater: function(){
+        this.updateables = [];
     },
     update: function () {
         for(let key in this.updateables){
@@ -107,4 +115,4 @@ class CollisionManager {
     */
 }
 //maybe split into 2?
-module.exports = {startUpdate, stopUpdate, addToUpdate, CollisionManager};
+module.exports = {startUpdate, stopUpdate, addToUpdate, clearUpdater, CollisionManager};

@@ -43,7 +43,10 @@ function startClient(ip, socket){
         }
 
         Client.socket.on('move',function(data){
-            Game.movePlayer(data.id,data.x,data.y);
+            if(Game.movePlayer){
+                Game.movePlayer(data.id,data.x,data.y);
+            }
+
         });
 
         Client.socket.on('remove',function(id){
@@ -53,12 +56,18 @@ function startClient(ip, socket){
 
 
     Client.socket.on('newball',function(data){
-        Game.addNewBall(data.x,data.y);
+        if(Game.addNewBall){
+            Game.addNewBall(data.x,data.y);
+        }
+
     });
 
 
     Client.socket.on('moveball',function(data){
-        Game.moveBall(data.x,data.y);
+        if(Game.moveBall){
+            Game.moveBall(data.x,data.y);
+        }
+
         console.log(data);
     });
 //
@@ -101,7 +110,9 @@ function startClient(ip, socket){
 
     Client.socket.on('newmember',function(data){
         console.log(data);
-        Lobby.newLobbyMember(data.socketid, data.ready, data.position)
+        if(Lobby.newLobbyMember) {
+            Lobby.newLobbyMember(data.socketid, data.ready, data.position)
+        }
     });
 
 
@@ -115,7 +126,10 @@ function startClient(ip, socket){
 
     Client.socket.on('playerready', function(data){
         console.log(data);
-        Lobby.memberReadied(data.key, data.isready);
+        if(Lobby.memberReadied){
+            Lobby.memberReadied(data.key, data.isready);
+        }
+
     });
 
 

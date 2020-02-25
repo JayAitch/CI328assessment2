@@ -12,8 +12,9 @@ lobby.members = {};
 
 let ball;//temp
 server.lastMemberID = 0;
-
 server.lastPlayerID = 0;
+
+
 // here for now as we only have one lobby
 // only the collection needs to be up here in future
 
@@ -27,62 +28,66 @@ io.on('connection', function(client) {
 
     client.on('joinlobby', function(){
 
-        client.join('lobby'); // i think we can have a list of rooms
-        client.member = {
-            position: server.lastMemberID,
-            isready: false,
-            socketid : client.id
-        }
-
-        server.lastMemberID++;
-        lobby.members[client.id] = client.member;
-
-        // just the connecting client
-        client.emit('alllobbymembers', lobby.members);
-
-        // all lobby members that arnt the connecting client
-        client.broadcast.to('lobby').emit('newmember', client.member);
-
-
-        client.on('changecharacter',function(data) {
-            //todo: change the character
-
-            // tell everyone in the lobby the player has changed
-            // this should probably be only the people in the lobby
-            client.broadcast.emit('characterchange', client.player);
-        });
-
-
-        client.on('playerreadytoggle', function(data){
-            console.log('playerreadytoggle');
-            let clientId = client.id;
-            let isReady = !client.member.isready
-
-            lobby.members[clientId].isready = isReady;
-
-            let isLobbyReady = true;
-            io.sockets.in('lobby').emit('playerready', {key: clientId, isready: isReady});
-
-            // go through and make sure everyone is ready
-            for(let key in lobby.members){
-                // some seriouse jank, deffo move to ood
-                if(!lobby.members[key].isready){
-                    isLobbyReady = false;
-                }
+            client.join('lobby'); // i think we can have a list of rooms
+            client.member = {
+                position: server.lastMemberID,
+                isready: false,
+                socketid : client.id
             }
 
-            // if they are all ready clear the lobby and trigger game load
-            if(isLobbyReady){
-                setTimeout( function () {
-                    game = new Game(lobby.members);
-                    io.sockets.in('lobby').emit("loadgame");
-                    lobby = {};
-                    lobby.members = {};
-                    server.lastMemberID = 0;
+            server.lastMemberID++;
+            lobby.members[client.id] = client.member;
 
-                }, 3000);
-            };
-        });
+            // just the connecting client
+            client.emit('alllobbymembers', lobby.members);
+
+            // all lobby members that arnt the connecting client
+            client.broadcast.to('lobby').emit('newmember', client.member);
+
+
+            client.on('changecharacter',function(data) {
+                //todo: change the character
+
+                // tell everyone in the lobby the player has changed
+                // this should probably be only the people in the lobby
+                client.broadcast.emit('characterchange', client.player);
+            });
+
+
+            client.on('playerreadytoggle', function(data){
+                console.log('playerreadytoggle');
+                let clientId = client.id;
+                let isReady = !client.member.isready
+
+                lobby.members[clientId].isready = isReady;
+
+                let isLobbyReady = true;
+                io.sockets.in('lobby').emit('playerready', {key: clientId, isready: isReady});
+
+                // go through and make sure everyone is ready
+                for(let key in lobby.members){
+                    // some seriouse jank, deffo move to ood
+                    if(!lobby.members[key].isready){
+                        isLobbyReady = false;
+                    }
+                }
+
+                // if they are all ready clear the lobby and trigger game load
+                if(isLobbyReady){
+
+                    setTimeout( function () {
+                        if(game){
+                            game.destroyGame();
+                        }
+
+                        game = new Game(lobby.members);
+                        io.sockets.in('lobby').emit("loadgame");
+                        lobby = {};
+                        lobby.members = {};
+                        server.lastMemberID = 0;
+                    }, 3000);
+                };
+            });
     });
 
     // this logic should now be done when the lobby ready trigger is caused
@@ -178,7 +183,6 @@ function randomInt(low, high) {
 
 class Game {
     constructor(membersList){
-        this.lastBallID = 0;
         this.players = {};
         this.goals = {};
         this.balls = {};
@@ -190,6 +194,8 @@ class Game {
 
     destroyGame(){
         // remove this object from the updater
+        // bodge for now to stop us needing to restart the server everytime
+        systems.clearUpdater();
     }
     createPlayers(membersList){
         for(let memberkey in membersList){
@@ -199,7 +205,7 @@ class Game {
     }
 
     createPlayer(member){
-        let startVectors = getStartVectors(member.position);
+        let startVectors = this.getStartVectors(member.position);
         let width = 190; //temp
         let height = 49; //temp
         let xPos = startVectors.x;
@@ -218,19 +224,19 @@ class Game {
     }
 
     createBall(){
-
+        this.lastBallID++;
         let ballWidth = 48;
         let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2);
         newBall.setVelocity(10,0)
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);
-        this.lastBallID++;
+
     }
 
     addBallCollisions(ball){
         for(let playerKey in this.players) {
             let player = this.players[playerKey];
-            this.collisionManager.addCollision(player, ball, () => { onCollisionPlayerBall(player, ball) });
+            this.collisionManager.addCollision(player, ball, () => { this.onCollisionPlayerBall(player, ball) });
         }
         for(let goalKey in this.goals) {
             let goal = this.goals[goalKey];
@@ -259,6 +265,24 @@ class Game {
     getIsRotated(playerNumber){
         return !(playerNumber % 2);
     }
+
+    // get where the player should start
+    getStartVectors(playerNumber){
+        const width = physObjects.gameWidth;
+        const height = physObjects.gameHeight;
+        const playerWidth = 30;
+        const playerHeight = 30
+        switch (playerNumber) {
+            case 0:   return {x: 0 + playerWidth, y: height/2}
+            case 1:   return {x: width/2, y: height - playerHeight}
+            case 2:   return {x: width - playerWidth, y: height/2}
+            case 3:   return {x: width/2, y: 0 + playerHeight}
+        }
+    }
+
+    onCollisionPlayerBall(player, ball) {
+        ball.onCollision(player);
+    }
 }
 
 
@@ -266,23 +290,6 @@ class Game {
 // this should be done in the inards of a game class
 
 
-// TBD -- add velocity from moving paddles
-function onCollisionPlayerBall(player, ball) {
-    ball.onCollision(player);
-}
 
-// get where the player should start
-function getStartVectors(playnumber){
-    const width = physObjects.gameWidth;
-    const height = physObjects.gameHeight;
-    const playerWidth = 30;
-    const playerHeight = 30
-    switch (playnumber) {
-        case 0:   return {x: 0 + playerWidth, y: height/2}
-        case 1:   return {x: width/2, y: height - playerHeight}
-        case 2:   return {x: width - playerWidth, y: height/2}
-        case 3:   return {x: width/2, y: 0 + playerHeight}
-    }
-}
 
 systems.startUpdate();
