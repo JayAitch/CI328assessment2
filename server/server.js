@@ -79,8 +79,8 @@ io.on('connection', function(client) {
                         if(game){
                             game.destroyGame();
                         }
-
-                        game = new Game(lobby.members);
+                        // creating lobbies and multiple games should be easy now the game is handling where the updates go!
+                        game = new Game(lobby.members, 'lobby');
                         io.sockets.in('lobby').emit("loadgame");
                         lobby = {};
                         lobby.members = {};
@@ -182,10 +182,11 @@ function randomInt(low, high) {
 // }
 
 class Game {
-    constructor(membersList){
+    constructor(membersList, gameid){
         this.players = {};
         this.goals = {};
         this.balls = {};
+        this.gameid = gameid;
         this.collisionManager = new systems.CollisionManager();
         this.createPlayers(membersList);
         this.createBall();
@@ -219,6 +220,7 @@ class Game {
     createGoal(memberid, x, y, isRotated){
         let goalWidth = 1000;
         let goalHeight = 20;
+        // goal can probably keep track of lives
         let newGoal = new physObjects.PlayerGoal(x, y, goalWidth, goalHeight, isRotated);
         this.goals[memberid] = newGoal;
     }
@@ -253,6 +255,8 @@ class Game {
         for(let ballKey in this.balls) {
             let ball = this.balls[ballKey];
             ball.update();
+            //long term we dont need global update
+            global.io.sockets.in(this.gameid).emit('moveball', ball);
         }
     }
 
@@ -260,6 +264,8 @@ class Game {
         for(let playerKey in this.players) {
             let player = this.players[playerKey];
             player.update();
+            //long term we dont need global update
+            global.io.sockets.in(this.gameid).emit('move', player);
         }
     }
     getIsRotated(playerNumber){
@@ -282,6 +288,10 @@ class Game {
 
     onCollisionPlayerBall(player, ball) {
         ball.onCollision(player);
+    }
+
+    sendUpdateMessage(){
+
     }
 }
 
