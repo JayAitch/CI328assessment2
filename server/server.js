@@ -151,35 +151,6 @@ function randomInt(low, high) {
     return Math.floor(Math.random() * (high - low) + low);
 }
 
-// class ServerTickUpdate{
-//     constructor(io){
-//         this.io = io;
-//         this.balls = [];
-//         this.player = []
-//     }
-//     addToBallUpdates(ball){
-//         this.ball.push(ball);
-//     }
-//     addToPlayerupdates(player){
-//         this.player.push(player);
-//     }
-//     updateClients(){
-//         this.updateBallPosition();
-//         this.updatePlayerPosition();
-//     }
-//     updateBallPosition(obj){
-//         this.balls.forEach((obj) => {
-//             this.io.emit("moveball", obj);
-//         });
-//     }
-//
-//     updatePlayerPosition(obj){
-//         this.player.forEach((obj) => {
-//             this.io.emit('move', obj);
-//         });
-//
-//     }
-// }
 
 class Game {
     constructor(membersList, gameid){

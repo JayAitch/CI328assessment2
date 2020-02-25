@@ -146,7 +146,6 @@ class Ball extends CirclePhysicsObject{
 
     update() {
         super.update();
-     //   if(global.io)global.io.emit("moveball", this); // not here
     }
 }
 
@@ -197,8 +196,6 @@ class Player extends RectanglePhysicsObject{
 
     update() {
         super.update();
-        // tell everyone the player has been updated - do this somewhere else
-       // if(global.io)global.io.emit('move', this);
     }
 
     // which direction does the player move in
