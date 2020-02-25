@@ -173,8 +173,8 @@ class Player extends RectanglePhysicsObject{
     move(input){
         let moveSpeed = 10;
 
-        let xMovement = moveDirection.x * (moveSpeed * input);
-        let yMovement = moveDirection.y * (moveSpeed * input);
+        let xMovement = this.moveDirection.x * (moveSpeed * input);
+        let yMovement = this.moveDirection.y * (moveSpeed * input);
         this.setVelocity(xMovement, yMovement);
     }
 
