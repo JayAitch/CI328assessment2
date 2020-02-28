@@ -79,13 +79,6 @@ class RectanglePhysicsObject extends PhysicsObject{
         this.height = height;
     }
 
-    // this only detects rectangle with rectangle we should have a collision handling object instead to allow for cir - squ and cir-cir and sqr-sqr
-    intersects(a, b) {
-        return (a.x < b.x + b.width &&
-            a.x + a.width > b.x &&
-            a.y < b.y + b.height &&
-            a.y + a.height > b.y)
-    }
 
     isOutOfBounds() {
         let hWidth = this.width / 2;
@@ -103,31 +96,9 @@ class RectanglePhysicsObject extends PhysicsObject{
 
 }
 
-//  relivant interection logic https://jsfiddle.net/SalixAlba/54Fb2/
-class CirclePhysicsObject extends PhysicsObject{
-    constructor(x, y, radius) {
-        super(x,y);
-        this.radius = radius;
-    }
-
-    isOutOfBounds() {
-        const radius = this.radius;
-        let x = this.x;
-        let y = this.y;
-        return(x - radius < 0 ||
-            x + radius > gameWidth ||
-            y - radius < 0 ||
-            y + radius > gameHeight
-        )
-    }
-}
-
-class Ball extends CirclePhysicsObject{
-    constructor(x,y,radius){
-        super(x,y,radius);
-        let diameter = radius * 2;
-        this.height = diameter;
-        this.width = diameter;
+class Ball extends RectanglePhysicsObject{
+    constructor(x,y, radius){
+        super(x,y, radius, radius);
     }
 //https://stackoverflow.com/questions/13455042/random-number-between-negative-and-positive-value
     onCollision(otherObject) {

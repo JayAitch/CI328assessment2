@@ -97,21 +97,33 @@ class GameScene extends Phaser.Scene{
 
 
     spawnBall(x,y){
-        this.ball = this.add.sprite( x, y,"ball");
+        this.ball = this.add.sprite( x, y, "ball");
+        this.ball.newx = x;
+        this.ball.newy = y;
+        this.ball.update = ()=> {
+            let ball = this.ball;
+            console.dir(ball);
+            console.dir(this.ball);
+            ball.x = ball.x * 0.9 + ball.newx * 0.1;
+            ball.y = ball.y * 0.9 + ball.newy * 0.1;   
+        }
     }
 
     moveBall(x, y){
         let ball = this.ball;
+        ball.newx = x;
+        ball.newy = y;
         //console.log(ball);
-        let distance = Phaser.Math.Distance.Between(ball.x,ball.y, x, y);
-        let duration = distance * 5;
-        let tween = this.add.tween(
-            {
-                targets: [ball],
-                duration: duration,
-                x: x,
-                y : y
-            });
+        
+        // let distance = Phaser.Math.Distance.Between(ball.x,ball.y, x, y);
+        // let duration = distance * 5;
+        // let tween = this.add.tween(
+        //     {
+        //         targets: [ball],
+        //         duration: duration,
+        //         x: x,
+        //         y : y
+        //     });
     }
 
     getPlayerCharacter(id){
@@ -128,17 +140,8 @@ class GameScene extends Phaser.Scene{
         }
     }
 
-
-    preload(){
-        // this.load.image('sprite', 'assets/coin.png');
-        // this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
-        // this.load.image('green_paddleV', 'assets/green_paddleV.png');
-        // this.load.image('red_paddleV', 'assets/red_paddleV.png');
-        // this.load.image('yellow_paddleV', 'assets/yellow_paddleV.png');
-        // this.load.image('blue_paddleH', 'assets/blue_paddleH.png');
-        // this.load.image('green_paddleH', 'assets/green_paddleH.png');
-        // this.load.image('red_paddleH', 'assets/red_paddleH.png');
-        // this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
+    update() {
+        if(this.ball) this.ball.update()
     }
 
     getCoordinates(pointer){

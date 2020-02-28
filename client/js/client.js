@@ -68,7 +68,7 @@ function startClient(ip, socket){
             Game.moveBall(data.x,data.y);
         }
 
-        console.log(data);
+        // console.log(data);
     });
 
 
@@ -80,6 +80,7 @@ function startClient(ip, socket){
 
     Client.socket.on('loadgame',function(data){
         console.log(data);
+        if(Game.triggerGame)
        Game.triggerGame();
     });
 

@@ -64,7 +64,7 @@ class CollisionManager {
     update() {
         this.colliders.forEach((obj) => {
             if (this.collides(obj.objA, obj.objB)) {
-                //obj.objA.backstep();
+                // obj.objA.backstep();
                 // obj.objB.backstep();
                 obj.onCollision();
             }
@@ -77,10 +77,10 @@ class CollisionManager {
             //return !(((a.y + a.height /2) < (b.y))|| (a.y > (b.y + b.height)) || ((a.x + a.width) < b.x) || (a.x > (b.x + b.width)));
 
 
-            let aWidth = (a.radius || a.width) / 2;
-            let bWidth = (b.radius || b.width) / 2;
-            let aHeight  = (a.radius || a.height)/ 2;
-            let bHeight = (b.radius || b.height)/ 2;
+            let aWidth = a.width / 2;
+            let bWidth = b.width / 2;
+            let aHeight  = a.height/ 2;
+            let bHeight = b.height/ 2;
 
 
             return (a.x - aWidth < b.x + bWidth  &&

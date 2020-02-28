@@ -199,7 +199,7 @@ class Game {
     createBall(){
         this.lastBallID++;
         let ballWidth = 48;
-        let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2);
+        let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth);
         newBall.setVelocity(10,0)
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);
