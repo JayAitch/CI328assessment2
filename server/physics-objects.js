@@ -131,21 +131,21 @@ class Ball extends CirclePhysicsObject{
     }
 //https://stackoverflow.com/questions/13455042/random-number-between-negative-and-positive-value
     onCollision(otherObject) {
-
         let xVel = this.velocity.x;
         let yVel = this.velocity.y;
         let newXVeloctity = xVel  * -1;
         let newYVeloctity = yVel * -1;
+
         if(otherObject){
             newXVeloctity = newXVeloctity + otherObject.velocity.x;
             newYVeloctity = newYVeloctity + otherObject.velocity.y;
         }
+
         this.setVelocity(newXVeloctity, newYVeloctity);
     }
 
     update() {
         super.update();
-        if(global.io)global.io.emit("moveball",this); // not here
     }
 }
 
@@ -196,8 +196,6 @@ class Player extends RectanglePhysicsObject{
 
     update() {
         super.update();
-        // tell everyone the player has been updated - do this somewhere else
-        if(global.io)global.io.emit('move', this);
     }
 
     // which direction does the player move in

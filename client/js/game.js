@@ -88,7 +88,7 @@ class GameScene extends Phaser.Scene{
         Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)})
         Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
         Game.moveBall = ((x,y) => {this.moveBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
-        Client.askNewPlayer();
+        Client.askGameConnect();
         console.log("game started");
         // append methods to game object for client to interact with
 
