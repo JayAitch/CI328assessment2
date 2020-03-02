@@ -169,6 +169,7 @@ class Game {
         // bodge for now to stop us needing to restart the server everytime
         systems.clearUpdater();
     }
+
     createPlayers(membersList){
         for(let memberkey in membersList){
             let member = membersList[memberkey];
@@ -199,7 +200,7 @@ class Game {
     createBall(){
         this.lastBallID++;
         let ballWidth = 48;
-        let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2);
+        let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2, true, (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)});
         newBall.setVelocity(10,0)
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);
@@ -239,6 +240,7 @@ class Game {
             global.io.sockets.in(this.gameid).emit('move', player);
         }
     }
+
     getIsRotated(playerNumber){
         return !(playerNumber % 2);
     }
@@ -258,11 +260,66 @@ class Game {
     }
 
     onCollisionPlayerBall(player, ball) {
-        ball.onCollision(player);
+        // emit this shit for game to know where collision occurred, well, where the ball was when it did
+        global.io.sockets.in(this.gameid).emit('collisionplayer', {player: player, ball: ball});
+
+        let aWidth = player.width / 2;
+        let aHeight = player.height / 2;
+        let hWidth = ball.width / 2;
+        let hHeight = ball.height / 2;
+
+        let bound;
+        if (ball.x > player.x + aWidth) {
+            bound = 0; // east of player - bounce right
+            ball.x += hWidth;
+        } else if (ball.x < player.x - aWidth) {
+            bound = 2; // west of player - bounce left
+            ball.x -= hWidth;
+        }
+        
+        if (ball.y > player.y + aHeight) {
+            bound = 1; // south of player - bounce down
+            ball.y += hHeight;
+        } else if (ball.y < player.y - aHeight) {
+            bound = 3; // north of player - bounce up
+            ball.y -= hHeight;
+        }
+
+        let angle = this.getAngleFromBounds(bound);
+        ball.bounce(angle, player.velocity.x, player.velocity.y);
     }
 
-    onCollisionGoalBall(goal, ball){
-        goal.onCollision();
+    onCollisionGoalBall(goal, ball) {
+        // goal.onCollision();
+    }
+
+    onCollisionBallBounds(ball, bounds) {
+        let angle = this.getAngleFromBounds(bounds);
+
+        ball.bounce(angle);
+    }
+
+    getAngleFromBounds(bounds) {
+        let angle;
+        switch (bounds) {
+            case 0:
+                angle = Math.PI; // east of bound - (x+)
+                break;
+            case 1:
+                angle = Math.PI / 2; // south of bound - (y+)
+                break;
+            case 2:
+                angle = 0; // west of bound - (x-)
+                break;
+            case 3:
+                angle = -Math.PI / 2; // north of bound - (y-)
+                break;
+        
+            default:
+                angle = 0; // might need better default
+                break;
+        }
+        return angle;
     }
 
     sendUpdateMessage(){

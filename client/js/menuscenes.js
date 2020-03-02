@@ -28,7 +28,7 @@ class LandingScene extends Phaser.Scene {
         super({key: 'landing'});
     }
     preload(){
-  //      this.load.image('sprite', 'assets/coin.png');
+        // this.load.image('sprite', 'assets/coin.png');
         this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
         this.load.image('green_paddleV', 'assets/green_paddleV.png');
         this.load.image('red_paddleV', 'assets/red_paddleV.png');
@@ -37,7 +37,7 @@ class LandingScene extends Phaser.Scene {
         this.load.image('green_paddleH', 'assets/green_paddleH.png');
         this.load.image('red_paddleH', 'assets/red_paddleH.png');
         this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
-        this.load.image('ball', 'assets/balltest.png');
+        this.load.image('ball', 'assets/ball.png');
     }
 
 
