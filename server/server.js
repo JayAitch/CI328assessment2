@@ -15,9 +15,9 @@ server.lastMemberID = 0;
 server.lastPlayerID = 0;
 
 const characters  = {
-    "BIG": {speed:2, size: 400, lives: 4},
+    "BIG": {speed:2, size: 380, lives: 4},
     "MEDIUM": {speed:4, size: 190, lives: 3},
-    "SMALL": {speed:6, size: 50, lives: 4}
+    "SMALL": {speed:6, size: 76, lives: 4}
 }
 
 // here for now as we only have one lobby
