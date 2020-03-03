@@ -43,10 +43,32 @@ class LandingScene extends Phaser.Scene {
         this.load.image('ball', 'assets/ball.png');
         this.load.image('UILeft', 'assets/arrowLeft.png');
         this.load.image('UIRight', 'assets/arrowRight.png');
+        this.load.atlasXML('slimeMiddle', 'assets/SlimeMiddle.png', 'assets/SlimeMiddle.xml')
+        this.load.atlasXML('slimeEdge', 'assets/SlimeEdge.png', 'assets/SlimeEdge.xml')
     }
 
+    createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
+        this.anims.create({
+          key: key,
+          repeat: repeat,
+          frameRate: frameRate,
+          yoyo: (yoyo || false),
+          frames: this.anims.generateFrameNames(spriteSheet, {
+            prefix: animationName,
+            suffix: '',
+            start: startFrame,
+            end: endFrame
+          })
+        });
+      }
 
     create() {
+        this.createAnimation('SlimeMiddleMoving', -1, 5, 'slimeMiddle', 'slimeMiddle', 0, 1);
+        this.createAnimation('SlimeMiddleStationary', -1, 5, 'slimeMiddle', 'slimeMiddle', 0, 0);
+        this.createAnimation('SlimeEdgeAway', -1, 5, 'slimeEdge', 'slimeEdge', 0, 1);
+        this.createAnimation('SlimeEdgeTowards', -1, 5, 'slimeEdge', 'slimeEdge', 1, 2);
+        this.createAnimation('SlimeEdgeStationary', -1, 5, 'slimeEdge', 'slimeEdge', 1, 1);
+        
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'Best Pong', textStyles.header);
         offsetByWidth(title);
         this.ip = 'localhost';
@@ -164,7 +186,6 @@ class LobbyScene extends Phaser.Scene {
         });
 
         Lobby.memberReadied = ((key, isready, position) => {
-            console.log(this.lobbyCards);
             let memberCard = this.lobbyCards[key].readyState = isready;
             console.log(memberCard);
         });

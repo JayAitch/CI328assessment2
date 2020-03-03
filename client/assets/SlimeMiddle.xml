@@ -1,0 +1,4 @@
+<TextureAtlas imagePath='SlimeMiddle.png'>
+  <SubTexture name='SlimeMiddle1' x='0' y='0' width='38' height='69'/>
+  <SubTexture name='SlimeMiddle0' x='38' y='0' width='38' height='69'/>
+</TextureAtlas>

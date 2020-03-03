@@ -29,7 +29,7 @@ class GameScene extends Phaser.Scene {
         });
 
         // this.input.onTap.add(Game.getCoordinates, this);
-        Game.addNewPlayer = ((id,x,y)=>{this.addNewPlayer(id, x, y)})
+        Game.addNewPlayer = ((id,character, x,y)=>{this.addNewPlayer(id, character, x, y)})
         Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)})
         Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
         Game.moveBall = ((x,y) => {this.moveBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
@@ -41,6 +41,12 @@ class GameScene extends Phaser.Scene {
 
         Game.onCollisionPlayerBall = ((ball, player) => {this.onCollisionPlayerBall(ball, player)});
         this.createEmitter();
+
+        this.characters = {
+            "BIG": {size: 8, eyes: 4, colour: 'blue'},
+            "MEDIUM": {size: 3, eyes: 3, colour: 'red'},
+            "SMALL": {size: 0, eyes: 4, colour: 'yellow'}
+        }
     }
 
     spawnBall(x,y) {
@@ -89,20 +95,6 @@ class GameScene extends Phaser.Scene {
         //ball.y = y;
     }
 
-    getPlayerCharacter(id) {
-      let playerNumber = id % 4;
-        switch(playerNumber){
-            case 0:
-                return 'blue_paddleV'
-            case 1:
-                return 'green_paddleH' 
-            case 2:
-                return 'red_paddleV'
-            case 3:
-                return 'yellow_paddleH'
-        }
-    }
-
     preload(){
     }
 
@@ -121,12 +113,14 @@ class GameScene extends Phaser.Scene {
         Client.sendClick(pointer.worldX, pointer.worldY);
     }
 
-    addNewPlayer(id, x, y) {
+    addNewPlayer(id, character, x, y) {
         if (Game.playerMap[id]) {
             //
         } else {
-            let newPlayer = this.add.sprite(x,y,this.getPlayerCharacter(id))
+            let selectedCharacter = character.toUpperCase();
+            let newPlayer = new Player(this, this.characters[selectedCharacter], x, y);
             Game.playerMap[id]= newPlayer;
+
             newPlayer.newx = x;
             newPlayer.newy = y;
 
@@ -137,24 +131,11 @@ class GameScene extends Phaser.Scene {
                 // this.y = this.y * 0.9 + this.newy * 0.1;
             }
         }
-
     }
 
-    movePlayer(id, x, y) {
-        // tween player to server calculate player position
+    movePlayer(id,x,y) {
         let player = Game.playerMap[id];
-        player.newx = x;
-        player.newy = y;
-        // let distance = Phaser.Math.Distance.Between(player.x, player.y, x, y);
-        // let duration = distance * 5;
-        // let tween = this.add.tween(
-        //     {
-        //         targets: [player],
-        //         duration: duration,
-        //         x: x,
-        //         y : y
-        //     }
-        // );
+        player.move(x,y);
     }
 
     removePlayer(id) {
