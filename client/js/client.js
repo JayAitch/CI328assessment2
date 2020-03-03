@@ -36,6 +36,9 @@ function startClient(ip, socket){
     });
 
 
+    Client.socket.on('collisionplayer',function(data){
+        Game.onCollisionPlayerBall(data.player, data.ball);
+    });
 
     Client.socket.on('allplayers',function(data){
         for(var i = 0; i < data.length; i++){
@@ -67,8 +70,6 @@ function startClient(ip, socket){
         if(Game.moveBall){
             Game.moveBall(data.x,data.y);
         }
-
-        console.log(data);
     });
 
 
