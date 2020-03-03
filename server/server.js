@@ -13,11 +13,6 @@ lobby.members = {};
 let ball;//temp
 server.lastMemberID = 0;
 server.lastPlayerID = 0;
-const characters  = {
-    "BIG": {speed:0, size: 0},
-    "MEDIUM": {speed:0, size: 0},
-    "SMALL": {speed:0, size: 0}
-}
 
 // here for now as we only have one lobby
 // only the collection needs to be up here in future
@@ -185,12 +180,10 @@ class Game {
 
     createPlayer(member){
         let startVectors = this.getStartVectors(member.position);
-        let width = 190; //temp
-        let height = 49; //temp
         let xPos = startVectors.x;
         let yPos = startVectors.y;
         let isRotated = this.getIsRotated(member.position)
-        let newPlayer = new physObjects.Player(member.position, xPos , yPos, width, height, isRotated);
+        let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character);
         this.players[member.socketid] = newPlayer;
         this.createGoal(member.position,xPos,yPos,isRotated);
     }
@@ -206,8 +199,15 @@ class Game {
     createBall(){
         this.lastBallID++;
         let ballWidth = 48;
-        let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2, true, (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)});
-        newBall.setVelocity(10,0)
+        let newBall = new physObjects.Ball(
+            physObjects.gameHeight/2,
+            physObjects.gameWidth/2,
+            ballWidth/2,
+            true,
+            (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)
+            });
+
+        newBall.setVelocity(5,0)
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);
 

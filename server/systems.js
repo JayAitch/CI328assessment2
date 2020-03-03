@@ -20,7 +20,7 @@ function update() {
     updateTimeout = setTimeout(function() {
         Updater.update();
         update();
-    }, 50);
+    }, 16.66667);
 }
 
 const Updater = {
@@ -58,8 +58,6 @@ class CollisionManager {
     update() {
         this.colliders.forEach((obj) => {
             if (this.collides(obj.objA, obj.objB)) {
-                // obj.objA.backstep();
-                // obj.objB.backstep();
                 obj.onCollision();
             }
         })

@@ -4,6 +4,12 @@ const gameHeight = 800;
 
 
 
+const characters  = {
+    "BIG": {speed:2, size: 380, lives: 4},
+    "MEDIUM": {speed:4, size: 190, lives: 3},
+    "SMALL": {speed:6, size: 76, lives: 4}
+}
+
 
 
 function createPoint(x, y){return {x: x, y: y};}
@@ -40,11 +46,10 @@ class PhysicsObject {
         // apply velocity changes
         this.previousX = this.x;
         this.previousY = this.y;
+
         this.x = this.previousX + this.velocity.x;
         this.y = this.previousY + this.velocity.y;
-        // undo velocity changes if they have collided, client will not see this
-        // TODO: need to create a collision handler
-        //       need to create a circle based physics object
+
     }
     //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection AABB
     //https://www.sevenson.com.au/actionscript/sat/
@@ -121,6 +126,7 @@ class RectanglePhysicsObject extends PhysicsObject{
 }
 
 class Ball extends RectanglePhysicsObject {
+
     constructor(x, y, radius, checkBounds, onBoundsCollision) {
         super(x, y, radius, radius, checkBounds, onBoundsCollision);
     }
@@ -192,24 +198,37 @@ class Ball extends RectanglePhysicsObject {
 
 // player class understands how to move and stop
 class Player extends RectanglePhysicsObject{
-    constructor(id, x, y, width, height, isRotated){
-        super(x, y, width, height);
-        this.id = id;
-        this.pos = {x:x,y:y}; // this value isnt being updates
-        // changed to use aabb
-        if (isRotated) {
-            this.width = height;
-            this.height = width;
-        } else {
-            this.height = height;
-            this.width = width;
-        }
 
+    constructor(id, x, y, isRotated, characterID){
+
+        let character = characters[characterID]
+        let characterHeight = 49;
+        let characterWidth = character.size;
+
+        super(x, y, characterWidth, characterHeight);
+
+
+        this.characterID = characterID;
+        this.id = id;
+
+        this.lives = character.lives;
+        this.baseSpeed = character.speed;
+        // changed to use aabb
+        // this is actually wrong, we are setting this value twice
+        if (isRotated) {
+            this.width = characterHeight;
+            this.height = characterWidth;
+        } else {
+            this.height = characterHeight;
+            this.width = characterWidth;
+        }
         this.moveDirection = this.getMoveDirection(isRotated);
     }
 
+
+
     move(input) {
-        let moveSpeed = 10;
+        let moveSpeed = this.baseSpeed; // + modifiers??
         let xMovement = this.moveDirection.x * (moveSpeed * input);
         let yMovement = this.moveDirection.y * (moveSpeed * input);
         this.setVelocity(xMovement, yMovement);
@@ -231,6 +250,9 @@ class Player extends RectanglePhysicsObject{
 
     update() {
         super.update();
+        if (this.isOutOfBounds()) {
+            this.backstep();
+        }
     }
 
     // which direction does the player move in
