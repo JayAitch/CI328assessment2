@@ -13,10 +13,11 @@ lobby.members = {};
 let ball;//temp
 server.lastMemberID = 0;
 server.lastPlayerID = 0;
+
 const characters  = {
-    "BIG": {speed:0, size: 0},
-    "MEDIUM": {speed:0, size: 0},
-    "SMALL": {speed:0, size: 0}
+    "BIG": {speed:2, size: 400, lives: 4},
+    "MEDIUM": {speed:10, size: 190, lives: 3},
+    "SMALL": {speed:55, size: 30, lives: 4}
 }
 
 // here for now as we only have one lobby
@@ -184,13 +185,16 @@ class Game {
     }
 
     createPlayer(member){
+        let character = characters[member.character]
         let startVectors = this.getStartVectors(member.position);
-        let width = 190; //temp
+        let width = character.size//190; //temp
+        let baseLives = character.lives;
+        let baseSpeed = character.speed;
         let height = 49; //temp
         let xPos = startVectors.x;
         let yPos = startVectors.y;
         let isRotated = this.getIsRotated(member.position)
-        let newPlayer = new physObjects.Player(member.position, xPos , yPos, width, height, isRotated);
+        let newPlayer = new physObjects.Player(member.position, xPos , yPos, width, height, isRotated, baseLives, baseSpeed);
         this.players[member.socketid] = newPlayer;
         this.createGoal(member.position,xPos,yPos,isRotated);
     }

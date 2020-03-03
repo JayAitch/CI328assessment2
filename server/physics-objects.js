@@ -121,6 +121,7 @@ class RectanglePhysicsObject extends PhysicsObject{
 }
 
 class Ball extends RectanglePhysicsObject {
+
     constructor(x, y, radius, checkBounds, onBoundsCollision) {
         super(x, y, radius, radius, checkBounds, onBoundsCollision);
     }
@@ -192,10 +193,13 @@ class Ball extends RectanglePhysicsObject {
 
 // player class understands how to move and stop
 class Player extends RectanglePhysicsObject{
-    constructor(id, x, y, width, height, isRotated){
+    // this constructor is begining to look exccessive
+    constructor(id, x, y, width, height, isRotated, lives, baseSpeed){
         super(x, y, width, height);
         this.id = id;
-        this.pos = {x:x,y:y}; // this value isnt being updates
+        //this.pos = {x:x,y:y}; // this value isnt being updates
+        this.lives = lives;
+        this.baseSpeed = baseSpeed;
         // changed to use aabb
         if (isRotated) {
             this.width = height;
@@ -209,7 +213,7 @@ class Player extends RectanglePhysicsObject{
     }
 
     move(input) {
-        let moveSpeed = 10;
+        let moveSpeed = this.baseSpeed; // + modifiers??
         let xMovement = this.moveDirection.x * (moveSpeed * input);
         let yMovement = this.moveDirection.y * (moveSpeed * input);
         this.setVelocity(xMovement, yMovement);

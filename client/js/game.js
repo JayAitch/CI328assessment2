@@ -47,11 +47,11 @@ class GameScene extends Phaser.Scene {
         this.ball = this.add.sprite(x, y, "ball");
         this.ball.newx = x;
         this.ball.newy = y;
-        /*this.ball.update = ()=> {
+        this.ball.update = ()=> {
             let ball = this.ball;
             ball.x = ball.x * 0.9 + ball.newx * 0.1;
             ball.y = ball.y * 0.9 + ball.newy * 0.1;
-        }*/
+        }
     }
 
     createEmitter(){
@@ -83,8 +83,8 @@ class GameScene extends Phaser.Scene {
         let ball = this.ball;
         ball.newx = x;
         ball.newy = y;
-        ball.x = x;
-        ball.y = y;
+        //ball.x = x;
+        //ball.y = y;
     }
 
     getPlayerCharacter(id) {
@@ -104,6 +104,17 @@ class GameScene extends Phaser.Scene {
     preload(){
     }
 
+
+    update(){
+        if(this.ball) this.ball.update();
+        for(let playerKey in Game.playerMap){
+            let player = Game.playerMap[playerKey];
+            console.log(player);
+            player.update();
+        }
+    }
+
+
     getCoordinates(pointer) {
         Client.sendClick(pointer.worldX, pointer.worldY);
     }
@@ -112,25 +123,34 @@ class GameScene extends Phaser.Scene {
         if (Game.playerMap[id]) {
             //
         } else {
-            Game.playerMap[id] = this.add.sprite(x,y,this.getPlayerCharacter(id));
+            let newPlayer = this.add.sprite(x,y,this.getPlayerCharacter(id))
+            Game.playerMap[id]= newPlayer;
+            newPlayer.newx = x;
+            newPlayer.newy = y;
+
+            newPlayer.update = function(){
+                this.x = this.x * 0.9 + this.newx * 0.1;
+                this.y = this.y * 0.9 + this.newy * 0.1;
+            }
         }
 
     }
 
-    movePlayer(id,x,y) {
+    movePlayer(id, x, y) {
         // tween player to server calculate player position
         let player = Game.playerMap[id];
-
-        let distance = Phaser.Math.Distance.Between(player.x, player.y, x, y);
-        let duration = distance * 5;
-        let tween = this.add.tween(
-            {
-                targets: [player],
-                duration: duration,
-                x: x,
-                y : y
-            }
-        );
+        player.newx = x;
+        player.newy = y;
+        // let distance = Phaser.Math.Distance.Between(player.x, player.y, x, y);
+        // let duration = distance * 5;
+        // let tween = this.add.tween(
+        //     {
+        //         targets: [player],
+        //         duration: duration,
+        //         x: x,
+        //         y : y
+        //     }
+        // );
     }
 
     removePlayer(id) {
