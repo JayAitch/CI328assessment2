@@ -14,12 +14,6 @@ let ball;//temp
 server.lastMemberID = 0;
 server.lastPlayerID = 0;
 
-const characters  = {
-    "BIG": {speed:2, size: 380, lives: 4},
-    "MEDIUM": {speed:4, size: 190, lives: 3},
-    "SMALL": {speed:6, size: 76, lives: 4}
-}
-
 // here for now as we only have one lobby
 // only the collection needs to be up here in future
 
@@ -185,16 +179,11 @@ class Game {
     }
 
     createPlayer(member){
-        let character = characters[member.character]
         let startVectors = this.getStartVectors(member.position);
-        let width = character.size//190; //temp
-        let baseLives = character.lives;
-        let baseSpeed = character.speed;
-        let height = 49; //temp
         let xPos = startVectors.x;
         let yPos = startVectors.y;
         let isRotated = this.getIsRotated(member.position)
-        let newPlayer = new physObjects.Player(member.position, xPos , yPos, width, height, isRotated, baseLives, baseSpeed);
+        let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character);
         this.players[member.socketid] = newPlayer;
         this.createGoal(member.position,xPos,yPos,isRotated);
     }

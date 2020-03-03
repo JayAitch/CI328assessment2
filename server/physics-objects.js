@@ -4,6 +4,12 @@ const gameHeight = 800;
 
 
 
+const characters  = {
+    "BIG": {speed:2, size: 400, lives: 4},
+    "MEDIUM": {speed:4, size: 190, lives: 3},
+    "SMALL": {speed:6, size: 50, lives: 4}
+}
+
 
 
 function createPoint(x, y){return {x: x, y: y};}
@@ -192,24 +198,34 @@ class Ball extends RectanglePhysicsObject {
 
 // player class understands how to move and stop
 class Player extends RectanglePhysicsObject{
-    // this constructor is begining to look exccessive
-    constructor(id, x, y, width, height, isRotated, lives, baseSpeed){
-        super(x, y, width, height);
-        this.id = id;
-        //this.pos = {x:x,y:y}; // this value isnt being updates
-        this.lives = lives;
-        this.baseSpeed = baseSpeed;
-        // changed to use aabb
-        if (isRotated) {
-            this.width = height;
-            this.height = width;
-        } else {
-            this.height = height;
-            this.width = width;
-        }
 
+    constructor(id, x, y, isRotated, characterID){
+
+        let character = characters[characterID]
+        let characterHeight = 49;
+        let characterWidth = character.size;
+
+        super(x, y, characterWidth, characterHeight);
+
+
+        this.characterID = characterID;
+        this.id = id;
+
+        this.lives = character.lives;
+        this.baseSpeed = character.speed;
+        // changed to use aabb
+        // this is actually wrong, we are setting this value twice
+        if (isRotated) {
+            this.width = characterHeight;
+            this.height = characterWidth;
+        } else {
+            this.height = characterHeight;
+            this.width = characterWidth;
+        }
         this.moveDirection = this.getMoveDirection(isRotated);
     }
+
+
 
     move(input) {
         let moveSpeed = this.baseSpeed; // + modifiers??
