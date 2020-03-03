@@ -13,7 +13,11 @@ lobby.members = {};
 let ball;//temp
 server.lastMemberID = 0;
 server.lastPlayerID = 0;
-
+const characters  = {
+    "BIG": {speed:0, size: 0},
+    "MEDIUM": {speed:0, size: 0},
+    "SMALL": {speed:0, size: 0}
+}
 
 // here for now as we only have one lobby
 // only the collection needs to be up here in future
@@ -32,7 +36,8 @@ io.on('connection', function(client) {
             client.member = {
                 position: server.lastMemberID,
                 isready: false,
-                socketid : client.id
+                socketid : client.id,
+                character : "BIG"
             }
 
             server.lastMemberID++;
@@ -47,10 +52,11 @@ io.on('connection', function(client) {
 
             client.on('changecharacter',function(data) {
                 //todo: change the character
-
+                client.member.character = data.character;
+                console.log(client.member);
                 // tell everyone in the lobby the player has changed
                 // this should probably be only the people in the lobby
-                client.broadcast.emit('characterchange', client.player);
+                io.sockets.in('lobby').emit('characterchange', {key:client.id, character: client.member.character});
             });
 
 

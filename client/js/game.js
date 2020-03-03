@@ -1,57 +1,4 @@
  var Game = {};
-//
-// Game.init = function(){
-//     game.stage.disableVisibilityChange = true;
-// };
-//
-// Game.preload = function() {
-//     game.load.image('sprite', 'assets/coin.png');
-// };
-//
-// Game.create = function(){
-//     Game.playerMap = {};
-//     var testKey = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
-//     var leftKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-//     var rightKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-//
-//     testKey.onDown.add(Client.sendTest, this);
-//
-//
-//     leftKey.on('down', function(event) {
-//         Client.sendMove(-1)
-//     });
-//
-//     rightKey.on('down', function(event) {
-//         Client.sendMove(1)
-//     });
-//
-//
-//     game.input.onTap.add(Game.getCoordinates, this);
-//
-//     Client.askNewPlayer();
-// };
-//
-// Game.getCoordinates = function(pointer){
-//     Client.sendClick(pointer.worldX,pointer.worldY);
-// };
-//
-// Game.addNewPlayer = function(id,x,y){
-//     Game.playerMap[id] = game.add.sprite(x,y,'sprite');
-// };
-//
-// Game.movePlayer = function(id,x,y){
-//     var player = Game.playerMap[id];
-//     var distance = Phaser.Math.distance(player.x,player.y,x,y);
-//     var tween = game.add.tween(player);
-//     var duration = distance*10;
-//     tween.to({x:x,y:y}, duration);
-//     tween.start();
-// };
-//
-// Game.removePlayer = function(id){
-//     Game.playerMap[id].destroy();
-//     delete Game.playerMap[id];
-// };
 
 class GameScene extends Phaser.Scene {
     constructor() {
@@ -93,6 +40,7 @@ class GameScene extends Phaser.Scene {
         // Game.setPlayerChar = ((number) => {this.switchPlayerCharacter(number)});
 
         Game.onCollisionPlayerBall = ((ball, player) => {this.onCollisionPlayerBall(ball, player)});
+        this.createEmitter();
     }
 
     spawnBall(x,y) {
@@ -106,23 +54,29 @@ class GameScene extends Phaser.Scene {
         }*/
     }
 
-    onCollisionPlayerBall(ball, player) {
-        /*
-        // blow particles for fun
-        var particles = this.add.particles('ball');
-    
-        var emitter = particles.createEmitter({
-            x: ball.x,
-            y: ball.y,
-            speed: { min: 50, max: 150 },
-            lifespan: { min: 300, max: 500 },
+    createEmitter(){
+        let particles = this.add.particles('ball');
+        particles.setDepth(2)
+        this.emitter = particles.createEmitter({
+            x: 300,
+            y: 300,
+            on:false,
+            speed: { min: 150, max: 250 },
+            lifespan: { min: 200, max: 300 },
             gravityY: 250,
             blendMode: 'ADD',
             scale: 0.2,
+            quantity: 5,
         });
-        this.time.delayedCall(100, function() {
-            emitter.on = false;
-        });*/
+
+    }
+
+    onCollisionPlayerBall(ball, player) {
+
+        // blow particles for fun
+        let emitter = this.emitter;
+        emitter.setPosition(ball.x,ball.y);
+        emitter.emitParticle();
     }
 
     moveBall(x, y) {
@@ -148,15 +102,6 @@ class GameScene extends Phaser.Scene {
     }
 
     preload(){
-        // this.load.image('sprite', 'assets/coin.png');
-        // this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
-        // this.load.image('green_paddleV', 'assets/green_paddleV.png');
-        // this.load.image('red_paddleV', 'assets/red_paddleV.png');
-        // this.load.image('yellow_paddleV', 'assets/yellow_paddleV.png');
-        // this.load.image('blue_paddleH', 'assets/blue_paddleH.png');
-        // this.load.image('green_paddleH', 'assets/green_paddleH.png');
-        // this.load.image('red_paddleH', 'assets/red_paddleH.png');
-        // this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
     }
 
     getCoordinates(pointer) {
