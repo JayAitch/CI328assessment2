@@ -263,26 +263,26 @@ class Game {
         // emit this shit for game to know where collision occurred, well, where the ball was when it did
         global.io.sockets.in(this.gameid).emit('collisionplayer', {player: player, ball: ball});
 
-        let aWidth = player.width / 2;
-        let aHeight = player.height / 2;
-        let hWidth = ball.width / 2;
-        let hHeight = ball.height / 2;
+        let playerWidth = player.width / 2;
+        let playerHeight = player.height / 2;
+        let ballWidth = ball.width / 2;
+        let ballHeight = ball.height / 2;
 
         let bound;
-        if (ball.x > player.x + aWidth) {
+        if (ball.x > player.x + playerWidth) {
             bound = 0; // east of player - bounce right
-            ball.x += hWidth;
-        } else if (ball.x < player.x - aWidth) {
+            ball.x += ballWidth;
+        } else if (ball.x < player.x - playerWidth) {
             bound = 2; // west of player - bounce left
-            ball.x -= hWidth;
+            ball.x -= ballWidth;
         }
         
-        if (ball.y > player.y + aHeight) {
+        if (ball.y > player.y + playerHeight) {
             bound = 1; // south of player - bounce down
-            ball.y += hHeight;
-        } else if (ball.y < player.y - aHeight) {
+            ball.y += ballHeight;
+        } else if (ball.y < player.y - playerHeight) {
             bound = 3; // north of player - bounce up
-            ball.y -= hHeight;
+            ball.y -= ballHeight;
         }
 
         let angle = this.getAngleFromBounds(bound);

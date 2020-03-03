@@ -107,6 +107,7 @@ class GameScene extends Phaser.Scene {
     }
 
     onCollisionPlayerBall(ball, player) {
+        /*
         // blow particles for fun
         var particles = this.add.particles('ball');
     
@@ -121,7 +122,7 @@ class GameScene extends Phaser.Scene {
         });
         this.time.delayedCall(100, function() {
             emitter.on = false;
-        });
+        });*/
     }
 
     moveBall(x, y) {

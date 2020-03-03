@@ -89,30 +89,30 @@ class RectanglePhysicsObject extends PhysicsObject{
     isOutOfBounds() {
         let lx = this.x;
         let ly = this.y;
-        let hWidth = this.width / 2;
-        let hHeight = this.height / 2;
+        let halfWidth = this.width / 2;
+        let halfHeight = this.height / 2;
         let outsideBounds = false;
 
         // check x
-        if (lx - hWidth <= 0) {
+        if (lx - halfWidth <= 0) {
             this.lastBoundryCrossed = 0;
             outsideBounds = true;
-            this.x += hWidth;
-		} else if (lx + hWidth >= gameWidth) {
+            this.x += halfWidth;
+		} else if (lx + halfWidth >= gameWidth) {
             this.lastBoundryCrossed = 2;
             outsideBounds = true;
-            this.x -= hWidth;
+            this.x -= halfWidth;
         }
         
         // check y
-        if (ly - hHeight <= 0) {
+        if (ly - halfHeight <= 0) {
             this.lastBoundryCrossed = 1;
             outsideBounds = true;
-            this.y += hHeight;
-		} else if (ly + hHeight >= gameHeight) {
+            this.y += halfHeight;
+		} else if (ly + halfHeight >= gameHeight) {
             this.lastBoundryCrossed = 3;
             outsideBounds = true;
-            this.y -= hHeight;
+            this.y -= halfHeight;
         }
 
         return outsideBounds;
