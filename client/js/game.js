@@ -49,8 +49,10 @@ class GameScene extends Phaser.Scene {
         this.ball.newy = y;
         this.ball.update = ()=> {
             let ball = this.ball;
-            ball.x = ball.x * 0.9 + ball.newx * 0.1;
-            ball.y = ball.y * 0.9 + ball.newy * 0.1;
+            ball.x = ball.newx;// * 0.9 + ball.newx * 0.1;
+            ball.y = ball.newy;// * 0.9 + ball.newy * 0.1;
+            // ball.x = ball.x * 0.9 + ball.newx * 0.1;
+            // ball.y = ball.y * 0.9 + ball.newy * 0.1;
         }
     }
 
@@ -129,8 +131,10 @@ class GameScene extends Phaser.Scene {
             newPlayer.newy = y;
 
             newPlayer.update = function(){
-                this.x = this.x * 0.9 + this.newx * 0.1;
-                this.y = this.y * 0.9 + this.newy * 0.1;
+                this.x = this.newx; //* 0.9 + this.newx * 0.1;
+                this.y = this.newy; //* 0.9 + this.newy * 0.1;
+                // this.x = this.x * 0.9 + this.newx * 0.1;
+                // this.y = this.y * 0.9 + this.newy * 0.1;
             }
         }
 

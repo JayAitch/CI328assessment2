@@ -16,8 +16,8 @@ server.lastPlayerID = 0;
 
 const characters  = {
     "BIG": {speed:2, size: 400, lives: 4},
-    "MEDIUM": {speed:10, size: 190, lives: 3},
-    "SMALL": {speed:55, size: 30, lives: 4}
+    "MEDIUM": {speed:4, size: 190, lives: 3},
+    "SMALL": {speed:6, size: 50, lives: 4}
 }
 
 // here for now as we only have one lobby
@@ -211,7 +211,7 @@ class Game {
         this.lastBallID++;
         let ballWidth = 48;
         let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2, true, (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)});
-        newBall.setVelocity(10,0)
+        newBall.setVelocity(5,0)
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);
 

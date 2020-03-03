@@ -20,7 +20,7 @@ function update() {
     updateTimeout = setTimeout(function() {
         Updater.update();
         update();
-    }, 50);
+    }, 16.66667);
 }
 
 const Updater = {
