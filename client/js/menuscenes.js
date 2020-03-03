@@ -21,6 +21,9 @@ const textStyles = {
     }
 
 };
+//https://www.kenney.nl/assets/game-icons
+const characters = {"Big":{},"Medium":{}, "Small":{}}  // probably store this somewhere more relevant
+const charactersArray = ["BIG","MEDIUM", "SMALL"]; //temp this could be constructed by the characters map or somehtign
 var HUDBaseDepth = 10;
 // consider making this screens a generic class
 class LandingScene extends Phaser.Scene {
@@ -38,6 +41,8 @@ class LandingScene extends Phaser.Scene {
         this.load.image('red_paddleH', 'assets/red_paddleH.png');
         this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
         this.load.image('ball', 'assets/ball.png');
+        this.load.image('UILeft', 'assets/arrowLeft.png');
+        this.load.image('UIRight', 'assets/arrowRight.png');
     }
 
 
@@ -65,6 +70,13 @@ class LandingScene extends Phaser.Scene {
             "Connect"
             );
         offsetByWidth(playBtn);
+
+
+
+
+
+
+
     }
 
     update(){
@@ -108,10 +120,14 @@ var Lobby = {};
 
 
 class LobbyCard {
-    constructor(x,y, scene) {
+
+    constructor(x,y,scene, isReady, character) {
         this.readyText = scene.add.text(x + 150, y, 'not ready', textStyles.header);
         this.playerText = scene.add.text(x - 150, y, 'playerimage', textStyles.header);
+        this.readyState = isReady;
+        this.character = character;
     }
+
     set readyState(val){
         this.isReady = val;
         if(val){
@@ -121,8 +137,10 @@ class LobbyCard {
             this.readyText.text = "not ready";
         }
     }
+
     set character(val){
-        // show an image
+        this.selctedCharacter = val;
+        this.playerText.text = val;
     }
 }
 
@@ -130,7 +148,7 @@ class LobbyCard {
 class LobbyScene extends Phaser.Scene {
     constructor() {
         super({key: 'lobby'});
-
+        this.selectedCharacter = 0;
     }
 
     create() {
@@ -139,8 +157,8 @@ class LobbyScene extends Phaser.Scene {
         this.lobbyCards =  [];
         this.listPos = gameCenterY() - 150//temp
 
-        Lobby.newLobbyMember = ((key, isready, position) => {
-            let newCard = new LobbyCard(gameCenterX(), this.listPos, this);
+        Lobby.newLobbyMember = ((key, isready, character) => {
+            let newCard = new LobbyCard(gameCenterX(), this.listPos, this, isready,  charactersArray[character]);
             this.lobbyCards[key] = newCard;
             this.listPos += 25;
         });
@@ -149,6 +167,12 @@ class LobbyScene extends Phaser.Scene {
             console.log(this.lobbyCards);
             let memberCard = this.lobbyCards[key].readyState = isready;
             console.log(memberCard);
+        });
+
+        Lobby.changeLobbyCharacter = ((key, character) => {
+            console.log(character);
+            let lobbyCard = this.lobbyCards[key];
+            lobbyCard.character = charactersArray[character];
         });
 
 
@@ -178,7 +202,65 @@ class LobbyScene extends Phaser.Scene {
             "PLAY"
         );
         offsetByWidth(playBtn);
+
+        this.createCharacterSelectionControls();
+
     }
+
+
+    createCharacterSelectionControls(){
+        // this will probably be a sprite
+        this.selectedCharacterText = this.add.text(gameCenterX(), game.config.height - 155, charactersArray[this.selectedCharacter], textStyles.header);
+        offsetByWidth(this.selectedCharacterText);
+        let leftButtonAction = () => {
+            // error handle fained connection in lobby switch
+            //this.scene.start("lobbyselection");
+            this.selectCharacter(-1);
+        };
+
+
+        // create the button object, no need for an icon, or UI text
+        let leftButton = new ImageButton(
+            gameCenterX() - 150,
+            game.config.height - 155,
+            "UILeft",
+            this,
+            leftButtonAction
+        );
+
+
+        let rightButtonAction = () => {
+            // error handle fained connection in lobby switch
+            //this.scene.start("lobbyselection");
+            this.selectCharacter(+1);
+        };
+
+
+        // create the button object, no need for an icon, or UI text
+        let rightButton = new ImageButton(
+            gameCenterX() + 150,
+            game.config.height - 155,
+            "UIRight",
+            this,
+            rightButtonAction
+        );
+    }
+
+    selectCharacter(direction){
+        this.selectedCharacter = this.selectedCharacter + direction;
+        if(this.selectedCharacter < 0) this.selectedCharacter = charactersArray.length - 1;
+        if(this.selectedCharacter > charactersArray.length -1) this.selectedCharacter = 0;
+        this.changeCharacter();
+    }
+
+    // if we switch to a map maybe use a key
+    changeCharacter(){
+        let characterMapKey = charactersArray[this.selectedCharacter]
+        this.selectedCharacterText.text = characterMapKey;
+        // and send message
+        Client.sendChangeCharacter(characterMapKey);
+    }
+
 
     update(){
 

@@ -13,7 +13,9 @@ function startClient(ip, socket){
         Client.socket.emit('test');
     };
 
-
+    Client.sendChangeCharacter = function(characterID){
+        Client.socket.emit("changecharacter", {character: characterID});
+    }
 
 
     Client.askGameConnect = function(){
@@ -120,15 +122,17 @@ function startClient(ip, socket){
 
     });
 
-
+    Client.socket.on('characterchange', function (data) {
+        console.log(data);
+        Lobby.changeLobbyCharacter(data.key, data.character);
+    });
 
     // this could target a specific lobby?
     Client.socket.on('alllobbymembers',function (data) {
         console.log('alllobbymemebrs');
         for(let key in data){
             let member = data[key];
-            console.log('alllobbymemebrs');
-            Lobby.newLobbyMember(key, member.ready, member.position);
+            Lobby.newLobbyMember(key, member.ready, member.character);
         }
     });
 
