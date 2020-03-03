@@ -210,7 +210,14 @@ class Game {
     createBall(){
         this.lastBallID++;
         let ballWidth = 48;
-        let newBall = new physObjects.Ball(physObjects.gameHeight/2, physObjects.gameWidth/2, ballWidth/2, true, (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)});
+        let newBall = new physObjects.Ball(
+            physObjects.gameHeight/2,
+            physObjects.gameWidth/2,
+            ballWidth/2,
+            true,
+            (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)
+            });
+
         newBall.setVelocity(5,0)
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);

@@ -58,8 +58,6 @@ class CollisionManager {
     update() {
         this.colliders.forEach((obj) => {
             if (this.collides(obj.objA, obj.objB)) {
-                // obj.objA.backstep();
-                // obj.objB.backstep();
                 obj.onCollision();
             }
         })

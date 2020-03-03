@@ -40,11 +40,10 @@ class PhysicsObject {
         // apply velocity changes
         this.previousX = this.x;
         this.previousY = this.y;
+
         this.x = this.previousX + this.velocity.x;
         this.y = this.previousY + this.velocity.y;
-        // undo velocity changes if they have collided, client will not see this
-        // TODO: need to create a collision handler
-        //       need to create a circle based physics object
+
     }
     //https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection AABB
     //https://www.sevenson.com.au/actionscript/sat/
@@ -235,6 +234,9 @@ class Player extends RectanglePhysicsObject{
 
     update() {
         super.update();
+        if (this.isOutOfBounds()) {
+            this.backstep();
+        }
     }
 
     // which direction does the player move in
