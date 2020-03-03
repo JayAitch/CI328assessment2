@@ -23,13 +23,22 @@ class Player {
 
   generateBody(size, rotation) {
     let xPos = 0;
-    this.bodyContainer.add(this.game.add.sprite(xPos,0,'slimeEdge'));
-    xPos += 38;
-    for (let i = 0; i < size; i++) {
-      this.bodyContainer.add(this.game.add.sprite(xPos,0,'slimeMiddle'));
+    if (size == 0) {
+      xPos = 19;
+    } else if (size % 2 == 0 && size != 0) {
+      let middleSprite = this.game.add.sprite(xPos,0,'slimeMiddle').setOrigin(0.5,0.5);
+      this.bodyContainer.add(middleSprite);
+      xPos = 38;
+    }
+    for (let i = 1; i < size/2; i++) {
+      let rightSprite = this.game.add.sprite(xPos,0,'slimeMiddle').setOrigin(0.5,0.5);
+      let leftSprite = this.game.add.sprite(xPos * -1,0,'slimeMiddle').setOrigin(0.5,0.5);
+      this.bodyContainer.add(rightSprite);
+      this.bodyContainer.add(leftSprite);
       xPos += 38;
     }
-    let edge = this.game.add.sprite(xPos,0,'slimeEdge')
+    this.bodyContainer.add(this.game.add.sprite(xPos * -1,0,'slimeEdge').setOrigin(0.5,0.5));
+    let edge = this.game.add.sprite(xPos,0,'slimeEdge').setOrigin(0.5,0.5);
     edge.scaleX = -1;
     this.bodyContainer.add(edge);
     this.bodyContainer.angle = rotation;

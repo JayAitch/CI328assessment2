@@ -103,7 +103,6 @@ class GameScene extends Phaser.Scene {
         if(this.ball) this.ball.update();
         for(let playerKey in Game.playerMap){
             let player = Game.playerMap[playerKey];
-            console.log(player);
             player.update();
         }
     }
