@@ -34,12 +34,11 @@ class Player {
     rightEdge.scaleX = -1;
     rightEdge.tint = colour;
     this.bodyContainer.add(rightEdge);
-    this.placeSprites(eyes, 32, -15, 'eye', this.eyeContainter);
-    this.placeSprites(eyes, 32, -15, 'socket', this.socketContainer, colour);
+    this.placeSprites(eyes, 32, -20, 'eye', this.eyeContainter);
+    this.placeSprites(eyes, 32, -20, 'socket', this.socketContainer, colour);
     this.bodyContainer.add(this.eyeContainter);
     this.bodyContainer.add(this.socketContainer);
     this.socketContainer.each(this.toggleEyes, '', true);
-    console.log(this.socketContainer);
     this.bodyContainer.angle = rotation;
   }
 
@@ -48,10 +47,10 @@ class Player {
   }
 
   placeSprites(spriteCount, widthOffset, heightOffset, sprite, container, colour = null) {
-    let xPos = 0;
+    let xPos = widthOffset/2;
     if (spriteCount == 0) {
-      xPos = widthOffset/2;
-    } else if (spriteCount % 2 == 0 && spriteCount != 0) {
+    } else if (spriteCount % 2 == 1 && spriteCount != 0) {
+      xPos = 0;
       let middleSprite = this.game.add.sprite(xPos, heightOffset, sprite).setOrigin(0.5,0.5);
       if (colour != null) middleSprite.tint = colour;
       container.add(middleSprite);
