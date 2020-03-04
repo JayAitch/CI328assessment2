@@ -36,8 +36,10 @@ class LandingScene extends Phaser.Scene {
         this.load.image('ball', 'assets/ball.png');
         this.load.image('UILeft', 'assets/arrowLeft.png');
         this.load.image('UIRight', 'assets/arrowRight.png');
-        this.load.atlasXML('slimeMiddle', 'assets/SlimeMiddle.png', 'assets/SlimeMiddle.xml')
-        this.load.atlasXML('slimeEdge', 'assets/SlimeEdge.png', 'assets/SlimeEdge.xml')
+        this.load.image('eye', 'assets/eye.png');
+        this.load.atlasXML('slimeMiddle', 'assets/SlimeMiddle.png', 'assets/SlimeMiddle.xml');
+        this.load.atlasXML('slimeEdge', 'assets/SlimeEdge.png', 'assets/SlimeEdge.xml');
+        this.load.atlasXML('socket', 'assets/socket.png', 'assets/socket.xml');
     }
 
     createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {

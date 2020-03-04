@@ -1,0 +1,4 @@
+<TextureAtlas imagePath='socket.png'>
+  <SubTexture name='SocketClosed' x='0' y='0' width='35' height='41'/>
+  <SubTexture name='SocketOpen' x='35' y='0' width='31' height='35'/>
+</TextureAtlas>
