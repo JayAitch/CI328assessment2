@@ -12,11 +12,6 @@ class Player {
     let socketContainer = this.game.add.container(0,0);
     this.socketContainer = socketContainer;
     this.generateBody(type, size, eyes, colour, this.isRotated(x, y));
-
-    // this.previousX = 0;
-    // this.previousY = 0
-    // this.bodyGroup.incX(spawnX);
-    // this.bodyGroup.incY(spawnY);
   }
 
   isRotated(x, y) {
@@ -74,7 +69,6 @@ class Player {
   }
 
   chooseAnimation(sprite, direction) {
-    console.log(sprite);
     if (sprite.type == 'Sprite') {
       let spriteName = sprite.texture.key;
       sprite.anims.play(`${spriteName}${direction}`, true);
