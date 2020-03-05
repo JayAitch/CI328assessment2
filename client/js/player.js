@@ -28,12 +28,14 @@ class Player {
     this.bodyContainer.add(leftEdge);
     let rightEdge = this.game.add.sprite(xPos,0,`${type}Right`).setOrigin(0.5,0.5);
     rightEdge.tint = colour;
+    let yOffset = rightEdge.height - 49;
     this.bodyContainer.add(rightEdge);
     this.placeSprites(eyes, 32, -20, 'eye', this.eyeContainter);
     this.placeSprites(eyes, 32, -20, 'socket', this.socketContainer, colour);
     this.bodyContainer.add(this.eyeContainter);
     this.bodyContainer.add(this.socketContainer);
     this.socketContainer.each(this.toggleEyes, '', true);
+    this.bodyContainer.each(object => {object.y = object.y += yOffset});
     this.bodyContainer.angle = rotation;
   }
 
