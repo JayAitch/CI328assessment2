@@ -38,7 +38,8 @@ class LandingScene extends Phaser.Scene {
         this.load.image('UIRight', 'assets/arrowRight.png');
         this.load.image('eye', 'assets/eye.png');
         this.load.atlasXML('slimeMiddle', 'assets/SlimeMiddle.png', 'assets/SlimeMiddle.xml');
-        this.load.atlasXML('slimeEdge', 'assets/SlimeEdge.png', 'assets/SlimeEdge.xml');
+        this.load.atlasXML('slimeLeft', 'assets/slimeLeft.png', 'assets/slimeLeft.xml');
+        this.load.atlasXML('slimeRight', 'assets/slimeRight.png', 'assets/slimeRight.xml');
         this.load.atlasXML('socket', 'assets/socket.png', 'assets/socket.xml');
     }
 
@@ -58,11 +59,15 @@ class LandingScene extends Phaser.Scene {
       }
 
     create() {
-        this.createAnimation('SlimeMiddleMoving', -1, 5, 'slimeMiddle', 'slimeMiddle', 0, 1);
-        this.createAnimation('SlimeMiddleStationary', -1, 5, 'slimeMiddle', 'slimeMiddle', 0, 0);
-        this.createAnimation('SlimeEdgeAway', -1, 5, 'slimeEdge', 'slimeEdge', 0, 1);
-        this.createAnimation('SlimeEdgeTowards', -1, 5, 'slimeEdge', 'slimeEdge', 1, 2);
-        this.createAnimation('SlimeEdgeStationary', -1, 5, 'slimeEdge', 'slimeEdge', 1, 1);
+        this.createAnimation('slimeMiddleLeft', -1, 5, 'slimeMiddle', 'SlimeMiddle', 0, 1);
+        this.createAnimation('slimeMiddleIdle', -1, 5, 'slimeMiddle', 'SlimeMiddle', 1, 1);
+        this.createAnimation('slimeMiddleRight', -1, 5, 'slimeMiddle', 'SlimeMiddle', 1, 2);
+        this.createAnimation('slimeLeftLeft', -1, 5, 'slimeLeft', 'SlimeLeft', 0, 1);
+        this.createAnimation('slimeLeftIdle', -1, 5, 'slimeLeft', 'SlimeLeft', 1, 1);
+        this.createAnimation('slimeLeftRight', -1, 5, 'slimeLeft', 'SlimeLeft', 1, 2);
+        this.createAnimation('slimeRightLeft', -1, 5, 'slimeRight', 'SlimeRight', 0, 1);
+        this.createAnimation('slimeRightIdle', -1, 5, 'slimeRight', 'SlimeRight', 1, 1);
+        this.createAnimation('slimeRightRight', -1, 5, 'slimeRight', 'SlimeRight', 1, 2);
         
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'Best Pong', textStyles.header);
         offsetByWidth(title);

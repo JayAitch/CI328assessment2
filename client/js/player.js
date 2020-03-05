@@ -27,11 +27,10 @@ class Player {
 
   generateBody(size, eyes, colour, rotation) {
     let xPos = this.placeSprites(size, 38, 0, 'slimeMiddle', this.bodyContainer, colour);
-    let leftEdge = this.game.add.sprite(xPos * -1,0,'slimeEdge').setOrigin(0.5,0.5);
+    let leftEdge = this.game.add.sprite(xPos * -1,0,'slimeLeft').setOrigin(0.5,0.5);
     leftEdge.tint = colour;
     this.bodyContainer.add(leftEdge);
-    let rightEdge = this.game.add.sprite(xPos,0,'slimeEdge').setOrigin(0.5,0.5);
-    rightEdge.scaleX = -1;
+    let rightEdge = this.game.add.sprite(xPos,0,'slimeRight').setOrigin(0.5,0.5);
     rightEdge.tint = colour;
     this.bodyContainer.add(rightEdge);
     this.placeSprites(eyes, 32, -20, 'eye', this.eyeContainter);
@@ -69,8 +68,35 @@ class Player {
     return xPos;
   }
 
+  animateMovement(direction) {
+    this.bodyContainer.each(this.chooseAnimation, '', direction);
+  }
+
+  chooseAnimation(sprite, direction) {
+    console.log(sprite);
+    if (sprite.type == 'Sprite') {
+      let spriteName = sprite.texture.key;
+      sprite.anims.play(`${spriteName}${direction}`, true);
+    }
+  }
+
   move(newX, newY) {
+    let x = this.bodyContainer.x;
+    let y = this.bodyContainer.y;
+
+    switch(true) {
+      case (x < newX || y < newY):
+        this.animateMovement('Right');
+        break;
+      case (x == newX || y == newY):
+        this.animateMovement('Idle');
+        break;
+      case (x > newX || y > newY):
+        this.animateMovement('Left');
+        break;
+    }    
+
     this.bodyContainer.x = newX;
     this.bodyContainer.y = newY;
-  }
+  } 
 }
