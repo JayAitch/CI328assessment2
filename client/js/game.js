@@ -43,9 +43,9 @@ class GameScene extends Phaser.Scene {
         this.createEmitter();
 
         this.characters = {
-            "BIG": {size: 8, eyes: 4, colour: 0x00ffff},
-            "MEDIUM": {size: 3, eyes: 3, colour: 0xff0000},
-            "SMALL": {size: 0, eyes: 4, colour: 0xffff00}
+            "BIG": {size: 8, eyes: 4, colour: 0x00ffff, type: 'slime'},
+            "MEDIUM": {size: 3, eyes: 3, colour: 0xff0000, type: 'slime'},
+            "SMALL": {size: 0, eyes: 4, colour: 0xffff00, type: 'slime'}
         }
     }
 
