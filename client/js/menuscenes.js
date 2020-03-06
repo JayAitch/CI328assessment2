@@ -32,21 +32,43 @@ class LandingScene extends Phaser.Scene {
     }
     preload(){
         // this.load.image('sprite', 'assets/coin.png');
-        this.load.image('blue_paddleV', 'assets/blue_paddleV.png');
-        this.load.image('green_paddleV', 'assets/green_paddleV.png');
-        this.load.image('red_paddleV', 'assets/red_paddleV.png');
-        this.load.image('yellow_paddleV', 'assets/yellow_paddleV.png');
-        this.load.image('blue_paddleH', 'assets/blue_paddleH.png');
         this.load.image('green_paddleH', 'assets/green_paddleH.png');
-        this.load.image('red_paddleH', 'assets/red_paddleH.png');
-        this.load.image('yellow_paddleH', 'assets/yellow_paddleH.png');
         this.load.image('ball', 'assets/ball.png');
         this.load.image('UILeft', 'assets/arrowLeft.png');
         this.load.image('UIRight', 'assets/arrowRight.png');
+        this.load.image('eye', 'assets/eye.png');
+        this.load.atlasXML('slimeMiddle', 'assets/SlimeMiddle.png', 'assets/SlimeMiddle.xml');
+        this.load.atlasXML('slimeLeft', 'assets/slimeLeft.png', 'assets/slimeLeft.xml');
+        this.load.atlasXML('slimeRight', 'assets/slimeRight.png', 'assets/slimeRight.xml');
+        this.load.atlasXML('socket', 'assets/socket.png', 'assets/socket.xml');
     }
 
+    createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
+        this.anims.create({
+          key: key,
+          repeat: repeat,
+          frameRate: frameRate,
+          yoyo: (yoyo || false),
+          frames: this.anims.generateFrameNames(spriteSheet, {
+            prefix: animationName,
+            suffix: '',
+            start: startFrame,
+            end: endFrame
+          })
+        });
+      }
 
     create() {
+        this.createAnimation('slimeMiddleLeft', -1, 5, 'slimeMiddle', 'SlimeMiddle', 0, 1);
+        this.createAnimation('slimeMiddleIdle', -1, 5, 'slimeMiddle', 'SlimeMiddle', 1, 1);
+        this.createAnimation('slimeMiddleRight', -1, 5, 'slimeMiddle', 'SlimeMiddle', 1, 2);
+        this.createAnimation('slimeLeftLeft', -1, 5, 'slimeLeft', 'SlimeLeft', 0, 1);
+        this.createAnimation('slimeLeftIdle', -1, 5, 'slimeLeft', 'SlimeLeft', 1, 1);
+        this.createAnimation('slimeLeftRight', -1, 5, 'slimeLeft', 'SlimeLeft', 1, 2);
+        this.createAnimation('slimeRightLeft', -1, 5, 'slimeRight', 'SlimeRight', 0, 1);
+        this.createAnimation('slimeRightIdle', -1, 5, 'slimeRight', 'SlimeRight', 1, 1);
+        this.createAnimation('slimeRightRight', -1, 5, 'slimeRight', 'SlimeRight', 1, 2);
+        
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'Best Pong', textStyles.header);
         offsetByWidth(title);
         this.ip = 'localhost';
@@ -164,7 +186,6 @@ class LobbyScene extends Phaser.Scene {
         });
 
         Lobby.memberReadied = ((key, isready, position) => {
-            console.log(this.lobbyCards);
             let memberCard = this.lobbyCards[key].readyState = isready;
             console.log(memberCard);
         });

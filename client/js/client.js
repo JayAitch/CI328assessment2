@@ -33,8 +33,9 @@ function startClient(ip, socket){
         Client.socket.emit('stopmove');
     }
 
+    //Jordan any ideas why data.character isn't working here?
     Client.socket.on('newplayer',function(data){
-         Game.addNewPlayer(data.id,data.x,data.y);
+         Game.addNewPlayer(data.id, data.characterID, data.x, data.y);
     });
 
 
@@ -42,9 +43,10 @@ function startClient(ip, socket){
         Game.onCollisionPlayerBall(data.player, data.ball);
     });
 
+    //Jordan any ideas why data.character isn't working here?
     Client.socket.on('allplayers',function(data){
         for(var i = 0; i < data.length; i++){
-           Game.addNewPlayer(data[i].id,data[i].x,data[i].y);
+           Game.addNewPlayer(data[i].id, data[i].characterID ,data[i].x ,data[i].y);
         }
 
         Client.socket.on('move',function(data){
