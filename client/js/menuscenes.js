@@ -40,6 +40,9 @@ class LandingScene extends Phaser.Scene {
         this.load.atlasXML('slimeMiddle', 'assets/SlimeMiddle.png', 'assets/SlimeMiddle.xml');
         this.load.atlasXML('slimeLeft', 'assets/slimeLeft.png', 'assets/slimeLeft.xml');
         this.load.atlasXML('slimeRight', 'assets/slimeRight.png', 'assets/slimeRight.xml');
+        this.load.atlasXML('metalMiddle', 'assets/MetalMiddle.png', 'assets/MetalMiddle.xml');
+        this.load.atlasXML('metalLeft', 'assets/metalLeft.png', 'assets/metalLeft.xml');
+        this.load.atlasXML('metalRight', 'assets/metalRight.png', 'assets/metalRight.xml');
         this.load.atlasXML('socket', 'assets/socket.png', 'assets/socket.xml');
     }
 
@@ -68,6 +71,16 @@ class LandingScene extends Phaser.Scene {
         this.createAnimation('slimeRightLeft', -1, 5, 'slimeRight', 'SlimeRight', 0, 1);
         this.createAnimation('slimeRightIdle', -1, 5, 'slimeRight', 'SlimeRight', 1, 1);
         this.createAnimation('slimeRightRight', -1, 5, 'slimeRight', 'SlimeRight', 1, 2);
+
+        this.createAnimation('metalMiddleLeft', -1, 5, 'metalMiddle', 'MetalMiddle', 0, 1);
+        this.createAnimation('metalMiddleIdle', -1, 5, 'metalMiddle', 'MetalMiddle', 1, 1);
+        this.createAnimation('metalMiddleRight', -1, 5, 'metalMiddle', 'MetalMiddle', 1, 2);
+        this.createAnimation('metalLeftLeft', -1, 5, 'metalLeft', 'MetalLeft', 0, 2);
+        this.createAnimation('metalLeftIdle', -1, 5, 'metalLeft', 'MetalLeft', 2, 2);
+        this.createAnimation('metalLeftRight', -1, 5, 'metalLeft', 'MetalLeft', 2, 4);
+        this.createAnimation('metalRightLeft', -1, 5, 'metalRight', 'MetalRight', 0, 2);
+        this.createAnimation('metalRightIdle', -1, 5, 'metalRight', 'MetalRight', 2, 2);
+        this.createAnimation('metalRightRight', -1, 5, 'metalRight', 'MetalRight', 2, 4);
         
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'Best Pong', textStyles.header);
         offsetByWidth(title);

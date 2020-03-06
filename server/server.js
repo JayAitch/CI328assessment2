@@ -255,13 +255,12 @@ class Game {
     getStartVectors(playerNumber){
         const width = physObjects.gameWidth;
         const height = physObjects.gameHeight;
-        const playerWidth = 30;
-        const playerHeight = 30
+        const playerOffset = 50;
         switch (playerNumber) {
-            case 0:   return {x: 0 + playerWidth, y: height/2}
-            case 1:   return {x: width/2, y: height - playerHeight}
-            case 2:   return {x: width - playerWidth, y: height/2}
-            case 3:   return {x: width/2, y: 0 + playerHeight}
+            case 0:   return {x: 0 + playerOffset, y: height/2}
+            case 1:   return {x: width/2, y: height - playerOffset}
+            case 2:   return {x: width - playerOffset, y: height/2}
+            case 3:   return {x: width/2, y: 0 + playerOffset}
         }
     }
 

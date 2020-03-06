@@ -5,9 +5,9 @@ const gameHeight = 800;
 
 
 const characters  = {
-    "BIG": {speed:2, size: 380, lives: 4},
+    "BIG": {speed:2, size: 304, lives: 4},
     "MEDIUM": {speed:4, size: 190, lives: 3},
-    "SMALL": {speed:6, size: 76, lives: 4}
+    "SMALL": {speed:6, size: 114, lives: 4}
 }
 
 

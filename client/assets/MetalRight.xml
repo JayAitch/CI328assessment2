@@ -1,0 +1,7 @@
+<TextureAtlas imagePath='MetalRight.png'>
+  <SubTexture name='MetalRight0' x='0' y='0' width='63' height='49'/>
+  <SubTexture name='MetalRight1' x='63' y='0' width='63' height='49'/>
+  <SubTexture name='MetalRight2' x='126' y='0' width='63' height='49'/>
+  <SubTexture name='MetalRight3' x='0' y='49' width='63' height='49'/>
+  <SubTexture name='MetalRight4' x='63' y='49' width='63' height='49'/>
+</TextureAtlas>

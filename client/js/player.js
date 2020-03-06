@@ -11,7 +11,8 @@ class Player {
     this.eyeContainter = eyeContainter;
     let socketContainer = this.game.add.container(0,0);
     this.socketContainer = socketContainer;
-    this.generateBody(type, size, eyes, colour, this.isRotated(x, y));
+    this.rotation = this.isRotated(x, y)
+    this.generateBody(type, size, eyes, colour, this.rotation);
   }
 
   isRotated(x, y) {
@@ -24,11 +25,14 @@ class Player {
   generateBody(type, size, eyes, colour, rotation) {
     let xPos = this.placeSprites(size, 38, 0, `${type}Middle`, this.bodyContainer, colour);
     let leftEdge = this.game.add.sprite(xPos * -1,0,`${type}Left`).setOrigin(0.5,0.5);
-    leftEdge.tint = colour;
+    if (colour != null) leftEdge.tint = colour;
+    let endOffset = (leftEdge.width - 38)/2;
+    leftEdge.x = leftEdge.x - endOffset;
     this.bodyContainer.add(leftEdge);
     let rightEdge = this.game.add.sprite(xPos,0,`${type}Right`).setOrigin(0.5,0.5);
-    rightEdge.tint = colour;
+    if (colour != null) rightEdge.tint = colour;
     let yOffset = rightEdge.height - 49;
+    rightEdge.x = rightEdge.x + endOffset;
     this.bodyContainer.add(rightEdge);
     this.placeSprites(eyes, 32, -20, 'eye', this.eyeContainter);
     this.placeSprites(eyes, 32, -20, 'socket', this.socketContainer, colour);
@@ -83,13 +87,13 @@ class Player {
 
     switch(true) {
       case (x < newX || y < newY):
-        this.animateMovement('Right');
+        (this.rotation  == 180 || this.rotation == -90) ? this.animateMovement('Right') : this.animateMovement('Left');
         break;
       case (x == newX && y == newY):
         this.animateMovement('Idle');
         break;
       case (x > newX || y > newY):
-        this.animateMovement('Left');
+        (this.rotation  == 0 || this.rotation == 90) ? this.animateMovement('Left') : this.animateMovement('Right');
         break;
     }    
 
