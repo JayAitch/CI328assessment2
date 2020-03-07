@@ -151,6 +151,34 @@ function getAllPlayers(){
 function randomInt(low, high) {
     return Math.floor(Math.random() * (high - low) + low);
 }
+function randomVelocity(low, high){
+    let velY = randomInt(low, high);
+    let velX = randomInt(low, high);
+    return{x: velX, y: velY};
+}
+
+// function roleBetweenVelocity(min, max, low, high){
+//     let velocity = randomVelocity(low, high);
+//     let absVeloX = Math.abs(velocity.x);
+//     let absVeloY = Math.abs(velocity.y);
+//     if(absVeloX + absVeloY < min || absVeloX + absVeloY > max ){
+//         roleBetweenVelocity(min);
+//     }else{
+//         return velocity
+//     }
+//
+// }
+
+function isVelocityBetweenMinAndMax(vel, min, max){
+    let absVeloX = Math.abs(vel.x);
+    let absVeloY = Math.abs(vel.y);
+    if(absVeloX + absVeloY < min || absVeloX + absVeloY > max ){
+        return false
+    }else{
+        return true
+    }
+}
+
 
 
 class Game {
@@ -185,15 +213,14 @@ class Game {
         let isRotated = this.getIsRotated(member.position)
         let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character);
         this.players[member.socketid] = newPlayer;
-        this.createGoal(member.position,xPos,yPos,isRotated);
+        this.createGoal(newPlayer, xPos, yPos, isRotated);
     }
 
-    createGoal(memberid, x, y, isRotated){
+    createGoal(player, x, y, isRotated){
         let goalWidth = 1000;
         let goalHeight = 20;
-        // goal can probably keep track of lives
-        let newGoal = new physObjects.PlayerGoal(x, y, goalWidth, goalHeight, isRotated);
-        this.goals[memberid] = newGoal;
+        let newGoal = new physObjects.PlayerGoal(x, y, goalWidth, goalHeight, isRotated, player);
+        this.goals[player.id] = newGoal;
     }
 
     createBall(){
@@ -207,7 +234,7 @@ class Game {
             (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)
             });
 
-        newBall.setVelocity(5,0)
+        this.setBallVelocityBetween(newBall, 5, 5, -10, 10);
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);
 
@@ -219,8 +246,10 @@ class Game {
             this.collisionManager.addCollision(player, ball, () => { this.onCollisionPlayerBall(player, ball) });
         }
         for(let goalKey in this.goals) {
+            console.log("added collider");
             let goal = this.goals[goalKey];
-            this.collisionManager.addCollision(goal, ball, () => { this.onCollisionGoalBall(goal, ball)});
+            console.log(goal);
+            this.collisionManager.addCollision(goal, ball, () => { this.onCollisionGoalBall(goal, ball);});
         }
     }
 
@@ -264,6 +293,11 @@ class Game {
         }
     }
 
+    killPlayer(player){
+        player.isActive = false;
+        global.io.sockets.in(this.gameid).emit('playerdeath', {id:player.id});
+    }
+
     onCollisionPlayerBall(player, ball) {
         // emit this shit for game to know where collision occurred, well, where the ball was when it did
         global.io.sockets.in(this.gameid).emit('collisionplayer', {player: player, ball: ball});
@@ -295,12 +329,40 @@ class Game {
     }
 
     onCollisionGoalBall(goal, ball) {
-        // goal.onCollision();
+        let player = goal.owner;
+        global.io.sockets.in(this.gameid).emit('goalscored', {id:player.id});
+        player.lives--;
+        if(player.lives == 0 ){
+            goal.isActive = false;
+            this.killPlayer(player);
+        }
+        else{
+            goal.setImmunity(1500);
+            this.resetBallPosition();
+        }
+        console.log(goal);
+    }
+
+    setBallVelocityBetween(ball, min, max, axisLow, axisHigh){
+        let newVelocity = {x:0,y:0};
+        while(!isVelocityBetweenMinAndMax(newVelocity, min,max)){
+            newVelocity = randomVelocity( axisLow, axisHigh);
+        }
+        ball.setVelocity(newVelocity.x, newVelocity.y)
+    }
+
+    resetBallPosition(){
+        let ball = this.balls[this.lastBallID];
+        ball.x = physObjects.gameWidth / 2;
+        ball.y = physObjects.gameHeight / 2;
+        ball.setVelocity(0,0);
+        // pause the ball for a second - we can do something clientside to make this nicer
+        setTimeout(()=>{this.setBallVelocityBetween(ball, 5, 10, -10, 10);}, 2000)
+
     }
 
     onCollisionBallBounds(ball, bounds) {
         let angle = this.getAngleFromBounds(bounds);
-
         ball.bounce(angle);
     }
 

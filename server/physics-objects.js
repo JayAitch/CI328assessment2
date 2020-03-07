@@ -23,6 +23,7 @@ class PhysicsObject {
         this.x = x;
         this.y = y;
         this.velocity = createPoint(0,0);
+        this.isActive = true;
         //Updater.addToUpdate(this);
     }
 
@@ -265,22 +266,35 @@ class Player extends RectanglePhysicsObject{
 
 }
 
-class PlayerGoal {
-    constructor(x, y, width, height, isRotated) {
-        this.x = x;
-        this.y = y;
+
+
+class PlayerGoal extends RectanglePhysicsObject {
+
+    constructor(x, y, width, height, isRotated, owner) {
+        let actualWidth = width;
+        let actualHeight = height;
+
         if (isRotated) {
-            this.width = height;
-            this.height = width;
-        } else {
-            this.width = width;
-            this.height = height;
+            actualWidth = height;
+            actualHeight = width;
+        }
+        super(x, y, actualWidth, actualHeight);
+        this.owner = owner;
+        console.log(owner);
+        console.log(this);
+    }
+    setImmunity(length){
+        this.isActive = false;
+        if(!this.immunityTimeOut){
+            this.immunityTimeOut = setTimeout(()=>{
+                    this.isActive = true;
+                    this.immunityTimeOut = null;
+                },
+                length
+            );
         }
     }
 
-    onCollision() {
-        console.log("goal scored");
-    }
 }
 
 // delliberately only exporting non 'abstract'

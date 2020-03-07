@@ -58,7 +58,7 @@ class CollisionManager {
     update() {
         this.colliders.forEach((obj) => {
             if (this.collides(obj.objA, obj.objB)) {
-                obj.onCollision();
+                if((obj.objA.isActive && obj.objB.isActive)) obj.onCollision();
             }
         })
     }

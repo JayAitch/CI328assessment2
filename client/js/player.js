@@ -2,6 +2,7 @@ class Player {
   constructor(game, character, x, y) {
     let size = character.size;
     let eyes = character.eyes;
+    this.lives = eyes; // probably not like this?
     let colour = character.colour;
     let type = character.type.toLowerCase();
     this.game = game;
@@ -46,6 +47,14 @@ class Player {
   toggleEyes(socket, shouldOpen) {
     shouldOpen ? socket.setFrame('SocketOpen') : socket.setFrame('SocketClosed');
   }
+
+  // we can probably use set lives or set eyes instead
+  looseLife(){
+    let socket = this.socketContainer.list[this.lives - 1];
+    if(socket) socket.setFrame('SocketClosed');
+    this.lives--;
+  }
+
 
   placeSprites(spriteCount, widthOffset, heightOffset, sprite, container, colour = null) {
     let xPos = widthOffset/2;

@@ -29,10 +29,12 @@ class GameScene extends Phaser.Scene {
         });
 
         // this.input.onTap.add(Game.getCoordinates, this);
-        Game.addNewPlayer = ((id,character, x,y)=>{this.addNewPlayer(id, character, x, y)})
-        Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)})
-        Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
-        Game.moveBall = ((x,y) => {this.moveBall(x,y)}) // extend to allow multiple ball position updates (simularly to players)
+        Game.addNewPlayer = ((id,character, x,y)=>{this.addNewPlayer(id, character, x, y)});
+        Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)});
+        Game.goalScored = ((id)=>{this.goalScored(id)});
+        Game.playerDeath = ((id)=>{this.killPlayer(id)})
+        Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}); // extend to allow multiple ball position updates (simularly to players)
+        Game.moveBall = ((x,y) => {this.moveBall(x,y)}) ;// extend to allow multiple ball position updates (simularly to players)
         Client.askGameConnect();
         console.log("game started");
         // append methods to game object for client to interact with
@@ -79,11 +81,23 @@ class GameScene extends Phaser.Scene {
 
     }
 
+    goalScored(id){
+        let player = Game.playerMap[id];
+        player.looseLife();
+    }
+
+
+    killPlayer(id){
+        let player = Game.playerMap[id];
+        this.removePlayer(id);
+    }
+
+
     onCollisionPlayerBall(ball, player) {
 
         // blow particles for fun
         let emitter = this.emitter;
-        emitter.setPosition(ball.x,ball.y);
+        emitter.setPosition(this.ball.x,this.ball.y);
         emitter.emitParticle();
     }
 
@@ -137,8 +151,8 @@ class GameScene extends Phaser.Scene {
         player.move(x,y);
     }
 
-    removePlayer(id) {
-        Game.playerMap[id].destroy();
-        delete Game.playerMap[id];
+    removePlayer(id) {;
+        //Game.playerMap[id].destroy();
+        //delete Game.playerMap[id];
     }
 }
