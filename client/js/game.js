@@ -55,12 +55,14 @@ class GameScene extends Phaser.Scene {
         this.ball = this.add.sprite(x, y, "ball");
         this.ball.newx = x;
         this.ball.newy = y;
+        this.createBallTrail();
         this.ball.update = ()=> {
             let ball = this.ball;
             ball.x = ball.newx;// * 0.9 + ball.newx * 0.1;
             ball.y = ball.newy;// * 0.9 + ball.newy * 0.1;
             // ball.x = ball.x * 0.9 + ball.newx * 0.1;
             // ball.y = ball.y * 0.9 + ball.newy * 0.1;
+
         }
     }
 
@@ -80,6 +82,27 @@ class GameScene extends Phaser.Scene {
         });
 
     }
+
+
+    createBallTrail(){
+        let particles = this.add.particles('ball');
+        particles.setDepth(2)
+        this.ballTrail = particles.createEmitter({
+            x: 0,
+            y: 0,
+            on:true,
+
+            follow:this.ball,
+            speed: { min: -100, max: 100 },
+            angle: { min: -120, max: -60 },
+            lifespan: { min: 80, max: 200 },
+            blendMode: 'ADD',
+            scale: {start:0.7,end:0.1},
+            quantity: 1,
+        });
+
+    }
+
 
     goalScored(id){
         let player = Game.playerMap[id];
