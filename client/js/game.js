@@ -107,7 +107,7 @@ class GameScene extends Phaser.Scene {
 
     goalScored(id){
         let player = Game.playerMap[id];
-        player.looseLife();
+        player.loseLife();
     }
 
 

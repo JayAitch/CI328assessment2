@@ -52,7 +52,7 @@ class Player {
   }
 
   // we can probably use set lives or set eyes instead
-  looseLife(){
+  loseLife(){
     let socket = this.socketContainer.list[this.eyes - 1];
     if(socket) socket.setFrame('SocketClosed');
     this.eyes--;
