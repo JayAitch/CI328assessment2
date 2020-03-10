@@ -184,6 +184,7 @@ class LobbyScene extends Phaser.Scene {
     constructor() {
         super({key: 'lobby'});
         this.selectedCharacter = 0;
+
     }
 
     create() {
@@ -223,6 +224,7 @@ class LobbyScene extends Phaser.Scene {
         Game.triggerGame = () =>{
             Game.triggerGame = null;
             this.scene.start("maingame");
+            this.scene.remove('lobby');
         }
 
 
@@ -294,7 +296,6 @@ class LobbyScene extends Phaser.Scene {
         // and send message
         Client.sendChangeCharacter(characterMapKey);
     }
-
 
     update(){
 
