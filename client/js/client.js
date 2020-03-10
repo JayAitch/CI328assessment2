@@ -61,12 +61,15 @@ function startClient(ip, socket){
         });
 
         Client.socket.on('goalscored',function(data){
-            console.log(data);
             Game.goalScored(data.id);
         });
 
         Client.socket.on('playerdeath',function(data){
             Game.playerDeath(data.id);
+        });
+
+        Client.socket.on('endgame',function(data){
+            Game.endGame(data.id);
         });
 
     });

@@ -200,7 +200,7 @@ class Ball extends RectanglePhysicsObject {
 // player class understands how to move and stop
 class Player extends RectanglePhysicsObject{
 
-    constructor(id, x, y, isRotated, characterID){
+    constructor(id, x, y, isRotated, characterID, socketid){
 
         let character = characters[characterID]
         let characterHeight = 49;
@@ -211,7 +211,7 @@ class Player extends RectanglePhysicsObject{
 
         this.characterID = characterID;
         this.id = id;
-
+        this.socketid = socketid
         this.lives = character.lives;
         this.baseSpeed = character.speed;
         // changed to use aabb
@@ -225,7 +225,6 @@ class Player extends RectanglePhysicsObject{
         }
         this.moveDirection = this.getMoveDirection(isRotated);
     }
-
 
 
     move(input) {

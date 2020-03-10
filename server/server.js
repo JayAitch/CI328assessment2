@@ -78,7 +78,7 @@ io.on('connection', function(client) {
 
                     setTimeout( function () {
                         if(game){
-                            game.destroyGame();
+                            game.destroy();
                         }
                         // creating lobbies and multiple games should be easy now the game is handling where the updates go!
                         game = new Game(lobby.members, 'lobby');
@@ -157,17 +157,6 @@ function randomVelocity(low, high){
     return{x: velX, y: velY};
 }
 
-// function roleBetweenVelocity(min, max, low, high){
-//     let velocity = randomVelocity(low, high);
-//     let absVeloX = Math.abs(velocity.x);
-//     let absVeloY = Math.abs(velocity.y);
-//     if(absVeloX + absVeloY < min || absVeloX + absVeloY > max ){
-//         roleBetweenVelocity(min);
-//     }else{
-//         return velocity
-//     }
-//
-// }
 
 function isVelocityBetweenMinAndMax(vel, min, max){
     let absVeloX = Math.abs(vel.x);
@@ -187,16 +176,11 @@ class Game {
         this.goals = {};
         this.balls = {};
         this.gameid = gameid;
+        this.collisions = [];
         this.collisionManager = new systems.CollisionManager();
         this.createPlayers(membersList);
         this.createBall();
-        systems.addToUpdate(this);
-    }
-
-    destroyGame(){
-        // remove this object from the updater
-        // bodge for now to stop us needing to restart the server everytime
-        systems.clearUpdater();
+        this.updaterID = systems.addToUpdate(this);
     }
 
     createPlayers(membersList){
@@ -211,7 +195,7 @@ class Game {
         let xPos = startVectors.x;
         let yPos = startVectors.y;
         let isRotated = this.getIsRotated(member.position)
-        let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character);
+        let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character, member.socketid);
         this.players[member.socketid] = newPlayer;
         this.createGoal(newPlayer, xPos, yPos, isRotated);
     }
@@ -246,9 +230,7 @@ class Game {
             this.collisionManager.addCollision(player, ball, () => { this.onCollisionPlayerBall(player, ball) });
         }
         for(let goalKey in this.goals) {
-            console.log("added collider");
             let goal = this.goals[goalKey];
-            console.log(goal);
             this.collisionManager.addCollision(goal, ball, () => { this.onCollisionGoalBall(goal, ball);});
         }
     }
@@ -295,6 +277,13 @@ class Game {
 
     killPlayer(player){
         player.isActive = false;
+        // this will leave a collision reference on the collision manager
+        // deleting the reference in this array will prevent any balls created after from adding collision and prevent movemnt updates
+        // a ball adding a collision would not work after the player has been disables
+        // we could potentially change the collision managers to return an ID when an object is added
+        // this will allow us to remove objects completely
+        delete this.players[player.socketid];
+        delete this.goals[player.id];
         global.io.sockets.in(this.gameid).emit('playerdeath', {id:player.id});
     }
 
@@ -332,15 +321,35 @@ class Game {
         let player = goal.owner;
         global.io.sockets.in(this.gameid).emit('goalscored', {id:player.id});
         player.lives--;
+
+
         if(player.lives == 0 ){
+
             goal.isActive = false;
+
             this.killPlayer(player);
+            if(Object.keys(this.players).length === 1){
+                this.endGame();
+            }
         }
         else{
             goal.setImmunity(1500);
             this.resetBallPosition();
         }
-        console.log(goal);
+    }
+
+    endGame(){
+        let winningPlayer;
+        for(let  playerKey in this.players){
+            winningPlayer = this.players[playerKey];
+        }
+        global.io.sockets.in(this.gameid).emit('endgame', {id:winningPlayer.id});
+        this.destroy();
+    }
+
+    destroy(){
+        systems.removeFromUpdater(this.updaterID);
+        delete this.collisionManager; // clean up the game
     }
 
     setBallVelocityBetween(ball, min, max, axisLow, axisHigh){

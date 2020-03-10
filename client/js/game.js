@@ -28,11 +28,12 @@ class GameScene extends Phaser.Scene {
             Client.sendStopMove();
         });
 
-        // this.input.onTap.add(Game.getCoordinates, this);
+
         Game.addNewPlayer = ((id,character, x,y)=>{this.addNewPlayer(id, character, x, y)});
         Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)});
         Game.goalScored = ((id)=>{this.goalScored(id)});
         Game.playerDeath = ((id)=>{this.killPlayer(id)})
+        Game.endGame = ((id)=>{this.endGame(id)})
         Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}); // extend to allow multiple ball position updates (simularly to players)
         Game.moveBall = ((x,y) => {this.moveBall(x,y)}) ;// extend to allow multiple ball position updates (simularly to players)
         Client.askGameConnect();
@@ -116,6 +117,46 @@ class GameScene extends Phaser.Scene {
     }
 
 
+
+    endGame(winnerID){
+        let winnerNumber = winnerID +1;
+        let winText = this.add.text(gameCenterX(), gameCenterY(), `Player ${winnerNumber} wins!!` , textStyles.header);
+        offsetByWidth(winText);
+
+        let playBtnAction =  () => {
+            this.scene.start("lobby");
+        };
+        // create the button object, no need for an icon, or UI text
+        let playBtn = new ImageButton(
+            gameCenterX() - 155,
+            game.config.height - 55,
+            "green_paddleH",
+            this,
+            playBtnAction,
+            "Again?"
+        );
+
+
+
+        let lobbySelectionBtnAction = () => {
+            // error handle fained connection in lobby switch
+            this.scene.start("lobbyselection");
+        };
+
+
+        // create the button object, no need for an icon, or UI text
+        let lobbySelectionBtn = new ImageButton(
+            gameCenterX() +155,
+            game.config.height - 55,
+            "green_paddleH",
+            this,
+            lobbySelectionBtnAction,
+            "Lobby Selection"
+        );
+
+
+    }
+
     onCollisionPlayerBall(ball, player) {
 
         // blow particles for fun
@@ -175,7 +216,7 @@ class GameScene extends Phaser.Scene {
     }
 
     removePlayer(id) {;
-        //Game.playerMap[id].destroy();
-        //delete Game.playerMap[id];
+        Game.playerMap[id].destroy();
+        delete Game.playerMap[id];
     }
 }

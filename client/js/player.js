@@ -1,8 +1,7 @@
 class Player {
   constructor(game, character, x, y) {
     let size = character.size;
-    let eyes = character.eyes;
-    this.lives = eyes; // probably not like this?
+    this.eyes = character.eyes;
     let colour = character.colour;
     let type = character.type.toLowerCase();
     this.game = game;
@@ -13,7 +12,7 @@ class Player {
     let socketContainer = this.game.add.container(0,0);
     this.socketContainer = socketContainer;
     this.rotation = this.isRotated(x, y)
-    this.generateBody(type, size, eyes, colour, this.rotation);
+    this.generateBody(type, size, this.eyes, colour, this.rotation);
   }
 
   isRotated(x, y) {
@@ -22,7 +21,11 @@ class Player {
     if (y < 300) return 180;
     return 0;
   }
-
+  destroy(){
+    this.eyeContainter.destroy();
+    this.socketContainer.destroy();
+    this.bodyContainer.destroy();
+  }
   generateBody(type, size, eyes, colour, rotation) {
     let xPos = this.placeSprites(size, 38, 0, `${type}Middle`, this.bodyContainer, colour);
     let leftEdge = this.game.add.sprite(xPos * -1,0,`${type}Left`).setOrigin(0.5,0.5);
@@ -50,9 +53,9 @@ class Player {
 
   // we can probably use set lives or set eyes instead
   looseLife(){
-    let socket = this.socketContainer.list[this.lives - 1];
+    let socket = this.socketContainer.list[this.eyes - 1];
     if(socket) socket.setFrame('SocketClosed');
-    this.lives--;
+    this.eyes--;
   }
 
 
