@@ -73,7 +73,7 @@ class Game {
         this.createGoal(newPlayer, xPos, yPos, isRotated);
 
         // add player collision with nearest posts
-        /*let nearestPosts = [];
+        let nearestPosts = [];
         let gameCenter = {
             x: physObjects.gameWidth / 2,
             y: physObjects.gameHeight / 2,
@@ -82,22 +82,22 @@ class Game {
         }
         let bound = this.getBoundsFromPositions(newPlayer, gameCenter, false);
         switch (bound) {
-            case 0:
+            case 2:
                 nearestPosts.push(this.posts[0]);
                 nearestPosts.push(this.posts[3]);
                 
                 break;
-            case 1:
+            case 3:
                 nearestPosts.push(this.posts[0]);
                 nearestPosts.push(this.posts[1]);
                 
                 break;
-            case 2:
+            case 0:
                 nearestPosts.push(this.posts[1]);
                 nearestPosts.push(this.posts[2]);
                 
                 break;
-            case 3:
+            case 1:
                 nearestPosts.push(this.posts[3]);
                 nearestPosts.push(this.posts[2]);
                 
@@ -106,7 +106,7 @@ class Game {
 
         nearestPosts.forEach((post)=> {
             this.collisionManager.addCollision(newPlayer, post, () => { this.onCollisionPlayerPost(newPlayer, post) });
-        });*/
+        });
         
     }
 

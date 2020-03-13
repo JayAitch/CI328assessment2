@@ -220,12 +220,12 @@ class Player extends RectanglePhysicsObject{
             this.width = characterHeight;
             this.height = characterWidth;
             // add post.height * 2 for easy bound checking
-            this.height += 200;
+            // this.height += 200;
         } else {
             this.height = characterHeight;
             this.width = characterWidth;
             // add post.width * 2 for easy bound checking
-            this.width += 200;
+            // this.width += 200;
         }
         this.moveDirection = this.getMoveDirection(isRotated);
     }
