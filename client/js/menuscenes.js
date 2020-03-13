@@ -224,7 +224,7 @@ class LobbyScene extends Phaser.Scene {
         Game.triggerGame = () =>{
             Game.triggerGame = null;
             this.scene.start("maingame");
-            this.scene.remove('lobby');
+         //   this.scene.remove('lobby');
         }
 
 
