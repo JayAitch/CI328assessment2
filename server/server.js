@@ -78,7 +78,7 @@ io.on('connection', function(client) {
 
                     setTimeout( function () {
                         if(game){
-                            game.destroyGame();
+                            game.destroy();
                         }
                         // creating lobbies and multiple games should be easy now the game is handling where the updates go!
                         game = new Game(lobby.members, 'lobby');
@@ -151,6 +151,23 @@ function getAllPlayers(){
 function randomInt(low, high) {
     return Math.floor(Math.random() * (high - low) + low);
 }
+function randomVelocity(low, high){
+    let velY = randomInt(low, high);
+    let velX = randomInt(low, high);
+    return{x: velX, y: velY};
+}
+
+
+function isVelocityBetweenMinAndMax(vel, min, max){
+    let absVeloX = Math.abs(vel.x);
+    let absVeloY = Math.abs(vel.y);
+    if(absVeloX + absVeloY < min || absVeloX + absVeloY > max ){
+        return false
+    }else{
+        return true
+    }
+}
+
 
 
 class Game {
@@ -159,16 +176,11 @@ class Game {
         this.goals = {};
         this.balls = {};
         this.gameid = gameid;
+        this.collisions = [];
         this.collisionManager = new systems.CollisionManager();
         this.createPlayers(membersList);
         this.createBall();
-        systems.addToUpdate(this);
-    }
-
-    destroyGame(){
-        // remove this object from the updater
-        // bodge for now to stop us needing to restart the server everytime
-        systems.clearUpdater();
+        this.updaterID = systems.addToUpdate(this);
     }
 
     createPlayers(membersList){
@@ -183,17 +195,16 @@ class Game {
         let xPos = startVectors.x;
         let yPos = startVectors.y;
         let isRotated = this.getIsRotated(member.position)
-        let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character);
+        let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character, member.socketid);
         this.players[member.socketid] = newPlayer;
-        this.createGoal(member.position,xPos,yPos,isRotated);
+        this.createGoal(newPlayer, xPos, yPos, isRotated);
     }
 
-    createGoal(memberid, x, y, isRotated){
+    createGoal(player, x, y, isRotated){
         let goalWidth = 1000;
         let goalHeight = 20;
-        // goal can probably keep track of lives
-        let newGoal = new physObjects.PlayerGoal(x, y, goalWidth, goalHeight, isRotated);
-        this.goals[memberid] = newGoal;
+        let newGoal = new physObjects.PlayerGoal(x, y, goalWidth, goalHeight, isRotated, player);
+        this.goals[player.id] = newGoal;
     }
 
     createBall(){
@@ -207,7 +218,7 @@ class Game {
             (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)
             });
 
-        newBall.setVelocity(5,0)
+        this.setBallVelocityBetween(newBall, 5, 5, -10, 10);
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);
 
@@ -220,7 +231,7 @@ class Game {
         }
         for(let goalKey in this.goals) {
             let goal = this.goals[goalKey];
-            this.collisionManager.addCollision(goal, ball, () => { this.onCollisionGoalBall(goal, ball)});
+            this.collisionManager.addCollision(goal, ball, () => { this.onCollisionGoalBall(goal, ball);});
         }
     }
 
@@ -264,6 +275,18 @@ class Game {
         }
     }
 
+    killPlayer(player){
+        player.isActive = false;
+        // this will leave a collision reference on the collision manager
+        // deleting the reference in this array will prevent any balls created after from adding collision and prevent movemnt updates
+        // a ball adding a collision would not work after the player has been disables
+        // we could potentially change the collision managers to return an ID when an object is added
+        // this will allow us to remove objects completely
+        delete this.players[player.socketid];
+        delete this.goals[player.id];
+        global.io.sockets.in(this.gameid).emit('playerdeath', {id:player.id});
+    }
+
     onCollisionPlayerBall(player, ball) {
         // emit this shit for game to know where collision occurred, well, where the ball was when it did
         global.io.sockets.in(this.gameid).emit('collisionplayer', {player: player, ball: ball});
@@ -295,12 +318,60 @@ class Game {
     }
 
     onCollisionGoalBall(goal, ball) {
-        // goal.onCollision();
+        let player = goal.owner;
+        global.io.sockets.in(this.gameid).emit('goalscored', {id:player.id});
+        player.lives--;
+
+
+        if(player.lives == 0 ){
+
+            goal.isActive = false;
+
+            this.killPlayer(player);
+            if(Object.keys(this.players).length === 1){
+                this.endGame();
+            }
+        }
+        else{
+            goal.setImmunity(1500);
+            this.resetBallPosition();
+        }
+    }
+
+    endGame(){
+        let winningPlayer;
+        for(let  playerKey in this.players){
+            winningPlayer = this.players[playerKey];
+        }
+        global.io.sockets.in(this.gameid).emit('endgame', {id:winningPlayer.id});
+        this.destroy();
+    }
+
+    destroy(){
+        systems.removeFromUpdater(this.updaterID);
+        delete this.collisionManager; // clean up the game
+    }
+
+    setBallVelocityBetween(ball, min, max, axisLow, axisHigh){
+        let newVelocity = {x:0,y:0};
+        while(!isVelocityBetweenMinAndMax(newVelocity, min,max)){
+            newVelocity = randomVelocity( axisLow, axisHigh);
+        }
+        ball.setVelocity(newVelocity.x, newVelocity.y)
+    }
+
+    resetBallPosition(){
+        let ball = this.balls[this.lastBallID];
+        ball.x = physObjects.gameWidth / 2;
+        ball.y = physObjects.gameHeight / 2;
+        ball.setVelocity(0,0);
+        // pause the ball for a second - we can do something clientside to make this nicer
+        setTimeout(()=>{this.setBallVelocityBetween(ball, 5, 10, -10, 10);}, 2000)
+
     }
 
     onCollisionBallBounds(ball, bounds) {
         let angle = this.getAngleFromBounds(bounds);
-
         ball.bounce(angle);
     }
 

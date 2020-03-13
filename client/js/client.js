@@ -59,6 +59,19 @@ function startClient(ip, socket){
         Client.socket.on('remove',function(id){
             Game.removePlayer(id);
         });
+
+        Client.socket.on('goalscored',function(data){
+            Game.goalScored(data.id);
+        });
+
+        Client.socket.on('playerdeath',function(data){
+            Game.playerDeath(data.id);
+        });
+
+        Client.socket.on('endgame',function(data){
+            Game.endGame(data.id);
+        });
+
     });
 
 
