@@ -267,9 +267,13 @@ class Game {
     onCollisionPlayerPost(player, post) {
         // again, just leaving this here - remove if not used
         // global.io.sockets.in(this.gameid).emit('collisionplayerpost', {player: player, post: post});
-
-        // how we doing this? backstep?
-        console.log('hitting post');
+        
+        // lengthy backstep
+        if (post.x < player.x) player.x += player.baseSpeed;
+		else if (post.x > player.x) player.x -= player.baseSpeed;
+        
+        if (post.y < player.y) player.y += player.baseSpeed;
+		else if (post.y > player.y) player.y -= player.baseSpeed;
     }
 
     onCollisionGoalBall(goal, ball) {
