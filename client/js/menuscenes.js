@@ -32,18 +32,22 @@ class LandingScene extends Phaser.Scene {
     }
     preload(){
         // this.load.image('sprite', 'assets/coin.png');
-        this.load.image('green_paddleH', 'assets/green_paddleH.png');
-        this.load.image('ball', 'assets/ball.png');
-        this.load.image('UILeft', 'assets/arrowLeft.png');
-        this.load.image('UIRight', 'assets/arrowRight.png');
-        this.load.image('eye', 'assets/eye.png');
-        this.load.atlasXML('slimeMiddle', 'assets/SlimeMiddle.png', 'assets/SlimeMiddle.xml');
-        this.load.atlasXML('slimeLeft', 'assets/slimeLeft.png', 'assets/slimeLeft.xml');
-        this.load.atlasXML('slimeRight', 'assets/slimeRight.png', 'assets/slimeRight.xml');
-        this.load.atlasXML('metalMiddle', 'assets/MetalMiddle.png', 'assets/MetalMiddle.xml');
-        this.load.atlasXML('metalLeft', 'assets/metalLeft.png', 'assets/metalLeft.xml');
-        this.load.atlasXML('metalRight', 'assets/metalRight.png', 'assets/metalRight.xml');
-        this.load.atlasXML('socket', 'assets/socket.png', 'assets/socket.xml');
+        this.load.image('playButton', 'assets/ui/playButton.png');
+        this.load.image('UILeft', 'assets/ui/arrowLeft.png');
+        this.load.image('UIRight', 'assets/ui/arrowRight.png');
+        this.load.image('sand', 'assets/backdrops/sand.png');
+        this.load.image('grass', 'assets/backdrops/grass.png');
+        this.load.image('metalPosts', 'assets/backdrops/metalPosts.png');
+        this.load.image('treePosts', 'assets/backdrops/treePosts.png');
+        this.load.image('ball', 'assets/sprites/images/ball.png');
+        this.load.image('eye', 'assets/sprites/images/eye.png');
+        this.load.atlasXML('slimeMiddle', 'assets/sprites/images/SlimeMiddle.png', 'assets/sprites/xml/SlimeMiddle.xml');
+        this.load.atlasXML('slimeLeft', 'assets/sprites/images/slimeLeft.png', 'assets/sprites/xml/slimeLeft.xml');
+        this.load.atlasXML('slimeRight', 'assets/sprites/images/slimeRight.png', 'assets/sprites/xml/slimeRight.xml');
+        this.load.atlasXML('metalMiddle', 'assets/sprites/images/MetalMiddle.png', 'assets/sprites/xml/MetalMiddle.xml');
+        this.load.atlasXML('metalLeft', 'assets/sprites/images/metalLeft.png', 'assets/sprites/xml/metalLeft.xml');
+        this.load.atlasXML('metalRight', 'assets/sprites/images/metalRight.png', 'assets/sprites/xml/metalRight.xml');
+        this.load.atlasXML('socket', 'assets/sprites/images/socket.png', 'assets/sprites/xml/socket.xml');
     }
 
     createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
@@ -99,7 +103,7 @@ class LandingScene extends Phaser.Scene {
         let playBtn = new ImageButton(
             gameCenterX(),
             game.config.height - 55,
-            "green_paddleH",
+            "playButton",
             this,
             playBtnAction,
             "Connect"
@@ -138,7 +142,7 @@ class LobbySelectionScene extends Phaser.Scene {
         let playBtn = new ImageButton(
             gameCenterX(),
             game.config.height - 55,
-            "green_paddleH",
+            "playButton",
             this,
             playBtnAction,
             "ignore this screen"
@@ -232,7 +236,7 @@ class LobbyScene extends Phaser.Scene {
         let playBtn = new ImageButton(
             gameCenterX(),
             game.config.height - 55,
-            "green_paddleH",
+            "playButton",
             this,
             playBtnAction,
             "PLAY"
