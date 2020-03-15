@@ -9,7 +9,8 @@ class GameScene extends Phaser.Scene {
                 { name: 'metalPosts', depth: 0 },
                 { name: 'treePosts', depth: 10 }
             ],
-            doodads: []
+            doodads: [ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6', 
+                       'doodad7', 'doodad8', 'doodad9', 'doodad10' ]
         }
     }
 
@@ -82,6 +83,10 @@ class GameScene extends Phaser.Scene {
         randNum = parseInt(Math.random() * this.backdropItems.pillars.length);
         let posts = this.add.image(400, 400, this.backdropItems.pillars[randNum].name);
         posts.setDepth(posts.depth + this.backdropItems.pillars[randNum].depth);
+        for (let i =0; i < 3; i++) {
+            randNum = parseInt(Math.random() * this.backdropItems.doodads.length);
+            this.add.image(400, 400, this.backdropItems.doodads[randNum]);
+        }
     }
 
     createEmitter(){
