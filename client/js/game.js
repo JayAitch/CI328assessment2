@@ -3,6 +3,9 @@
 class GameScene extends Phaser.Scene {
     constructor() {
         super({key: 'maingame'});
+    }
+
+    create() {
         this.backdropItems = {
             floors: [ 'sand', 'grass' ],
             pillars: [ 
@@ -10,11 +13,9 @@ class GameScene extends Phaser.Scene {
                 { name: 'treePosts', depth: 10 }
             ],
             doodads: [ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6', 
-                       'doodad7', 'doodad8', 'doodad9', 'doodad10' ]
+                       'doodad7', 'doodad8', 'doodad9', 'doodad10', 'doodad11' ]
         }
-    }
-
-    create() {
+        
         this.buildBackdrop();
         Game.playerMap = {};
         //var testKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);

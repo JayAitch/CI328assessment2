@@ -49,6 +49,7 @@ class LandingScene extends Phaser.Scene {
         this.load.image('doodad8', 'assets/backdrops/doodad8.png');
         this.load.image('doodad9', 'assets/backdrops/doodad9.png');
         this.load.image('doodad10', 'assets/backdrops/doodad10.png');
+        this.load.image('doodad11', 'assets/backdrops/doodad11.png');
         this.load.image('ball', 'assets/sprites/images/ball.png');
         this.load.image('eye', 'assets/sprites/images/eye.png');
         this.load.atlasXML('slimeMiddle', 'assets/sprites/images/SlimeMiddle.png', 'assets/sprites/xml/SlimeMiddle.xml');
