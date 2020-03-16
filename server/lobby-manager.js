@@ -34,8 +34,8 @@ const lobbyManager = {
         return lobby;
     },
 
-    destroyLobby: function(lobby){
-        delete lobbies[lobby];
+    destroyLobby: function(pos){
+        delete this.lobbies[pos];
     }
 
 }
@@ -54,7 +54,7 @@ class Lobby{
         client.game = null;
         client.player = null;
         client.lobby = null;
-        client.memeber = null;
+        client.member = null;
         console.log(this)
         client.join(this.id);
         let lobbyMember = new LobbyMember(this.members.length);
@@ -77,8 +77,6 @@ class Lobby{
         let rooms = client.rooms;
         for (let key in rooms) {
             let roomid = rooms[key];
-            console.log(roomid);
-            console.log(client.rooms);
             client.leave(roomid);
         }
     }
@@ -105,15 +103,16 @@ class Lobby{
     }
 
     notifyNewMember(client){
-        client.broadcast.to(this.id).emit('newmember', client.member);
+        client.broadcast.to(this.id).emit('newmember', {position: client.member.position, isReady: client.member.isReady, character: client.member.character });
     }
 
     notifyCharacterChange(client){
-        io.sockets.in(this.id).emit('characterchange', {key:client.member.position, character: client.member.character})
+        io.sockets.in(this.id).emit('characterchange', {position:client.member.position, character: client.member.character})
     }
 
     notifyMemberReadyChange(client){
-        io.sockets.in(this.id).emit('playerready', {key: client.member.position, isready: client.member.isReady});
+        console.log(client.member)
+        io.sockets.in(this.id).emit('playerready', {position: client.member.position, isReady: client.member.isReady});
     }
 
     isFull(){
@@ -121,7 +120,8 @@ class Lobby{
     }
 
     isReady(){
-        console.log(this.members)
+        if(this.members.length < 2) return;
+
         for(let key in this.members){
             let member = this.members[key];
             if(member.isReady != true){

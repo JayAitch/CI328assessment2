@@ -49,16 +49,6 @@ io.on('connection', function(client) {
         client.emit("newball", gameBall); // we may be able to contain this transisition inside a game object to parsel sockets together
         client.emit('allplayers', getAllPlayers(client.game)); // probably want this bundled as an init
 
-        client.on('stopmove',function(data) {
-            client.player.stop();
-        });
-
-        // we will want to write out own update mechanic, this will allow us to check for collisions after moving and combine movement of player/ball logic
-        client.on('move',function(data) {
-            let direction = Math.sign(data.direction);
-            client.player.move(direction);
-        });
-
 
         client.on('disconnect',function() {
      //       io.emit('remove', client.player.id);
@@ -66,6 +56,19 @@ io.on('connection', function(client) {
         });
 
     });
+
+    client.on('stopmove',function() {
+        if(client.player)
+        client.player.stop();
+    });
+
+    // we will want to write out own update mechanic, this will allow us to check for collisions after moving and combine movement of player/ball logic
+    client.on('move',function(data) {
+        let direction = Math.sign(data.direction);
+        if(client.player)
+        client.player.move(direction);
+    });
+
 });
 
 server.listen(PORT, function(){

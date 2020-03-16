@@ -216,20 +216,19 @@ class LobbyScene extends Phaser.Scene {
         this.listPos = gameCenterY() - 150//temp
 
 
-        Lobby.newLobbyMember = ((key, isready, character) => {
-            let newCard = new LobbyCard(gameCenterX(), this.listPos, this, isready,  character);
-            this.lobbyCards[key] = newCard;
+        Lobby.newLobbyMember = ((pos, isReady, character) => {
+            let newCard = new LobbyCard(gameCenterX(), this.listPos, this, isReady,  character);
+            this.lobbyCards[pos] = newCard;
             this.listPos += 25;
         });
 
-        Lobby.memberReadied = ((key, isready, position) => {
-            let memberCard = this.lobbyCards[key].readyState = isready;
-            console.log(memberCard);
+        Lobby.memberReadied = ((position, isReady, ) => {
+            let memberCard = this.lobbyCards[position].readyState = isReady;
         });
 
-        Lobby.changeLobbyCharacter = ((key, character) => {
+        Lobby.changeLobbyCharacter = ((position, character) => {
             console.log(character);
-            let lobbyCard = this.lobbyCards[key];
+            let lobbyCard = this.lobbyCards[position];
             lobbyCard.character = character;
         });
 
