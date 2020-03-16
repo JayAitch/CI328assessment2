@@ -6,6 +6,17 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        this.backdropItems = {
+            floors: [ 'sand', 'grass' ],
+            pillars: [ 
+                { name: 'metalPosts', depth: 0 },
+                { name: 'treePosts', depth: 10 }
+            ],
+            doodads: [ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6', 
+                       'doodad7', 'doodad8', 'doodad9', 'doodad10', 'doodad11' ]
+        }
+        
+        this.buildBackdrop();
         Game.playerMap = {};
         //var testKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
         var leftKey = this.input.keyboard.addKey("LEFT");
@@ -64,6 +75,18 @@ class GameScene extends Phaser.Scene {
             // ball.x = ball.x * 0.9 + ball.newx * 0.1;
             // ball.y = ball.y * 0.9 + ball.newy * 0.1;
 
+        }
+    }
+
+    buildBackdrop() {
+        let randNum = parseInt(Math.random() * this.backdropItems.floors.length);
+        this.add.image(400, 400, this.backdropItems.floors[randNum]);
+        randNum = parseInt(Math.random() * this.backdropItems.pillars.length);
+        let posts = this.add.image(400, 400, this.backdropItems.pillars[randNum].name);
+        posts.setDepth(posts.depth + this.backdropItems.pillars[randNum].depth);
+        for (let i =0; i < 3; i++) {
+            randNum = parseInt(Math.random() * this.backdropItems.doodads.length);
+            this.add.image(400, 400, this.backdropItems.doodads[randNum]);
         }
     }
 
@@ -130,7 +153,7 @@ class GameScene extends Phaser.Scene {
         let playBtn = new ImageButton(
             gameCenterX() - 155,
             game.config.height - 55,
-            "green_paddleH",
+            "playButton",
             this,
             playBtnAction,
             "Again?"
@@ -148,7 +171,7 @@ class GameScene extends Phaser.Scene {
         let lobbySelectionBtn = new ImageButton(
             gameCenterX() +155,
             game.config.height - 55,
-            "green_paddleH",
+            "playButton",
             this,
             lobbySelectionBtnAction,
             "Lobby Selection"
