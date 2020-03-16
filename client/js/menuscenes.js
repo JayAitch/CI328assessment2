@@ -149,7 +149,7 @@ class LobbySelectionScene extends Phaser.Scene {
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'LobbySelection - Stubbed', textStyles.header);
         offsetByWidth(title);
         let playBtnAction =  () => {
-           this.scene.switch("lobby");
+           this.scene.start("lobby");
         };
 
 
@@ -421,7 +421,14 @@ class ImageButton {
         if(this.btnIcon) {this.btnIcon.size(scale)};
         this.newBtn.setScale(scale);
     }
+    destroy(){
+        this.newBtn.destroy();
+        if(this.btnIcon)
+        this.btnIcon.destroy();
 
+        if(this.newTxt)
+        this.newTxt.destroy();
+    }
     // reset the tint to no tint
     resetTint(){
         this.baseTint = -1;
