@@ -12,8 +12,8 @@ class GameScene extends Phaser.Scene {
                 { name: 'metalPosts', depth: 0 },
                 { name: 'treePosts', depth: 10 }
             ],
-            doodads: [ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6', 
-                       'doodad7', 'doodad8', 'doodad9', 'doodad10', 'doodad11' ]
+            doodads: []//[ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6',
+                     //  'doodad7', 'doodad8', 'doodad9', 'doodad10', 'doodad11' ]
         }
         
         this.buildBackdrop();
