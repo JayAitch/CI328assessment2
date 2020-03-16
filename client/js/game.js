@@ -147,8 +147,10 @@ class GameScene extends Phaser.Scene {
         offsetByWidth(winText);
 
         let playBtnAction =  () => {
-            this.scene.start("lobby");
+            this.scene.switch("lobby");
+
         };
+
         // create the button object, no need for an icon, or UI text
         let playBtn = new ImageButton(
             gameCenterX() - 155,
@@ -163,7 +165,9 @@ class GameScene extends Phaser.Scene {
 
         let lobbySelectionBtnAction = () => {
             // error handle fained connection in lobby switch
-            this.scene.start("lobbyselection");
+
+            this.scene.switch("lobbyselection");
+
         };
 
 

@@ -124,6 +124,7 @@ function startClient(ip, socket){
 
 
     Client.memberReadyToggle = function(){
+        console.log("sending memeber tioggle");
         Client.socket.emit('playerreadytoggle');
     }
 

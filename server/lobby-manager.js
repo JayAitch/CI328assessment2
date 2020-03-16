@@ -1,5 +1,5 @@
 var gameManager = require('./game-manager.js');
-let lobbySize = 1;
+let lobbySize = 4;
 gameManager.createManager();
 const lobbyManager = {
     lobbies:[],
@@ -14,7 +14,7 @@ const lobbyManager = {
 
     joinLobby: function(client, lobbyID){
         let lobby = this.lobbies[lobbyID];
-        if(lobby && !lobby.isfull()) lobby.join(client);
+        if(lobby && !lobby.isfull() && !lobby.isStarted) lobby.join(client);
     },
 
     quickJoin: function(client){
@@ -22,10 +22,8 @@ const lobbyManager = {
         for(let lobbyIncrementor = 0; lobbies.length > lobbyIncrementor; lobbyIncrementor++){
 
             let lobby = lobbies[lobbyIncrementor];
-            if(lobby.isFull() || lobby.isStarted)
+            if(!lobby.isFull() && !lobby.isStarted)
             {
-            }
-            else{
                 lobby.joinLobby(client);
                 return lobby;
             }
@@ -52,8 +50,13 @@ class Lobby{
     }
 
     joinLobby(client){
+        this.leaveAllRooms(client);
+        client.game = null;
+        client.player = null;
+        client.lobby = null;
+        client.memeber = null;
+        console.log(this)
         client.join(this.id);
-
         let lobbyMember = new LobbyMember(this.members.length);
         this.members.push(lobbyMember);
 
@@ -69,17 +72,30 @@ class Lobby{
         this.notifyCharacterChange(client);
     }
 
+
+    leaveAllRooms(client) {
+        let rooms = client.rooms;
+        for (let key in rooms) {
+            let roomid = rooms[key];
+            console.log(roomid);
+            console.log(client.rooms);
+            client.leave(roomid);
+        }
+    }
+
+
     toggleReady(client){
 
         client.member.toggleReady();
-
         this.notifyMemberReadyChange(client);
 
         if(this.isReady()){
             this.isStarted = true;
-            setTimeout( () => {
+            if(!this.loadTimeOut);
+            this.loadTimeOut = setTimeout( () => {
                 this.createGame();
                 this.triggerLoad();
+                this.loadTimeOut = null;
             }, 3000);
         }
     }
@@ -105,9 +121,10 @@ class Lobby{
     }
 
     isReady(){
+        console.log(this.members)
         for(let key in this.members){
             let member = this.members[key];
-            if(!member.isReady){
+            if(member.isReady != true){
                 return false;
             }
         }
@@ -128,7 +145,6 @@ class Lobby{
         client.game = this.game;
         client.player = this.game.players[playerPosition];
         this.gameJoinedIncrementor++
-
     }
 }
 

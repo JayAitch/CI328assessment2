@@ -26,18 +26,17 @@ function createManager(){
     systems.startUpdate();
 }
 
-function createNewGame(memberList){
-    return GameManager.createGame(memberList);
+function createNewGame(lobby){
+    return GameManager.createGame(lobby);
 }
 
 const GameManager = {
     games: {},
      createGame: function(lobby){
-        //let position = "game" + Object.keys(this.games).length;
-         let position = "lobby";
+
+        let position = lobby.id + Object.keys(this.games);
         let newGame = new Game(lobby);
         this.games[position] = newGame;
-        console.log(newGame);
         return newGame;
     }
 }
@@ -153,7 +152,7 @@ class Game {
         // a ball adding a collision would not work after the player has been disables
         // we could potentially change the collision managers to return an ID when an object is added
         // this will allow us to remove objects completely
-        delete this.players[player.socketid];
+        delete this.players[player.id];
         delete this.goals[player.id];
         global.io.sockets.in(this.gameid).emit('playerdeath', {id:player.id});
     }
@@ -194,19 +193,19 @@ class Game {
         player.lives--;
 
 
-        if(player.lives == 0 ){
+    //    if(player.lives <= 0 ){
 
             goal.isActive = false;
 
             this.killPlayer(player);
-            if(Object.keys(this.players).length === 1){
+            if(Object.keys(this.players).length <= 1){
                 this.endGame();
             }
-        }
-        else{
-            goal.setImmunity(1500);
-            this.resetBallPosition();
-        }
+ //       }
+   //     else{
+//            goal.setImmunity(1500);
+//            this.resetBallPosition();
+ //       }
     }
 
     endGame(){

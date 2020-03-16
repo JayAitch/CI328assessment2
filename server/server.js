@@ -24,27 +24,26 @@ server.lastPlayerID = 0;
 io.on('connection', function(client) {
 
 
-    client.on('joinlobby', function(){
-        lobbies.lobbyManager.quickJoin(client);
-
-        let lobby = client.lobby;
-
-        client.on('changecharacter', function(data) {
-            let character = data.character;
-            lobby.changeCharacter(client, character);
-        });
-
-
-        client.on('playerreadytoggle', function(){
-            lobby.toggleReady(client);
-        });
+    client.on('playerreadytoggle', function(){
+        console.log(client.rooms)
+        client.lobby.toggleReady(client);
     });
 
+    client.on('changecharacter', function(data) {
+        let character = data.character;
+        client.lobby.changeCharacter(client, character);
+    });
+
+    client.on('joinlobby', function(){
+        lobbies.lobbyManager.quickJoin(client);
+    });
+
+
+
+
     client.on('gameconnect', function() {
-
-        let playerPosition = client.lobby.joinGame(client);
+        client.lobby.joinGame(client);
         let gameBall = client.game.balls[client.game.lastBallID];
-
 
 
         client.emit("newball", gameBall); // we may be able to contain this transisition inside a game object to parsel sockets together
@@ -62,7 +61,7 @@ io.on('connection', function(client) {
 
 
         client.on('disconnect',function() {
-            io.emit('remove', client.player.id);
+     //       io.emit('remove', client.player.id);
             console.log('disconnecting: ' + client.player.id);
         });
 
