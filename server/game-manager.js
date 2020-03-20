@@ -32,10 +32,10 @@ function createNewGame(memberList){
 
 const GameManager = {
     games: {},
-     createGame: function(memberList){
+     createGame: function(lobby){
         //let position = "game" + Object.keys(this.games).length;
          let position = "lobby";
-        let newGame = new Game(memberList, position);
+        let newGame = new Game(lobby);
         this.games[position] = newGame;
         console.log(newGame);
         return newGame;
@@ -69,7 +69,7 @@ class Game {
         let yPos = startVectors.y;
         let isRotated = this.getIsRotated(member.position)
         let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character, member.socketid);
-        this.players[member.socketid] = newPlayer;
+        this.players[member.position] = newPlayer;
         this.createGoal(newPlayer, xPos, yPos, isRotated);
 
         // add player collision with nearest posts

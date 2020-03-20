@@ -99,7 +99,7 @@ class Player {
 
     switch(true) {
       case (x < newX || y < newY):
-        (this.rotation  == 180 || this.rotation == -90) ? this.animateMovement('Right') : this.animateMovement('Left');
+        (this.rotation  == 0 || this.rotation == 90) ? this.animateMovement('Right') : this.animateMovement('Left');
         break;
       case (x == newX && y == newY):
         this.animateMovement('Idle');
