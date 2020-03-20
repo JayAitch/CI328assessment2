@@ -43,15 +43,15 @@ const GameManager = {
 }
 
 class Game {
-    constructor(membersList, gameid){
+    constructor(lobby){
         this.players = {};
         this.goals = {};
         this.balls = {};
         this.posts = {};
-        this.gameid = gameid;
+        this.gameid = lobby.id;
         this.collisionManager = new systems.CollisionManager();
         this.createPosts();
-        this.createPlayers(membersList);
+        this.createPlayers(lobby.members);
         this.createBall();
         this.updaterID = systems.addToUpdate(this);
     }
