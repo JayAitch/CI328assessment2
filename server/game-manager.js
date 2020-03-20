@@ -48,9 +48,9 @@ class Game {
         this.goals = {};
         this.balls = {};
         this.posts = {};
-        this.createPosts();
         this.gameid = lobby.id;
         this.collisionManager = new systems.CollisionManager();
+        this.createPosts();
         this.createPlayers(lobby.members);
         this.createBall();
         this.updaterID = systems.addToUpdate(this);
