@@ -55,7 +55,7 @@ class Lobby{
         client.player = null;
         client.lobby = null;
         client.member = null;
-        console.log(this)
+        console.log(this);
         client.join(this.id);
         let lobbyMember = new LobbyMember(this.members.length);
         this.members.push(lobbyMember);

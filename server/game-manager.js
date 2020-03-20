@@ -278,8 +278,6 @@ class Game {
         let player = goal.owner;
         global.io.sockets.in(this.gameid).emit('goalscored', {id:player.id});
         player.lives--;
-
-
         if(player.lives <= 0 ){
 
             goal.isActive = false;
@@ -289,7 +287,7 @@ class Game {
                 this.endGame();
             }
         }
-
+        this.resetBallPosition();
     }
 
     endGame(){
