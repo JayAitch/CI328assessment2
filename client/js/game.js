@@ -12,7 +12,7 @@ class GameScene extends Phaser.Scene {
                 { name: 'metalPosts', depth: 0 },
                 { name: 'treePosts', depth: 10 }
             ],
-            doodads: [ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6', 
+            doodads: [ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6',
                        'doodad7', 'doodad8', 'doodad9', 'doodad10', 'doodad11' ]
         }
         
@@ -48,7 +48,7 @@ class GameScene extends Phaser.Scene {
         Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}); // extend to allow multiple ball position updates (simularly to players)
         Game.moveBall = ((x,y) => {this.moveBall(x,y)}) ;// extend to allow multiple ball position updates (simularly to players)
         Client.askGameConnect();
-        console.log("game started");
+
         // append methods to game object for client to interact with
 
         // Game.setPlayerChar = ((number) => {this.switchPlayerCharacter(number)});
@@ -143,14 +143,16 @@ class GameScene extends Phaser.Scene {
 
     endGame(winnerID){
         let winnerNumber = winnerID +1;
-        let winText = this.add.text(gameCenterX(), gameCenterY(), `Player ${winnerNumber} wins!!` , textStyles.header);
-        offsetByWidth(winText);
+        this.winText = this.add.text(gameCenterX(), gameCenterY(), `Player ${winnerNumber} wins!!` , textStyles.header);
+        offsetByWidth(this.winText);
 
         let playBtnAction =  () => {
-            this.scene.start("lobby");
+            this.scene.switch("lobby");
+            this.cleanGameScene();
         };
+
         // create the button object, no need for an icon, or UI text
-        let playBtn = new ImageButton(
+        this.playBtn = new ImageButton(
             gameCenterX() - 155,
             game.config.height - 55,
             "playButton",
@@ -163,12 +165,14 @@ class GameScene extends Phaser.Scene {
 
         let lobbySelectionBtnAction = () => {
             // error handle fained connection in lobby switch
-            this.scene.start("lobbyselection");
+
+            this.scene.switch("lobbyselection");
+            this.cleanGameScene();
         };
 
 
         // create the button object, no need for an icon, or UI text
-        let lobbySelectionBtn = new ImageButton(
+        this.lobbySelectionBtn = new ImageButton(
             gameCenterX() +155,
             game.config.height - 55,
             "playButton",
@@ -178,6 +182,13 @@ class GameScene extends Phaser.Scene {
         );
 
 
+    }
+
+    cleanGameScene(){
+        this.winText.destroy();
+        this.playBtn.destroy();
+        this.lobbySelectionBtn.destroy();
+        this.ballTrail.stop();
     }
 
     onCollisionPlayerBall(ball, player) {

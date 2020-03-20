@@ -99,10 +99,17 @@ class LandingScene extends Phaser.Scene {
         
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'Best Pong', textStyles.header);
         offsetByWidth(title);
-        this.ip = 'localhost';
+        //this.ip = 'localhost';
         this.socket = '55000';
+        //this.socket ="";
+        this.ip = "localhost";
+
+        if(!clientStarted){
+            startClient(this.ip, this.socket);
+            clientStarted = true;
+        }
+
         // error handle fained connection in lobby switch make sure this has happended
-        startClient(this.ip, this.socket);
 
         let playBtnAction = () => {
             // error handle fained connection in lobby switch
@@ -134,7 +141,7 @@ class LandingScene extends Phaser.Scene {
     }
 }
 
-
+let clientStarted = false;
 
 class LobbySelectionScene extends Phaser.Scene {
     constructor() {
@@ -145,7 +152,7 @@ class LobbySelectionScene extends Phaser.Scene {
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'LobbySelection - Stubbed', textStyles.header);
         offsetByWidth(title);
         let playBtnAction =  () => {
-            this.scene.start("lobby");
+           this.scene.start("lobby");
         };
 
 
@@ -177,7 +184,10 @@ class LobbyCard {
         this.readyState = isReady;
         this.character = character;
     }
-
+    destroy(){
+        this.readyText.destroy();
+        this.playerText.destroy();
+    }
     set readyState(val){
         this.isReady = val;
         if(val){
@@ -189,7 +199,7 @@ class LobbyCard {
     }
 
     set character(val){
-        this.selctedCharacter = val;
+        this.selectedCharacter = val;
         this.playerText.text = val;
     }
 }
@@ -203,25 +213,25 @@ class LobbyScene extends Phaser.Scene {
     }
 
     create() {
-        Client.askJoinLobby();
 
+        this.joinLobby();
         this.lobbyCards =  [];
-        this.listPos = gameCenterY() - 150//temp
+        this.listPos = gameCenterY() - 150;//temp
 
-        Lobby.newLobbyMember = ((key, isready, character) => {
-            let newCard = new LobbyCard(gameCenterX(), this.listPos, this, isready,  character);
-            this.lobbyCards[key] = newCard;
+
+        Lobby.newLobbyMember = ((pos, isReady, character) => {
+            let newCard = new LobbyCard(gameCenterX(), this.listPos, this, isReady,  character);
+            this.lobbyCards[pos] = newCard;
             this.listPos += 25;
         });
 
-        Lobby.memberReadied = ((key, isready, position) => {
-            let memberCard = this.lobbyCards[key].readyState = isready;
-            console.log(memberCard);
+        Lobby.memberReadied = ((position, isReady, ) => {
+            let memberCard = this.lobbyCards[position].readyState = isReady;
         });
 
-        Lobby.changeLobbyCharacter = ((key, character) => {
+        Lobby.changeLobbyCharacter = ((position, character) => {
             console.log(character);
-            let lobbyCard = this.lobbyCards[key];
+            let lobbyCard = this.lobbyCards[position];
             lobbyCard.character = character;
         });
 
@@ -232,14 +242,13 @@ class LobbyScene extends Phaser.Scene {
 
         let playBtnAction = () => {
             // we probably want to have seperate ready buttons or somehting ehr
-           //Client.triggerLoad();
             Client.memberReadyToggle();
         };
 
         Game.triggerGame = () =>{
             Game.triggerGame = null;
             this.scene.start("maingame");
-         //   this.scene.remove('lobby');
+            playBtn.active = false;
         }
 
 
@@ -258,14 +267,24 @@ class LobbyScene extends Phaser.Scene {
 
     }
 
+    joinLobby(){
+        if(this.lobbyCards) this.removeLobbyCards();
+        this.listPos = gameCenterY() - 150;
+        Client.askJoinLobby();
+    }
 
+    removeLobbyCards(){
+        for(let key in this.lobbyCards){
+            this.lobbyCards[key].destroy();
+            delete this.lobbyCards[key]
+        }
+    }
     createCharacterSelectionControls(){
         // this will probably be a sprite
         this.selectedCharacterText = this.add.text(gameCenterX(), game.config.height - 155, charactersArray[this.selectedCharacter], textStyles.header);
         offsetByWidth(this.selectedCharacterText);
         let leftButtonAction = () => {
             // error handle fained connection in lobby switch
-            //this.scene.start("lobbyselection");
             this.selectCharacter(-1);
         };
 
@@ -281,8 +300,6 @@ class LobbyScene extends Phaser.Scene {
 
 
         let rightButtonAction = () => {
-            // error handle fained connection in lobby switch
-            //this.scene.start("lobbyselection");
             this.selectCharacter(+1);
         };
 
@@ -357,6 +374,7 @@ class ImageButton {
             // feedback for button presses
         //    Audio.uiClickSound.play(); // way to play sound generically with buttons
             action();
+            console.log("btn-clicked");
         });
 
         // show the player the click action will be performed on this button
@@ -406,7 +424,14 @@ class ImageButton {
         if(this.btnIcon) {this.btnIcon.size(scale)};
         this.newBtn.setScale(scale);
     }
+    destroy(){
+        this.newBtn.destroy();
+        if(this.btnIcon)
+        this.btnIcon.destroy();
 
+        if(this.newTxt)
+        this.newTxt.destroy();
+    }
     // reset the tint to no tint
     resetTint(){
         this.baseTint = -1;

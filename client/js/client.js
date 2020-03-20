@@ -97,7 +97,6 @@ function startClient(ip, socket){
 
 
     Client.socket.on('loadgame',function(data){
-        console.log(data);
        Game.triggerGame();
     });
 
@@ -114,9 +113,8 @@ function startClient(ip, socket){
 
 
     Client.socket.on('newmember',function(data){
-        console.log(data);
         if(Lobby.newLobbyMember) {
-            Lobby.newLobbyMember(data.socketid, data.ready, data.position)
+            Lobby.newLobbyMember(data.position, data.isReady, data.character);
         }
     });
 
@@ -132,14 +130,14 @@ function startClient(ip, socket){
     Client.socket.on('playerready', function(data){
         console.log(data);
         if(Lobby.memberReadied){
-            Lobby.memberReadied(data.key, data.isready);
+            Lobby.memberReadied(data.position, data.isReady);
         }
 
     });
 
     Client.socket.on('characterchange', function (data) {
         console.log(data);
-        Lobby.changeLobbyCharacter(data.key, data.character);
+        Lobby.changeLobbyCharacter(data.position, data.character);
     });
 
     // this could target a specific lobby?
@@ -147,7 +145,7 @@ function startClient(ip, socket){
         console.log('alllobbymemebrs');
         for(let key in data){
             let member = data[key];
-            Lobby.newLobbyMember(key, member.ready, member.character);
+            Lobby.newLobbyMember(key, member.isReady, member.character, member.position);
         }
     });
 

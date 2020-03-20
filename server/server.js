@@ -24,49 +24,51 @@ server.lastPlayerID = 0;
 io.on('connection', function(client) {
 
 
-    client.on('joinlobby', function(){
-        lobbies.lobbyManager.quickJoin(client);
-
-        let lobby = client.lobby;
-
-        client.on('changecharacter', function(data) {
-            let character = data.character;
-            lobby.changeCharacter(client, character);
-        });
-
-
-        client.on('playerreadytoggle', function(){
-            lobby.toggleReady(client);
-        });
+    client.on('playerreadytoggle', function(){
+        console.log(client.rooms)
+        client.lobby.toggleReady(client);
     });
 
+    client.on('changecharacter', function(data) {
+        let character = data.character;
+        client.lobby.changeCharacter(client, character);
+    });
+
+    client.on('joinlobby', function(){
+        lobbies.lobbyManager.quickJoin(client);
+    });
+
+
+
+
     client.on('gameconnect', function() {
-
-        let playerPosition = client.lobby.joinGame(client);
+        client.lobby.joinGame(client);
         let gameBall = client.game.balls[client.game.lastBallID];
-
 
 
         client.emit("newball", gameBall); // we may be able to contain this transisition inside a game object to parsel sockets together
         client.emit('allplayers', getAllPlayers(client.game)); // probably want this bundled as an init
 
-        client.on('stopmove',function(data) {
-            client.player.stop();
-        });
-
-        // we will want to write out own update mechanic, this will allow us to check for collisions after moving and combine movement of player/ball logic
-        client.on('move',function(data) {
-            let direction = Math.sign(data.direction);
-            client.player.move(direction);
-        });
-
 
         client.on('disconnect',function() {
-            io.emit('remove', client.player.id);
+     //       io.emit('remove', client.player.id);
             console.log('disconnecting: ' + client.player.id);
         });
 
     });
+
+    client.on('stopmove',function() {
+        if(client.player)
+        client.player.stop();
+    });
+
+    // we will want to write out own update mechanic, this will allow us to check for collisions after moving and combine movement of player/ball logic
+    client.on('move',function(data) {
+        let direction = Math.sign(data.direction);
+        if(client.player)
+        client.player.move(direction);
+    });
+
 });
 
 server.listen(PORT, function(){
