@@ -3,7 +3,6 @@ var systems = require('./systems.js');
 var physObjects = require('./physics-objects.js');
 
 
-
 function isVelocityBetweenMinAndMax(vel, min, max){
     let absVeloX = Math.abs(vel.x);
     let absVeloY = Math.abs(vel.y);
@@ -193,7 +192,7 @@ class Game {
         player.lives--;
 
 
-    //    if(player.lives <= 0 ){
+        if(player.lives <= 0 ){
 
             goal.isActive = false;
 
@@ -201,11 +200,8 @@ class Game {
             if(Object.keys(this.players).length <= 1){
                 this.endGame();
             }
- //       }
-   //     else{
-//            goal.setImmunity(1500);
-//            this.resetBallPosition();
- //       }
+        }
+
     }
 
     endGame(){

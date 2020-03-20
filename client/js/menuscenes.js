@@ -99,8 +99,11 @@ class LandingScene extends Phaser.Scene {
         
         let title = this.add.text(gameCenterX(), gameCenterY() - 350, 'Best Pong', textStyles.header);
         offsetByWidth(title);
-        this.ip = 'localhost';
+        //this.ip = 'localhost';
         this.socket = '55000';
+        //this.socket ="";
+        this.ip = "localhost";
+
         if(!clientStarted){
             startClient(this.ip, this.socket);
             clientStarted = true;
@@ -213,7 +216,7 @@ class LobbyScene extends Phaser.Scene {
 
         this.joinLobby();
         this.lobbyCards =  [];
-        this.listPos = gameCenterY() - 150//temp
+        this.listPos = gameCenterY() - 150;//temp
 
 
         Lobby.newLobbyMember = ((pos, isReady, character) => {
