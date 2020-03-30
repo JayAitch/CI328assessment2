@@ -79,7 +79,7 @@ class GameScene extends Phaser.Scene {
 
     createEmitter(){
         let particles = this.add.particles('ball');
-        particles.setDepth(2)
+        particles.setDepth(2);
         this.emitter = particles.createEmitter({
             x: 300,
             y: 300,

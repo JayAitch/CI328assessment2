@@ -105,7 +105,7 @@ class LandingScene extends Phaser.Scene {
         this.ip = "localhost";
 
         if(!clientStarted){
-            startClient(this.ip, this.socket);
+            Client.start(this.ip, this.socket);
             clientStarted = true;
         }
 
