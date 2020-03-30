@@ -28,9 +28,6 @@ Client = {
         Client.socket.emit('playerreadytoggle');
     },
     setListeners:function(){
-        console.log("setting listeners")
-        console.log("listerners set =" + this.listenersSet);
-        console.log("listerners set =" + this.listenersSet);
         if(this.listenersSet === true) return;
         this.listenersSet = true;
 
@@ -81,58 +78,50 @@ Client = {
             gameClient.moveBall(data.x,data.y);
         });
 
-
-        // not like this
-        Client.triggerLoad = function(){
-            Client.socket.emit('triggerload');
-        };
-
-
         Client.socket.on('loadgame',function(data){
-            Game.triggerGame();
+            lobbyClient.triggerGame();
         });
-
-
-
-
-
-
-
 
 
         Client.socket.on('newmember',function(data){
-            if(Lobby.newLobbyMember) {
-                Lobby.newLobbyMember(data.position, data.isReady, data.character);
-            }
+            lobbyClient.newLobbyMember(data.position, data.isReady, data.character);
         });
 
-
-
-
-
-
         Client.socket.on('playerready', function(data){
-            console.log(data);
-            if(Lobby.memberReadied){
-                Lobby.memberReadied(data.position, data.isReady);
-            }
-
+            lobbyClient.memberReadied(data.position, data.isReady);
         });
 
         Client.socket.on('characterchange', function (data) {
-            console.log(data);
-            Lobby.changeLobbyCharacter(data.position, data.character);
+            lobbyClient.changeLobbyCharacter(data.position, data.character);
         });
 
         // this could target a specific lobby?
         Client.socket.on('alllobbymembers',function (data) {
-            console.log('alllobbymemebrs');
             for(let key in data){
                 let member = data[key];
-                Lobby.newLobbyMember(key, member.isReady, member.character, member.position);
+                lobbyClient.newLobbyMember(key, member.isReady, member.character, member.position);
             }
         });
 
+    }
+};
+
+const lobbyClient = {
+    setScene: function(scene){
+        this.scene = scene;
+        Client.askJoinLobby();
+    },
+    triggerGame: function(){
+        this.scene.triggerGameLoad();
+    },
+    changeLobbyCharacter: function(position,character) {
+        this.scene.changeLobbyCharacter(position,character);
+    },
+    memberReadied: function(position, isReady, ){
+        this.scene.lobbyMemberReadied(position,isReady);
+    },
+    newLobbyMember: function(pos, isReady, character)  {
+        this.scene.newLobbyMember(pos, isReady, character);
     }
 };
 
