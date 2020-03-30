@@ -35,58 +35,53 @@ function startClient(ip, socket){
 
     //Jordan any ideas why data.character isn't working here?
     Client.socket.on('newplayer',function(data){
-         Game.addNewPlayer(data.id, data.characterID, data.x, data.y);
+        gameClient.addNewPlayer(data.id, data.characterID, data.x, data.y);
     });
 
 
     Client.socket.on('collisionplayer',function(data){
-        Game.onCollisionPlayerBall(data.player, data.ball);
+        gameClient.onCollisionPlayerBall(data.player, data.ball);
     });
 
     //Jordan any ideas why data.character isn't working here?
     Client.socket.on('allplayers',function(data){
+        console.log(data);
         for(var i = 0; i < data.length; i++){
-           Game.addNewPlayer(data[i].id, data[i].characterID ,data[i].x ,data[i].y);
+
+            gameClient.addNewPlayer(data[i].id, data[i].characterID ,data[i].x ,data[i].y);
         }
 
         Client.socket.on('move',function(data){
-            if(Game.movePlayer){
-                Game.movePlayer(data.id,data.x,data.y);
-            }
-
+            gameClient.movePlayer(data.id,data.x,data.y);
         });
 
         Client.socket.on('remove',function(id){
-            Game.removePlayer(id);
+            gameClient.removePlayer(id);
         });
 
         Client.socket.on('goalscored',function(data){
-            Game.goalScored(data.id);
+            gameClient.goalScored(data.id);
         });
 
         Client.socket.on('playerdeath',function(data){
-            Game.playerDeath(data.id);
+            gameClient.playerDeath(data.id);
         });
 
         Client.socket.on('endgame',function(data){
-            Game.endGame(data.id);
+            gameClient.endGame(data.id);
         });
 
     });
 
 
     Client.socket.on('newball',function(data){
-        if(Game.addNewBall){
-            Game.addNewBall(data.x,data.y);
-        }
+            gameClient.addNewBall(data.x,data.y);
 
     });
 
 
     Client.socket.on('moveball',function(data){
-        if(Game.moveBall){
-            Game.moveBall(data.x,data.y);
-        }
+            gameClient.moveBall(data.x,data.y);
     });
 
 
@@ -152,3 +147,42 @@ function startClient(ip, socket){
     // convert to using this kind of prototype notation
 }
 
+const gameClient =  {
+    setScene: function(scene){
+        this.scene = scene;
+        console.log(scene);
+        Client.askGameConnect();
+    },
+
+    addNewPlayer: function(id, character, x, y){
+        console.log(character);
+        this.scene.addNewPlayer(id, character, x, y);
+    },
+
+    movePlayer: function(id,x,y){
+      this.scene.movePlayer(id, x, y);
+    },
+
+    goalScored: function(id){
+        this.scene.goalScored(id);
+    },
+
+
+    playerDeath: function(id){
+        this.scene.killPlayer(id);
+    },
+
+    endGame: function(winnerId){
+        this.scene.endGame(winnerId);
+    },
+
+    addNewBall: function(x,y){
+        this.scene.spawnBall(x,y)
+    },
+    moveBall: function(x,y){
+        this.scene.moveBall(x,y)
+    },
+    onCollisionPlayerBall: function(ball, player){
+        this.scene.onCollisionPlayerBall(ball, player);
+    }
+};

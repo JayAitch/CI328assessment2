@@ -3,9 +3,11 @@
 class GameScene extends Phaser.Scene {
     constructor() {
         super({key: 'maingame'});
+
     }
 
     create() {
+        gameClient.setScene(this);
         this.backdropItems = {
             floors: [ 'sand', 'grass' ],
             pillars: [ 
@@ -39,21 +41,6 @@ class GameScene extends Phaser.Scene {
             Client.sendStopMove();
         });
 
-
-        Game.addNewPlayer = ((id,character, x,y)=>{this.addNewPlayer(id, character, x, y)});
-        Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)});
-        Game.goalScored = ((id)=>{this.goalScored(id)});
-        Game.playerDeath = ((id)=>{this.killPlayer(id)})
-        Game.endGame = ((id)=>{this.endGame(id)})
-        Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}); // extend to allow multiple ball position updates (simularly to players)
-        Game.moveBall = ((x,y) => {this.moveBall(x,y)}) ;// extend to allow multiple ball position updates (simularly to players)
-        Client.askGameConnect();
-
-        // append methods to game object for client to interact with
-
-        // Game.setPlayerChar = ((number) => {this.switchPlayerCharacter(number)});
-
-        Game.onCollisionPlayerBall = ((ball, player) => {this.onCollisionPlayerBall(ball, player)});
         this.createEmitter();
 
         this.characters = {

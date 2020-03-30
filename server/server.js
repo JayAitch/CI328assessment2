@@ -52,7 +52,7 @@ io.on('connection', function(client) {
 
         client.on('disconnect',function() {
      //       io.emit('remove', client.player.id);
-            console.log('disconnecting: ' + client.player.id);
+            console.log('killPlayer: ' + client.player.id);
         });
 
     });
