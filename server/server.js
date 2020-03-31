@@ -43,16 +43,12 @@ io.on('connection', function(client) {
 
     client.on('gameconnect', function() {
         client.lobby.joinGame(client);
-        let gameBall = client.game.balls[client.game.lastBallID];
 
-
-        client.emit("newball", gameBall); // we may be able to contain this transisition inside a game object to parsel sockets together
-        client.emit('allplayers', getAllPlayers(client.game)); // probably want this bundled as an init
-
+        client.emit('initgame', { players:getAllPlayers(client.game), balls:getAllBalls(client.game)});
 
         client.on('disconnect',function() {
      //       io.emit('remove', client.player.id);
-            console.log('killPlayer: ' + client.player.id);
+            //console.log('killPlayer: ' + client.player.id);
         });
 
     });
@@ -62,7 +58,7 @@ io.on('connection', function(client) {
         client.player.stop();
     });
 
-    // we will want to write out own update mechanic, this will allow us to check for collisions after moving and combine movement of player/ball logic
+
     client.on('move',function(data) {
         let direction = Math.sign(data.direction);
         if(client.player)
@@ -79,9 +75,17 @@ server.listen(PORT, function(){
 
 function getAllPlayers(game){
     var players = [];
-    Object.keys(game.players).forEach(function(socketID){
-        var player = game.players[socketID];//io.sockets.connected[socketID].player;
+    Object.keys(game.players).forEach(function(key){
+        var player = game.players[key];
         if(player) players.push(player);
     });
     return players;
+}
+function getAllBalls(game){
+    var balls = [];
+    Object.keys(game.balls).forEach(function(key){
+        var player = game.balls[key];
+        if(player) balls.push(player);
+    });
+    return balls;
 }

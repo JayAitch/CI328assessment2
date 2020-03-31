@@ -3,7 +3,7 @@
 class GameScene extends Phaser.Scene {
     constructor() {
         super({key: 'maingame'});
-
+        this.balls={};
     }
 
     create() {
@@ -16,7 +16,7 @@ class GameScene extends Phaser.Scene {
             ],
             doodads: [ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6',
                        'doodad7', 'doodad8', 'doodad9', 'doodad10', 'doodad11' ]
-        }
+        };
         
         this.buildBackdrop();
         Game.playerMap = {};
@@ -50,15 +50,16 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    spawnBall(x,y) {
-        this.ball = this.add.sprite(x, y, "ball");
-        this.ball.newx = x;
-        this.ball.newy = y;
-        this.createBallTrail();
-        this.ball.update = ()=> {
-            let ball = this.ball;
-            ball.x = ball.newx;// * 0.9 + ball.newx * 0.1;
-            ball.y = ball.newy;// * 0.9 + ball.newy * 0.1;
+    spawnBall(key, x, y) {
+        let newBall = this.add.sprite(x, y, "ball");
+        this.balls[key] = newBall;
+        newBall.newx = x;
+        newBall.newy = y;
+        this.createBallTrail(newBall);
+        newBall.update = ()=> {
+
+            newBall.x = newBall.newx;// * 0.9 + ball.newx * 0.1;
+            newBall.y = newBall.newy;// * 0.9 + ball.newy * 0.1;
             // ball.x = ball.x * 0.9 + ball.newx * 0.1;
             // ball.y = ball.y * 0.9 + ball.newy * 0.1;
 
@@ -95,15 +96,15 @@ class GameScene extends Phaser.Scene {
     }
 
 
-    createBallTrail(){
+    createBallTrail(ball){
         let particles = this.add.particles('ball');
-        particles.setDepth(2)
+        particles.setDepth(2);
         this.ballTrail = particles.createEmitter({
             x: 0,
             y: 0,
             on:true,
 
-            follow:this.ball,
+            follow:ball,
             speed: { min: -100, max: 100 },
             angle: { min: -120, max: -60 },
             lifespan: { min: 80, max: 200 },
@@ -186,8 +187,9 @@ class GameScene extends Phaser.Scene {
         emitter.emitParticle();
     }
 
-    moveBall(x, y) {
-        let ball = this.ball;
+    moveBall(key, x, y) {
+        let ball = this.balls[key];
+        console.log(ball);
         ball.newx = x;
         ball.newy = y;
         //ball.x = x;
@@ -199,7 +201,11 @@ class GameScene extends Phaser.Scene {
 
 
     update(){
-        if(this.ball) this.ball.update();
+        for(let ballKey in this.balls){
+            let ball = this.balls[ballKey];
+            ball.update();
+        }
+
         for(let playerKey in Game.playerMap){
             let player = Game.playerMap[playerKey];
             player.update();
@@ -241,3 +247,4 @@ class GameScene extends Phaser.Scene {
         delete Game.playerMap[id];
     }
 }
+

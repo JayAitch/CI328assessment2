@@ -47,13 +47,21 @@ class Game {
         this.balls = {};
         this.posts = {};
         this.gameid = lobby.id;
+        this.lastBallID = 0;
         this.collisionManager = new systems.CollisionManager();
         this.createPosts();
         this.createPlayers(lobby.members);
         this.createBall();
         this.updaterID = systems.addToUpdate(this);
+        this.testMultiBalls();
     }
-
+    testMultiBalls(){
+        setTimeout(()=>{
+            let ball = this.createBall();
+            this.setBallVelocityBetween(ball, 5, 5, -10, 10);
+            console.log(this.balls);
+        }, 2000)
+    }
     createPlayers(membersList){
         for(let memberkey in membersList){
             let member = membersList[memberkey];
@@ -77,7 +85,7 @@ class Game {
             y: physObjects.gameHeight / 2,
             width: newPlayer.width,
             height: newPlayer.height
-        }
+        };
         let bound = this.getBoundsFromPositions(newPlayer, gameCenter, false);
         switch (bound) {
             case 2:
@@ -134,7 +142,7 @@ class Game {
     }
 
     createBall(){
-        this.lastBallID++;
+
         let ballWidth = 48;
         let newBall = new physObjects.Ball(
             physObjects.gameHeight/2,
@@ -147,7 +155,9 @@ class Game {
         this.setBallVelocityBetween(newBall, 5, 5, -10, 10);
         this.balls[this.lastBallID] = newBall;
         this.addBallCollisions(newBall);
-
+        this.newBallMessage(this.lastBallID, newBall);
+        this.lastBallID++;
+        return newBall;
     }
 
     addBallCollisions(ball){
@@ -174,9 +184,14 @@ class Game {
         for(let ballKey in this.balls) {
             let ball = this.balls[ballKey];
             ball.update();
-            //long term we dont need global update
-            global.io.sockets.in(this.gameid).emit('moveball', ball);
+            let data = {key:ballKey, x:ball.x, y:ball.y};
+            global.io.sockets.in(this.gameid).emit('moveball', data);
         }
+    }
+
+    newBallMessage(key, ball){
+        let data = {key:key, x:ball.x, y:ball.y };
+        global.io.sockets.in(this.gameid).emit('newball', data);
     }
 
     updatePlayerPositions(){
@@ -263,9 +278,7 @@ class Game {
     }
 
     onCollisionPlayerPost(player, post) {
-        // again, just leaving this here - remove if not used
-        // global.io.sockets.in(this.gameid).emit('collisionplayerpost', {player: player, post: post});
-        
+
         // lengthy backstep
         if (post.x < player.x) player.x += player.baseSpeed;
 		else if (post.x > player.x) player.x -= player.baseSpeed;
@@ -287,7 +300,7 @@ class Game {
                 this.endGame();
             }
         }
-        this.resetBallPosition();
+        this.resetBallPosition(ball);
     }
 
     endGame(){
@@ -312,8 +325,7 @@ class Game {
         ball.setVelocity(newVelocity.x, newVelocity.y)
     }
 
-    resetBallPosition(){
-        let ball = this.balls[this.lastBallID];
+    resetBallPosition(ball){
         ball.x = physObjects.gameWidth / 2;
         ball.y = physObjects.gameHeight / 2;
         ball.setVelocity(0,0);
@@ -372,11 +384,6 @@ class Game {
         return{x: velX, y: velY};
     }
 
-
-
-    sendUpdateMessage(){
-
-    }
 }
 
 

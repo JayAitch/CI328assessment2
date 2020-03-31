@@ -40,13 +40,18 @@ Client = {
         });
 
         //Jordan any ideas why data.character isn't working here?
-        Client.socket.on('allplayers',function(data){
-            console.log(data);
-            for(var i = 0; i < data.length; i++){
+        Client.socket.on('initgame',function(data){
+            let players = data.players;
+            let balls = data.balls;
 
-                gameClient.addNewPlayer(data[i].id, data[i].characterID ,data[i].x ,data[i].y);
+            for(let key in players){
+                let player = players[key];
+                gameClient.addNewPlayer(player.id, player.characterID,player.x ,player.y);
             }
-
+            for(let key in balls){
+                let ball = balls[key];
+                gameClient.addNewBall(key, ball.x, ball.y);
+            }
         });
 
         Client.socket.on('move',function(data){
@@ -69,13 +74,12 @@ Client = {
             gameClient.endGame(data.id);
         });
         Client.socket.on('newball',function(data){
-            gameClient.addNewBall(data.x,data.y);
-
+            gameClient.addNewBall(data.key, data.x,data.y);
         });
 
 
         Client.socket.on('moveball',function(data){
-            gameClient.moveBall(data.x,data.y);
+            gameClient.moveBall(data.key, data.x, data.y);
         });
 
         Client.socket.on('loadgame',function(data){
@@ -97,6 +101,7 @@ Client = {
 
         // this could target a specific lobby?
         Client.socket.on('alllobbymembers',function (data) {
+            console.log('alllobbymemebrs');
             for(let key in data){
                 let member = data[key];
                 lobbyClient.newLobbyMember(key, member.isReady, member.character, member.position);
@@ -155,12 +160,13 @@ const gameClient =  {
         this.scene.endGame(winnerId);
     },
 
-    addNewBall: function(x,y){
-        this.scene.spawnBall(x,y)
+    addNewBall: function(key, x, y){
+        this.scene.spawnBall(key, x, y);
     },
-    moveBall: function(x,y){
-        this.scene.moveBall(x,y)
+    moveBall: function(key, x, y){
+        this.scene.moveBall(key, x, y);
     },
+
     onCollisionPlayerBall: function(ball, player){
         this.scene.onCollisionPlayerBall(ball, player);
     }
