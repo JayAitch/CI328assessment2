@@ -36,10 +36,9 @@ Client = {
         });
 
         Client.socket.on('collisionplayer',function(data){
-            gameClient.onCollisionPlayerBall(data.player, data.ball);
+            gameClient.onCollisionPlayerBall(data.ball, data.player);
         });
 
-        //Jordan any ideas why data.character isn't working here?
         Client.socket.on('initgame',function(data){
             let players = data.players;
             let balls = data.balls;
@@ -172,10 +171,5 @@ const gameClient =  {
     }
 };
 
-
-
-
-
-    // convert to using this kind of prototype notation
 
 

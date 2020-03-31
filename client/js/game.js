@@ -3,7 +3,8 @@
 class GameScene extends Phaser.Scene {
     constructor() {
         super({key: 'maingame'});
-        this.balls={};
+        this.balls = {};
+        this.ballTrailParticles = [];
     }
 
     create() {
@@ -99,11 +100,10 @@ class GameScene extends Phaser.Scene {
     createBallTrail(ball){
         let particles = this.add.particles('ball');
         particles.setDepth(2);
-        this.ballTrail = particles.createEmitter({
+        let ballTrail = particles.createEmitter({
             x: 0,
             y: 0,
             on:true,
-
             follow:ball,
             speed: { min: -100, max: 100 },
             angle: { min: -120, max: -60 },
@@ -112,6 +112,7 @@ class GameScene extends Phaser.Scene {
             scale: {start:0.7,end:0.1},
             quantity: 1,
         });
+        this.ballTrailParticles.push(particles);
 
     }
 
@@ -176,20 +177,26 @@ class GameScene extends Phaser.Scene {
         this.winText.destroy();
         this.playBtn.destroy();
         this.lobbySelectionBtn.destroy();
-        this.ballTrail.stop();
+        this.removeTrails();
+    }
+    // change this to remove balls
+    removeTrails(){
+
+        for(let i = 0; i < this.ballTrailParticles.length; i++){
+            //cant get this to work should probably be handled ina  ball class anyway
+        }
     }
 
     onCollisionPlayerBall(ball, player) {
 
         // blow particles for fun
         let emitter = this.emitter;
-        emitter.setPosition(this.ball.x,this.ball.y);
+        emitter.setPosition(ball.x,ball.y);
         emitter.emitParticle();
     }
 
     moveBall(key, x, y) {
         let ball = this.balls[key];
-        console.log(ball);
         ball.newx = x;
         ball.newy = y;
         //ball.x = x;
@@ -210,11 +217,6 @@ class GameScene extends Phaser.Scene {
             let player = Game.playerMap[playerKey];
             player.update();
         }
-    }
-
-
-    getCoordinates(pointer) {
-        Client.sendClick(pointer.worldX, pointer.worldY);
     }
 
     addNewPlayer(id, character, x, y) {
