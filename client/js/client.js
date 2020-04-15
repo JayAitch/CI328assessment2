@@ -97,7 +97,9 @@ Client = {
         Client.socket.on('characterchange', function (data) {
             lobbyClient.changeLobbyCharacter(data.position, data.character);
         });
-
+        Client.socket.on('spawnpowerup', function(data){
+            gameClient.spawnPowerUp(data.x,data.y);
+        });
         // this could target a specific lobby?
         Client.socket.on('alllobbymembers',function (data) {
             console.log('alllobbymemebrs');
@@ -168,6 +170,11 @@ const gameClient =  {
 
     onCollisionPlayerBall: function(ball, player){
         this.scene.onCollisionPlayerBall(ball, player);
+    },
+    spawnPowerUp: function(x,y){
+        this.scene.spawnPowerUp(x,y);
+        console.log("spawning powerup");
+        console.log(`${x},${y}`);
     }
 };
 

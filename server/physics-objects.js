@@ -1,7 +1,7 @@
 
 const gameWidth = 800;
 const gameHeight = 800;
-
+const powerUpWidth = 45;
 
 
 const characters  = {
@@ -196,7 +196,12 @@ class Ball extends RectanglePhysicsObject {
         super.update();
     }
 }
+class PowerUp extends RectanglePhysicsObject{
+    constructor(x, y){
+        super(x, y, powerUpWidth, powerUpWidth);
 
+    }
+}
 // player class understands how to move and stop
 class Player extends RectanglePhysicsObject{
 
@@ -211,7 +216,7 @@ class Player extends RectanglePhysicsObject{
 
         this.characterID = characterID;
         this.id = id;
-        this.socketid = socketid
+        this.socketid = socketid;//wrong
         this.lives = character.lives;
         this.baseSpeed = character.speed;
         // changed to use aabb
@@ -298,4 +303,4 @@ class PlayerGoal extends RectanglePhysicsObject {
 
 // delliberately only exporting non 'abstract'
 // width and height should be on same game class?
-module.exports = {RectanglePhysicsObject, Player, Ball, PlayerGoal, gameHeight, gameWidth}
+module.exports = {RectanglePhysicsObject, Player, Ball, PowerUp, PlayerGoal, gameHeight, gameWidth}

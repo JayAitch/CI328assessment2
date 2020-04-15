@@ -67,6 +67,12 @@ class GameScene extends Phaser.Scene {
         }
     }
 
+    spawnPowerUp(x,y){
+        // make powerup sprite
+        let newBall = this.add.sprite(x, y, "ball");
+
+    }
+
     buildBackdrop() {
         let randNum = parseInt(Math.random() * this.backdropItems.floors.length);
         this.add.image(400, 400, this.backdropItems.floors[randNum]);

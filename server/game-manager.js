@@ -54,16 +54,15 @@ class Game {
         this.createBall();
         this.updaterID = systems.addToUpdate(this);
         //test to create multiple balls
-        // this.testMultiBalls();
+        this.testMultiBalls();
     }
     // //test to create multiple balls
-    // testMultiBalls(){
-    //     setTimeout(()=>{
-    //         let ball = this.createBall();
-    //         this.resetBallPosition(ball);
-    //
-    //     }, 2000)
-    // }
+    testMultiBalls(){
+        setTimeout(()=>{
+            this.createPowerUp();
+
+        }, 2000)
+    }
     createPlayers(membersList){
         for(let memberkey in membersList){
             let member = membersList[memberkey];
@@ -147,8 +146,8 @@ class Game {
 
         let ballWidth = 48;
         let newBall = new physObjects.Ball(
-            physObjects.gameHeight/2,
             physObjects.gameWidth/2,
+            physObjects.gameHeight/2,
             ballWidth/2,
             true,
             (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)
@@ -161,6 +160,17 @@ class Game {
         this.lastBallID++;
         return newBall;
     }
+
+    createPowerUp(){
+        this.powerUp = new physObjects.PowerUp(physObjects.gameWidth / 2, physObjects.gameHeight / 2);
+
+        console.log("powerup pos");
+        console.log(this.powerUp);
+        global.io.sockets.in(this.gameid).emit('spawnpowerup', {x: this.powerUp.x, y:this.powerUp.y});
+    }
+
+
+
 
     addBallCollisions(ball, id){
         for(let playerKey in this.players) {
