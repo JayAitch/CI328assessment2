@@ -3,9 +3,12 @@
 class GameScene extends Phaser.Scene {
     constructor() {
         super({key: 'maingame'});
+        this.balls = {};
+        this.ballTrailParticles = [];
     }
 
     create() {
+        gameClient.setScene(this);
         this.backdropItems = {
             floors: [ 'sand', 'grass' ],
             pillars: [ 
@@ -14,7 +17,7 @@ class GameScene extends Phaser.Scene {
             ],
             doodads: [ 'doodad1', 'doodad2', 'doodad3', 'doodad4', 'doodad5', 'doodad6',
                        'doodad7', 'doodad8', 'doodad9', 'doodad10', 'doodad11' ]
-        }
+        };
         
         this.buildBackdrop();
         Game.playerMap = {};
@@ -39,21 +42,6 @@ class GameScene extends Phaser.Scene {
             Client.sendStopMove();
         });
 
-
-        Game.addNewPlayer = ((id,character, x,y)=>{this.addNewPlayer(id, character, x, y)});
-        Game.movePlayer = ((id,x,y)=>{this.movePlayer(id, x, y)});
-        Game.goalScored = ((id)=>{this.goalScored(id)});
-        Game.playerDeath = ((id)=>{this.killPlayer(id)})
-        Game.endGame = ((id)=>{this.endGame(id)})
-        Game.addNewBall = ((x,y)=>{this.spawnBall(x,y)}); // extend to allow multiple ball position updates (simularly to players)
-        Game.moveBall = ((x,y) => {this.moveBall(x,y)}) ;// extend to allow multiple ball position updates (simularly to players)
-        Client.askGameConnect();
-
-        // append methods to game object for client to interact with
-
-        // Game.setPlayerChar = ((number) => {this.switchPlayerCharacter(number)});
-
-        Game.onCollisionPlayerBall = ((ball, player) => {this.onCollisionPlayerBall(ball, player)});
         this.createEmitter();
 
         this.characters = {
@@ -63,15 +51,16 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    spawnBall(x,y) {
-        this.ball = this.add.sprite(x, y, "ball");
-        this.ball.newx = x;
-        this.ball.newy = y;
-        this.createBallTrail();
-        this.ball.update = ()=> {
-            let ball = this.ball;
-            ball.x = ball.newx;// * 0.9 + ball.newx * 0.1;
-            ball.y = ball.newy;// * 0.9 + ball.newy * 0.1;
+    spawnBall(key, x, y) {
+        let newBall = this.add.sprite(x, y, "ball");
+        this.balls[key] = newBall;
+        newBall.newx = x;
+        newBall.newy = y;
+        this.createBallTrail(newBall);
+        newBall.update = ()=> {
+
+            newBall.x = newBall.newx;// * 0.9 + ball.newx * 0.1;
+            newBall.y = newBall.newy;// * 0.9 + ball.newy * 0.1;
             // ball.x = ball.x * 0.9 + ball.newx * 0.1;
             // ball.y = ball.y * 0.9 + ball.newy * 0.1;
 
@@ -92,7 +81,7 @@ class GameScene extends Phaser.Scene {
 
     createEmitter(){
         let particles = this.add.particles('ball');
-        particles.setDepth(2)
+        particles.setDepth(2);
         this.emitter = particles.createEmitter({
             x: 300,
             y: 300,
@@ -108,15 +97,14 @@ class GameScene extends Phaser.Scene {
     }
 
 
-    createBallTrail(){
+    createBallTrail(ball){
         let particles = this.add.particles('ball');
-        particles.setDepth(2)
-        this.ballTrail = particles.createEmitter({
+        particles.setDepth(2);
+        let ballTrail = particles.createEmitter({
             x: 0,
             y: 0,
             on:true,
-
-            follow:this.ball,
+            follow:ball,
             speed: { min: -100, max: 100 },
             angle: { min: -120, max: -60 },
             lifespan: { min: 80, max: 200 },
@@ -124,6 +112,7 @@ class GameScene extends Phaser.Scene {
             scale: {start:0.7,end:0.1},
             quantity: 1,
         });
+        this.ballTrailParticles.push(particles);
 
     }
 
@@ -188,19 +177,26 @@ class GameScene extends Phaser.Scene {
         this.winText.destroy();
         this.playBtn.destroy();
         this.lobbySelectionBtn.destroy();
-        this.ballTrail.stop();
+        this.removeTrails();
+    }
+    // change this to remove balls
+    removeTrails(){
+
+        for(let i = 0; i < this.ballTrailParticles.length; i++){
+            //cant get this to work should probably be handled ina  ball class anyway
+        }
     }
 
     onCollisionPlayerBall(ball, player) {
 
         // blow particles for fun
         let emitter = this.emitter;
-        emitter.setPosition(this.ball.x,this.ball.y);
+        emitter.setPosition(ball.x,ball.y);
         emitter.emitParticle();
     }
 
-    moveBall(x, y) {
-        let ball = this.ball;
+    moveBall(key, x, y) {
+        let ball = this.balls[key];
         ball.newx = x;
         ball.newy = y;
         //ball.x = x;
@@ -212,16 +208,15 @@ class GameScene extends Phaser.Scene {
 
 
     update(){
-        if(this.ball) this.ball.update();
+        for(let ballKey in this.balls){
+            let ball = this.balls[ballKey];
+            ball.update();
+        }
+
         for(let playerKey in Game.playerMap){
             let player = Game.playerMap[playerKey];
             player.update();
         }
-    }
-
-
-    getCoordinates(pointer) {
-        Client.sendClick(pointer.worldX, pointer.worldY);
     }
 
     addNewPlayer(id, character, x, y) {
@@ -254,3 +249,4 @@ class GameScene extends Phaser.Scene {
         delete Game.playerMap[id];
     }
 }
+

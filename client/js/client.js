@@ -1,154 +1,175 @@
 var Client = {};
 //Client.socket = io('http://localhost:55000');
 
+Client = {
+    listenersSet: false,
+    start: function(ip, socket){
+        Client.socket = io('http://' + ip + ":" + socket);
+        this.setListeners();
 
-
-
-
-function startClient(ip, socket){
-    // error handle fained connection in lobby switch
-    Client.socket = io('http://' + ip + ":" + socket);
-    Client.sendTest = function(){
-        console.log("test sent");
-        Client.socket.emit('test');
-    };
-
-    Client.sendChangeCharacter = function(characterID){
-        Client.socket.emit("changecharacter", {character: characterID});
-    }
-
-
-    Client.askGameConnect = function(){
-        Client.socket.emit('gameconnect');
-    };
-
-    Client.sendClick = function(x,y){
-        Client.socket.emit('click',{x:x,y:y});
-    };
-    Client.sendMove = function (direction){
+    },
+    sendMove: function (direction){
         Client.socket.emit('move', {direction:direction});
-    };
-
-    Client.sendStopMove = function(){
+    },
+    sendChangeCharacter: function(characterID){
+        Client.socket.emit("changecharacter", {character: characterID});
+    },
+    askGameConnect:  function(){
+        Client.socket.emit('gameconnect');
+    },
+    sendStopMove: function () {
         Client.socket.emit('stopmove');
-    }
+    },
+    askJoinLobby: function(){
+        Client.socket.emit('joinlobby');
+        // extend this by passing in lobby id or something
+    },
+    memberReadyToggle: function(){
+        Client.socket.emit('playerreadytoggle');
+    },
+    setListeners:function(){
+        if(this.listenersSet === true) return;
+        this.listenersSet = true;
 
-    //Jordan any ideas why data.character isn't working here?
-    Client.socket.on('newplayer',function(data){
-         Game.addNewPlayer(data.id, data.characterID, data.x, data.y);
-    });
+        Client.socket.on('newplayer',function(data){
+            gameClient.addNewPlayer(data.id, data.characterID, data.x, data.y);
+        });
 
+        Client.socket.on('collisionplayer',function(data){
+            gameClient.onCollisionPlayerBall(data.ball, data.player);
+        });
 
-    Client.socket.on('collisionplayer',function(data){
-        Game.onCollisionPlayerBall(data.player, data.ball);
-    });
+        Client.socket.on('initgame',function(data){
+            let players = data.players;
+            let balls = data.balls;
 
-    //Jordan any ideas why data.character isn't working here?
-    Client.socket.on('allplayers',function(data){
-        for(var i = 0; i < data.length; i++){
-           Game.addNewPlayer(data[i].id, data[i].characterID ,data[i].x ,data[i].y);
-        }
+            for(let key in players){
+                let player = players[key];
+                gameClient.addNewPlayer(player.id, player.characterID,player.x ,player.y);
+            }
+            for(let key in balls){
+                let ball = balls[key];
+                gameClient.addNewBall(key, ball.x, ball.y);
+            }
+        });
 
         Client.socket.on('move',function(data){
-            if(Game.movePlayer){
-                Game.movePlayer(data.id,data.x,data.y);
-            }
-
+            gameClient.movePlayer(data.id,data.x,data.y);
         });
 
         Client.socket.on('remove',function(id){
-            Game.removePlayer(id);
+            gameClient.removePlayer(id);
         });
 
         Client.socket.on('goalscored',function(data){
-            Game.goalScored(data.id);
+            gameClient.goalScored(data.id);
         });
 
         Client.socket.on('playerdeath',function(data){
-            Game.playerDeath(data.id);
+            gameClient.playerDeath(data.id);
         });
 
         Client.socket.on('endgame',function(data){
-            Game.endGame(data.id);
+            gameClient.endGame(data.id);
+        });
+        Client.socket.on('newball',function(data){
+            gameClient.addNewBall(data.key, data.x,data.y);
         });
 
-    });
+
+        Client.socket.on('moveball',function(data){
+            gameClient.moveBall(data.key, data.x, data.y);
+        });
+
+        Client.socket.on('loadgame',function(data){
+            lobbyClient.triggerGame();
+        });
 
 
-    Client.socket.on('newball',function(data){
-        if(Game.addNewBall){
-            Game.addNewBall(data.x,data.y);
-        }
+        Client.socket.on('newmember',function(data){
+            lobbyClient.newLobbyMember(data.position, data.isReady, data.character);
+        });
 
-    });
+        Client.socket.on('playerready', function(data){
+            lobbyClient.memberReadied(data.position, data.isReady);
+        });
 
+        Client.socket.on('characterchange', function (data) {
+            lobbyClient.changeLobbyCharacter(data.position, data.character);
+        });
 
-    Client.socket.on('moveball',function(data){
-        if(Game.moveBall){
-            Game.moveBall(data.x,data.y);
-        }
-    });
+        // this could target a specific lobby?
+        Client.socket.on('alllobbymembers',function (data) {
+            console.log('alllobbymemebrs');
+            for(let key in data){
+                let member = data[key];
+                lobbyClient.newLobbyMember(key, member.isReady, member.character, member.position);
+            }
+        });
 
-
-    // not like this
-    Client.triggerLoad = function(){
-        Client.socket.emit('triggerload');
     }
+};
 
-
-    Client.socket.on('loadgame',function(data){
-       Game.triggerGame();
-    });
-
-
-
-
-    Client.askJoinLobby = function(){
-        Client.socket.emit('joinlobby');
-        // extend this by passing in lobby id or something
-    };
-
-
-
-
-
-    Client.socket.on('newmember',function(data){
-        if(Lobby.newLobbyMember) {
-            Lobby.newLobbyMember(data.position, data.isReady, data.character);
-        }
-    });
-
-
-
-
-    Client.memberReadyToggle = function(){
-        Client.socket.emit('playerreadytoggle');
+const lobbyClient = {
+    setScene: function(scene){
+        this.scene = scene;
+        Client.askJoinLobby();
+    },
+    triggerGame: function(){
+        this.scene.triggerGameLoad();
+    },
+    changeLobbyCharacter: function(position,character) {
+        this.scene.changeLobbyCharacter(position,character);
+    },
+    memberReadied: function(position, isReady, ){
+        this.scene.lobbyMemberReadied(position,isReady);
+    },
+    newLobbyMember: function(pos, isReady, character)  {
+        this.scene.newLobbyMember(pos, isReady, character);
     }
+};
 
 
+const gameClient =  {
+    setScene: function(scene){
+        this.scene = scene;
+        console.log(scene);
+        Client.askGameConnect();
+    },
 
-    Client.socket.on('playerready', function(data){
-        console.log(data);
-        if(Lobby.memberReadied){
-            Lobby.memberReadied(data.position, data.isReady);
-        }
+    addNewPlayer: function(id, character, x, y){
+        console.log(character);
+        this.scene.addNewPlayer(id, character, x, y);
+    },
 
-    });
+    movePlayer: function(id,x,y){
+        this.scene.movePlayer(id, x, y);
+    },
 
-    Client.socket.on('characterchange', function (data) {
-        console.log(data);
-        Lobby.changeLobbyCharacter(data.position, data.character);
-    });
+    goalScored: function(id){
+        this.scene.goalScored(id);
+    },
 
-    // this could target a specific lobby?
-    Client.socket.on('alllobbymembers',function (data) {
-        console.log('alllobbymemebrs');
-        for(let key in data){
-            let member = data[key];
-            Lobby.newLobbyMember(key, member.isReady, member.character, member.position);
-        }
-    });
 
-    // convert to using this kind of prototype notation
-}
+    playerDeath: function(id){
+        this.scene.killPlayer(id);
+    },
+
+    endGame: function(winnerId){
+        this.scene.endGame(winnerId);
+    },
+
+    addNewBall: function(key, x, y){
+        this.scene.spawnBall(key, x, y);
+    },
+    moveBall: function(key, x, y){
+        this.scene.moveBall(key, x, y);
+    },
+
+    onCollisionPlayerBall: function(ball, player){
+        this.scene.onCollisionPlayerBall(ball, player);
+    }
+};
+
+
 

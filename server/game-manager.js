@@ -47,13 +47,23 @@ class Game {
         this.balls = {};
         this.posts = {};
         this.gameid = lobby.id;
+        this.lastBallID = 0;
         this.collisionManager = new systems.CollisionManager();
         this.createPosts();
         this.createPlayers(lobby.members);
         this.createBall();
         this.updaterID = systems.addToUpdate(this);
+        //test to create multiple balls
+        // this.testMultiBalls();
     }
-
+    // //test to create multiple balls
+    // testMultiBalls(){
+    //     setTimeout(()=>{
+    //         let ball = this.createBall();
+    //         this.resetBallPosition(ball);
+    //
+    //     }, 2000)
+    // }
     createPlayers(membersList){
         for(let memberkey in membersList){
             let member = membersList[memberkey];
@@ -77,7 +87,7 @@ class Game {
             y: physObjects.gameHeight / 2,
             width: newPlayer.width,
             height: newPlayer.height
-        }
+        };
         let bound = this.getBoundsFromPositions(newPlayer, gameCenter, false);
         switch (bound) {
             case 2:
@@ -134,7 +144,7 @@ class Game {
     }
 
     createBall(){
-        this.lastBallID++;
+
         let ballWidth = 48;
         let newBall = new physObjects.Ball(
             physObjects.gameHeight/2,
@@ -146,11 +156,13 @@ class Game {
 
         this.setBallVelocityBetween(newBall, 5, 5, -10, 10);
         this.balls[this.lastBallID] = newBall;
-        this.addBallCollisions(newBall);
-
+        this.addBallCollisions(newBall, this.lastBallID);
+        this.newBallMessage(this.lastBallID, newBall);
+        this.lastBallID++;
+        return newBall;
     }
 
-    addBallCollisions(ball){
+    addBallCollisions(ball, id){
         for(let playerKey in this.players) {
             let player = this.players[playerKey];
             this.collisionManager.addCollision(player, ball, () => { this.onCollisionPlayerBall(player, ball) });
@@ -163,6 +175,14 @@ class Game {
             let post = this.posts[postKey];
             this.collisionManager.addCollision(post, ball, () => { this.onCollisionPostBall(post, ball)});
         }
+
+        for(let ballKey in this.balls){
+            // only on other balls
+            if(ballKey != id){
+                let oldBall = this.balls[ballKey];
+                this.collisionManager.addCollision(oldBall, ball, () => { this.onCollisionBallBall(oldBall, ball)});
+            }
+        }
     }
 
     update(){
@@ -174,9 +194,14 @@ class Game {
         for(let ballKey in this.balls) {
             let ball = this.balls[ballKey];
             ball.update();
-            //long term we dont need global update
-            global.io.sockets.in(this.gameid).emit('moveball', ball);
+            let data = {key:ballKey, x:ball.x, y:ball.y};
+            global.io.sockets.in(this.gameid).emit('moveball', data);
         }
+    }
+
+    newBallMessage(key, ball){
+        let data = {key:key, x:ball.x, y:ball.y };
+        global.io.sockets.in(this.gameid).emit('newball', data);
     }
 
     updatePlayerPositions(){
@@ -252,6 +277,21 @@ class Game {
         let angle = this.getAngleFromBounds(bound);
         ball.bounce(angle);
     }
+    onCollisionBallBall(ballA, ballB) {
+        // store pre change velocities
+        let ballAVelo = ballA.velocity;
+        let ballBVelo = ballB.velocity;
+
+
+        let bound = this.getBoundsFromPositions(ballA, ballB, true);
+        let angle = this.getAngleFromBounds(bound);
+        ballA.bounce(angle, ballBVelo.x, ballBVelo.y);
+
+        let bound2 = this.getBoundsFromPositions(ballB, ballA, true);
+        let angle2 = this.getAngleFromBounds(bound2);
+        ballB.bounce(angle2, ballAVelo.x, ballAVelo.y);
+    }
+
 
     onCollisionPlayerBall(player, ball) {
         // emit this shit for game to know where collision occurred, well, where the ball was when it did
@@ -263,9 +303,7 @@ class Game {
     }
 
     onCollisionPlayerPost(player, post) {
-        // again, just leaving this here - remove if not used
-        // global.io.sockets.in(this.gameid).emit('collisionplayerpost', {player: player, post: post});
-        
+
         // lengthy backstep
         if (post.x < player.x) player.x += player.baseSpeed;
 		else if (post.x > player.x) player.x -= player.baseSpeed;
@@ -287,7 +325,7 @@ class Game {
                 this.endGame();
             }
         }
-        this.resetBallPosition();
+        this.resetBallPosition(ball);
     }
 
     endGame(){
@@ -312,13 +350,16 @@ class Game {
         ball.setVelocity(newVelocity.x, newVelocity.y)
     }
 
-    resetBallPosition(){
-        let ball = this.balls[this.lastBallID];
+    resetBallPosition(ball){
+        ball.isActive = false;
         ball.x = physObjects.gameWidth / 2;
         ball.y = physObjects.gameHeight / 2;
         ball.setVelocity(0,0);
         // pause the ball for a second - we can do something clientside to make this nicer
-        setTimeout(()=>{this.setBallVelocityBetween(ball, 5, 10, -10, 10);}, 2000)
+        setTimeout(()=>{
+            this.setBallVelocityBetween(ball, 5, 10, -10, 10);
+            ball.isActive = true;
+        }, 2000)
 
     }
 
@@ -372,11 +413,6 @@ class Game {
         return{x: velX, y: velY};
     }
 
-
-
-    sendUpdateMessage(){
-
-    }
 }
 
 

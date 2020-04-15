@@ -38,7 +38,7 @@ const lobbyManager = {
         delete this.lobbies[pos];
     }
 
-}
+};
 
 
 class Lobby{

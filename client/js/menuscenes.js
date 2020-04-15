@@ -105,7 +105,7 @@ class LandingScene extends Phaser.Scene {
         this.ip = "localhost";
 
         if(!clientStarted){
-            startClient(this.ip, this.socket);
+            Client.start(this.ip, this.socket);
             clientStarted = true;
         }
 
@@ -218,42 +218,15 @@ class LobbyScene extends Phaser.Scene {
         this.lobbyCards =  [];
         this.listPos = gameCenterY() - 150;//temp
 
-
-        Lobby.newLobbyMember = ((pos, isReady, character) => {
-            let newCard = new LobbyCard(gameCenterX(), this.listPos, this, isReady,  character);
-            this.lobbyCards[pos] = newCard;
-            this.listPos += 25;
-        });
-
-        Lobby.memberReadied = ((position, isReady, ) => {
-            let memberCard = this.lobbyCards[position].readyState = isReady;
-        });
-
-        Lobby.changeLobbyCharacter = ((position, character) => {
-            console.log(character);
-            let lobbyCard = this.lobbyCards[position];
-            lobbyCard.character = character;
-        });
-
-
         let header = this.add.text(gameCenterX(), gameCenterY() - 350, 'Lobby', textStyles.header);
-
         offsetByWidth(header);
 
         let playBtnAction = () => {
-            // we probably want to have seperate ready buttons or somehting ehr
             Client.memberReadyToggle();
         };
 
-        Game.triggerGame = () =>{
-            Game.triggerGame = null;
-            this.scene.start("maingame");
-            playBtn.active = false;
-        }
-
-
         // create the button object, no need for an icon, or UI text
-        let playBtn = new ImageButton(
+        this.playBtn = new ImageButton(
             gameCenterX(),
             game.config.height - 55,
             "playButton",
@@ -261,16 +234,37 @@ class LobbyScene extends Phaser.Scene {
             playBtnAction,
             "PLAY"
         );
-        offsetByWidth(playBtn);
+        offsetByWidth(this.playBtn);
 
         this.createCharacterSelectionControls();
 
     }
 
+    newLobbyMember(pos, isReady, character){
+        let newCard = new LobbyCard(gameCenterX(), this.listPos, this, isReady,  character);
+        this.lobbyCards[pos] = newCard;
+        this.listPos += 25;
+    }
+
+    changeLobbyCharacter(position, character){
+        let lobbyCard = this.lobbyCards[position];
+        lobbyCard.character = character;
+    }
+
+    lobbyMemberReadied(position, isReady){
+        let memberCard = this.lobbyCards[position].readyState = isReady;
+    }
+
+    triggerGameLoad(){
+        Game.triggerGame = null;
+        this.scene.start("maingame");
+        this.playBtn.active = false;
+    }
+
     joinLobby(){
         if(this.lobbyCards) this.removeLobbyCards();
         this.listPos = gameCenterY() - 150;
-        Client.askJoinLobby();
+        lobbyClient.setScene(this);
     }
 
     removeLobbyCards(){
