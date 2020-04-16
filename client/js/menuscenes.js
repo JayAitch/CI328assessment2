@@ -22,7 +22,7 @@ const textStyles = {
 
 };
 //https://www.kenney.nl/assets/game-icons
-const characters = {"Big":{},"Medium":{}, "Small":{}}  // probably store this somewhere more relevant
+const characters = {"Big":{},"Medium":{}, "Small":{}};  // probably store this somewhere more relevant
 const charactersArray = ["BIG","MEDIUM", "SMALL"]; //temp this could be constructed by the characters map or somehtign
 var HUDBaseDepth = 10;
 // consider making this screens a generic class

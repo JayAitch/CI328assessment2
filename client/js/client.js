@@ -69,6 +69,10 @@ Client = {
             gameClient.playerDeath(data.id);
         });
 
+        Client.socket.on('powerupcollected',function(){
+            gameClient.powerUpCollected();
+        });
+
         Client.socket.on('endgame',function(data){
             gameClient.endGame(data.id);
         });
@@ -151,7 +155,9 @@ const gameClient =  {
     goalScored: function(id){
         this.scene.goalScored(id);
     },
-
+    powerUpCollected: function(){
+      this.scene.collectPowerUp();
+    },
 
     playerDeath: function(id){
         this.scene.killPlayer(id);

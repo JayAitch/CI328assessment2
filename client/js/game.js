@@ -69,8 +69,12 @@ class GameScene extends Phaser.Scene {
 
     spawnPowerUp(x,y){
         // make powerup sprite
-        let newBall = this.add.sprite(x, y, "ball");
+        this.powerUp = this.add.sprite(x, y, "ball");
 
+    }
+
+    collectPowerUp(){
+        this.powerUp.destroy();
     }
 
     buildBackdrop() {

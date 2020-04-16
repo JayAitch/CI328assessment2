@@ -11,7 +11,7 @@ class Player {
     this.eyeContainter = eyeContainter;
     let socketContainer = this.game.add.container(0,0);
     this.socketContainer = socketContainer;
-    this.rotation = this.isRotated(x, y)
+    this.rotation = this.isRotated(x, y);
     this.generateBody(type, size, this.eyes, colour, this.rotation);
   }
 
@@ -21,6 +21,7 @@ class Player {
     if (y < 300) return 180;
     return 0;
   }
+
   destroy(){
     this.eyeContainter.destroy();
     this.socketContainer.destroy();
