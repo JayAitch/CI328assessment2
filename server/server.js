@@ -25,7 +25,6 @@ io.on('connection', function(client) {
 
 
     client.on('playerreadytoggle', function(){
-        console.log(client.rooms)
         client.lobby.toggleReady(client);
     });
 
@@ -47,6 +46,7 @@ io.on('connection', function(client) {
         client.emit('initgame', { players:getAllPlayers(client.game), balls:getAllBalls(client.game)});
 
         client.on('disconnect',function() {
+            // handel this?
      //       io.emit('remove', client.player.id);
             //console.log('killPlayer: ' + client.player.id);
         });

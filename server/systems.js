@@ -41,7 +41,7 @@ const Updater = {
     },
     update: function () {
         for(let key in this.updateables){
-            let object = this.updateables[key]
+            let object = this.updateables[key];
             object.update();
         }
     },

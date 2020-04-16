@@ -1,24 +1,11 @@
 
 var systems = require('./systems.js');
 var physObjects = require('./physics-objects.js');
+let maxBalls = 5;
 
 
-function isVelocityBetweenMinAndMax(vel, min, max){
-    let absVeloX = Math.abs(vel.x);
-    let absVeloY = Math.abs(vel.y);
-    if(absVeloX + absVeloY < min || absVeloX + absVeloY > max ){
-        return false
-    }else{
-        return true
-    }
-}
 function randomInt(low, high) {
     return Math.floor(Math.random() * (high - low) + low);
-}
-function randomVelocity(low, high){
-    let velY = randomInt(low, high);
-    let velX = randomInt(low, high);
-    return{x: velX, y: velY};
 }
 
 function createManager(){
@@ -27,6 +14,13 @@ function createManager(){
 
 function createNewGame(lobby){
     return GameManager.createGame(lobby);
+}
+function getCentreY(){
+    return physObjects.gameHeight / 2;
+}
+
+function getCentreX(){
+    return physObjects.gameWidth / 2;
 }
 
 const GameManager = {
@@ -38,7 +32,7 @@ const GameManager = {
         this.games[position] = newGame;
         return newGame;
     }
-}
+};
 
 class Game {
     constructor(lobby){
@@ -53,17 +47,21 @@ class Game {
         this.createPlayers(lobby.members);
         this.createBall();
         this.updaterID = systems.addToUpdate(this);
-        //test to create multiple balls
-        // this.testMultiBalls();
+
+        this.spawnPowerUpTimer();
     }
-    // //test to create multiple balls
-    // testMultiBalls(){
-    //     setTimeout(()=>{
-    //         let ball = this.createBall();
-    //         this.resetBallPosition(ball);
-    //
-    //     }, 2000)
-    // }
+
+    spawnPowerUpTimer(){
+
+        let timerMax = 15000;
+        let timerMin = 25000;
+        let timeTrigger = randomInt(timerMax, timerMin);
+        this.powerUpSpawnTimer = setTimeout(()=>{
+            this.createPowerUp();
+        }, timeTrigger);
+    }
+
+
     createPlayers(membersList){
         for(let memberkey in membersList){
             let member = membersList[memberkey];
@@ -75,7 +73,7 @@ class Game {
         let startVectors = this.getStartVectors(member.position);
         let xPos = startVectors.x;
         let yPos = startVectors.y;
-        let isRotated = this.getIsRotated(member.position)
+        let isRotated = this.getIsRotated(member.position);
         let newPlayer = new physObjects.Player(member.position, xPos , yPos, isRotated, member.character, member.socketid);
         this.players[member.position] = newPlayer;
         this.createGoal(newPlayer, xPos, yPos, isRotated);
@@ -83,8 +81,8 @@ class Game {
         // add player collision with nearest posts
         let nearestPosts = [];
         let gameCenter = {
-            x: physObjects.gameWidth / 2,
-            y: physObjects.gameHeight / 2,
+            x: getCentreX(),
+            y: getCentreY(),
             width: newPlayer.width,
             height: newPlayer.height
         };
@@ -145,22 +143,58 @@ class Game {
 
     createBall(){
 
+        if(this.lastBallID >= maxBalls){
+            return;
+        }
         let ballWidth = 48;
         let newBall = new physObjects.Ball(
-            physObjects.gameHeight/2,
-            physObjects.gameWidth/2,
+            getCentreX(),
+            getCentreY(),
             ballWidth/2,
             true,
             (ball, bounds)=> { this.onCollisionBallBounds(ball, bounds)
             });
 
-        this.setBallVelocityBetween(newBall, 5, 5, -10, 10);
+        this.resetBallPosition(newBall);
         this.balls[this.lastBallID] = newBall;
+
+
+
         this.addBallCollisions(newBall, this.lastBallID);
         this.newBallMessage(this.lastBallID, newBall);
         this.lastBallID++;
         return newBall;
     }
+
+    createPowerUp(){
+
+        let spawnAreaHeight = physObjects.gameHeight /2;
+        let spawnAreaWidth = physObjects.gameWidth /2;
+        let gameCentreY = getCentreY();
+        let gameCentreX = getCentreX();
+
+
+        let spawnAreaMaxY = gameCentreY + spawnAreaHeight / 2;
+        let spawnAreaMinY = gameCentreY - spawnAreaHeight / 2;
+        let spawnAreaMaxX = gameCentreX + spawnAreaWidth /2;
+        let spawnAreaMinX = gameCentreX  - spawnAreaWidth /2;
+
+        let spawnPosX = randomInt(spawnAreaMinX, spawnAreaMaxX);
+        let spawnPosY = randomInt(spawnAreaMinY, spawnAreaMaxY);
+
+        this.powerUp = new physObjects.PowerUp(spawnPosX, spawnPosY);
+        this.powerUp.powerUpEffect = () => {this.createBall()};
+
+        for(let ballKey in this.balls){
+
+            let ball = this.balls[ballKey];
+            this.collisionManager.addCollision(this.powerUp, ball, () => { this.onCollisionBallPowerup(this.powerUp, ball)});
+        }
+        global.io.sockets.in(this.gameid).emit('spawnpowerup', {x: this.powerUp.x, y:this.powerUp.y});
+    }
+
+
+
 
     addBallCollisions(ball, id){
         for(let playerKey in this.players) {
@@ -180,7 +214,7 @@ class Game {
             // only on other balls
             if(ballKey != id){
                 let oldBall = this.balls[ballKey];
-                this.collisionManager.addCollision(oldBall, ball, () => { this.onCollisionBallBall(oldBall, ball)});
+                this.collisionManager.addCollision(ball, oldBall, () => { this.onCollisionBallBall(ball, oldBall)});
             }
         }
     }
@@ -208,13 +242,18 @@ class Game {
         for(let playerKey in this.players) {
             let player = this.players[playerKey];
             player.update();
-            //long term we dont need global update
             global.io.sockets.in(this.gameid).emit('move', player);
         }
     }
 
     getIsRotated(playerNumber){
-        return !(playerNumber % 2);
+
+        switch (playerNumber) {
+            case 0: return true;
+            case 1: return true;
+            case 2: return false;
+            case 3: return false;
+        }
     }
 
     // get where the player should start
@@ -222,21 +261,17 @@ class Game {
         const width = physObjects.gameWidth;
         const height = physObjects.gameHeight;
         const playerOffset = 50;
+
         switch (playerNumber) {
-            case 0:   return {x: 0 + playerOffset, y: height/2}
-            case 1:   return {x: width/2, y: height - playerOffset}
-            case 2:   return {x: width - playerOffset, y: height/2}
-            case 3:   return {x: width/2, y: 0 + playerOffset}
+            case 0:   return {x: 0 + playerOffset, y: height/2};
+            case 1:   return {x: width - playerOffset, y: height/2};
+            case 2:   return {x: width/2, y: height - playerOffset};
+            case 3:   return {x: width/2, y: 0 + playerOffset};
         }
     }
 
     killPlayer(player){
         player.isActive = false;
-        // this will leave a collision reference on the collision manager
-        // deleting the reference in this array will prevent any balls created after from adding collision and prevent movemnt updates
-        // a ball adding a collision would not work after the player has been disables
-        // we could potentially change the collision managers to return an ID when an object is added
-        // this will allow us to remove objects completely
         delete this.players[player.id];
         delete this.goals[player.id];
         global.io.sockets.in(this.gameid).emit('playerdeath', {id:player.id});
@@ -277,19 +312,32 @@ class Game {
         let angle = this.getAngleFromBounds(bound);
         ball.bounce(angle);
     }
+
+    onCollisionBallPowerup(powerup, ball){
+        powerup.collectPowerUp();
+        global.io.sockets.in(this.gameid).emit('powerupcollected');
+        this.powerUp.isActive = false;
+        this.powerup = null;
+        this.spawnPowerUpTimer();
+    }
+
     onCollisionBallBall(ballA, ballB) {
         // store pre change velocities
         let ballAVelo = ballA.velocity;
         let ballBVelo = ballB.velocity;
+        let ballAPos = {x: ballA.x, y: ballA.y};
+        let ballBPos = {x: ballB.x, y: ballB.y};
 
 
-        let bound = this.getBoundsFromPositions(ballA, ballB, true);
+        let bound = this.getBoundsFromPositions(ballAPos, ballBPos, false);
         let angle = this.getAngleFromBounds(bound);
         ballA.bounce(angle, ballBVelo.x, ballBVelo.y);
 
-        let bound2 = this.getBoundsFromPositions(ballB, ballA, true);
+        let bound2 = this.getBoundsFromPositions(ballBPos, ballAPos, false);
         let angle2 = this.getAngleFromBounds(bound2);
+        ballB.backstep();
         ballB.bounce(angle2, ballAVelo.x, ballAVelo.y);
+
     }
 
 
@@ -306,10 +354,10 @@ class Game {
 
         // lengthy backstep
         if (post.x < player.x) player.x += player.baseSpeed;
-		else if (post.x > player.x) player.x -= player.baseSpeed;
+		else if (post.x > player.x)player.backstep();
         
         if (post.y < player.y) player.y += player.baseSpeed;
-		else if (post.y > player.y) player.y -= player.baseSpeed;
+		else if (post.y > player.y) player.backstep();
     }
 
     onCollisionGoalBall(goal, ball) {
@@ -338,26 +386,39 @@ class Game {
     }
 
     destroy(){
+        clearTimeout(this.powerUpSpawnTimer);
         systems.removeFromUpdater(this.updaterID);
         delete this.collisionManager; // clean up the game
     }
 
-    setBallVelocityBetween(ball, min, max, axisLow, axisHigh){
-        let newVelocity = {x:0,y:0};
-        while(!this.isVelocityBetweenMinAndMax(newVelocity, min,max)){
-            newVelocity = this.randomVelocity( axisLow, axisHigh);
+    getPlayerGoalDirection(playerPos){
+        switch (playerPos) {
+            case 0: return {x:-1, y:0 };
+            case 1: return {x:1, y:0 };
+            case 2: return {x:0, y:1 };
+            case 3: return {x:0, y:-1 };
         }
+    }
+
+    roleBallVelocity(ball){
+        let newVelocity = {x:0,y:0};
+        let velocityFactor = randomInt(3, 5);
+        let goalPosition = randomInt(0, Object.keys(this.players).length);
+        let direction = this.getPlayerGoalDirection(goalPosition);
+        newVelocity.x = direction.x * velocityFactor;
+        newVelocity.y = direction.y * velocityFactor;
+
         ball.setVelocity(newVelocity.x, newVelocity.y)
     }
 
     resetBallPosition(ball){
         ball.isActive = false;
-        ball.x = physObjects.gameWidth / 2;
-        ball.y = physObjects.gameHeight / 2;
+        ball.x = getCentreX();
+        ball.y = getCentreY();
         ball.setVelocity(0,0);
         // pause the ball for a second - we can do something clientside to make this nicer
         setTimeout(()=>{
-            this.setBallVelocityBetween(ball, 5, 10, -10, 10);
+            this.roleBallVelocity(ball);
             ball.isActive = true;
         }, 2000)
 
@@ -390,29 +451,6 @@ class Game {
         }
         return angle;
     }
-
-
-    isVelocityBetweenMinAndMax(vel, min, max){
-        let absVeloX = Math.abs(vel.x);
-        let absVeloY = Math.abs(vel.y);
-        if(absVeloX + absVeloY < min || absVeloX + absVeloY > max ){
-            return false
-        }else{
-            return true
-        }
-    }
-
-
-    randomInt(low, high) {
-        return Math.floor(Math.random() * (high - low) + low);
-    }
-
-    randomVelocity(low, high){
-        let velY = this.randomInt(low, high);
-        let velX = this.randomInt(low, high);
-        return{x: velX, y: velY};
-    }
-
 }
 
 

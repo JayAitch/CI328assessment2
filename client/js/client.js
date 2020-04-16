@@ -69,6 +69,10 @@ Client = {
             gameClient.playerDeath(data.id);
         });
 
+        Client.socket.on('powerupcollected',function(){
+            gameClient.powerUpCollected();
+        });
+
         Client.socket.on('endgame',function(data){
             gameClient.endGame(data.id);
         });
@@ -97,7 +101,9 @@ Client = {
         Client.socket.on('characterchange', function (data) {
             lobbyClient.changeLobbyCharacter(data.position, data.character);
         });
-
+        Client.socket.on('spawnpowerup', function(data){
+            gameClient.spawnPowerUp(data.x,data.y);
+        });
         // this could target a specific lobby?
         Client.socket.on('alllobbymembers',function (data) {
             console.log('alllobbymemebrs');
@@ -149,7 +155,9 @@ const gameClient =  {
     goalScored: function(id){
         this.scene.goalScored(id);
     },
-
+    powerUpCollected: function(){
+      this.scene.collectPowerUp();
+    },
 
     playerDeath: function(id){
         this.scene.killPlayer(id);
@@ -168,6 +176,11 @@ const gameClient =  {
 
     onCollisionPlayerBall: function(ball, player){
         this.scene.onCollisionPlayerBall(ball, player);
+    },
+    spawnPowerUp: function(x,y){
+        this.scene.spawnPowerUp(x,y);
+        console.log("spawning powerup");
+        console.log(`${x},${y}`);
     }
 };
 
