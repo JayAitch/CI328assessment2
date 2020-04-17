@@ -50,7 +50,7 @@ class GameScene extends Phaser.Scene {
             "SMALL": {size: 1, eyes: 4, colour: 0xffff00, type: 'slime'}
         }
 
-        sounds["loop"].play();
+        sounds["music"].play();
     }
 
     spawnBall(key, x, y) {
@@ -188,7 +188,7 @@ class GameScene extends Phaser.Scene {
             "Lobby Selection"
         );
         
-        sounds["loop"].stop();
+        sounds["music"].stop();
 
     }
 

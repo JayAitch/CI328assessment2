@@ -74,7 +74,9 @@ class LandingScene extends Phaser.Scene {
         this.load.audio('powerup', 'assets/audio/power.wav'); // collect powerup
         this.load.audio('pong', 'assets/audio/pong.wav'); // hit ball
         this.load.audio('goal', 'assets/audio/goal.wav'); // score goal
-        this.load.audio('music', 'assets/audio/halloween.wav'); // score goal
+        // this.load.audio('music', 'assets/audio/halloween.wav'); // bg music https://freesound.org/people/dAmbient/sounds/251936/
+        // this.load.audio('music', 'assets/audio/metal01.wav'); // bg music https://freesound.org/people/zagi2/sounds/183507/
+        this.load.audio('music', 'assets/audio/metal02.wav'); // bg music https://freesound.org/people/zagi2/sounds/238827/
     }
 
     createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
