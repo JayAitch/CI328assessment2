@@ -69,14 +69,14 @@ class LandingScene extends Phaser.Scene {
         this.load.atlasXML('socket', 'assets/sprites/images/socket.png', 'assets/sprites/xml/socket.xml');
 
         // audio
-        this.load.audio('beep', 'assets/audio/beep.wav'); // button press
-        this.load.audio('wilhelm', 'assets/audio/wilhelm.wav'); // player death
-        this.load.audio('powerup', 'assets/audio/power.wav'); // collect powerup
-        this.load.audio('pong', 'assets/audio/pong.wav'); // hit ball
-        this.load.audio('goal', 'assets/audio/goal.wav'); // score goal
-        // this.load.audio('music', 'assets/audio/halloween.wav'); // bg music https://freesound.org/people/dAmbient/sounds/251936/
-        // this.load.audio('music', 'assets/audio/metal01.wav'); // bg music https://freesound.org/people/zagi2/sounds/183507/
-        this.load.audio('music', 'assets/audio/metal02.wav'); // bg music https://freesound.org/people/zagi2/sounds/238827/
+        this.load.audio('beep', 'assets/audio/beep.wav');       // button press    - https://freesound.org/people/OwlStorm/sounds/404793/
+        this.load.audio('wilhelm', 'assets/audio/wilhelm.wav'); // player death    - https://freesound.org/people/JarredGibb/sounds/219453/
+        this.load.audio('powerup', 'assets/audio/power.wav');   // collect powerup - https://freesound.org/people/akelley6/sounds/453027/
+        this.load.audio('pong', 'assets/audio/pong.wav');       // hit ball        - https://freesound.org/people/NoiseCollector/sounds/4359/
+        this.load.audio('goal', 'assets/audio/goal.wav');       // score goal      - https://freesound.org/people/GameAudio/sounds/220173/
+        // this.load.audio('music', 'assets/audio/halloween.wav'); // bg music        - https://freesound.org/people/dAmbient/sounds/251936/
+        // this.load.audio('music', 'assets/audio/metal01.wav');   // bg music        - https://freesound.org/people/zagi2/sounds/183507/
+        this.load.audio('music', 'assets/audio/metal02.wav');   // bg music        - https://freesound.org/people/zagi2/sounds/238827/
     }
 
     createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
@@ -147,12 +147,12 @@ class LandingScene extends Phaser.Scene {
         offsetByWidth(playBtn);
 
         // add audio to global property
-        sounds["beep"] = game.sound.add('beep'); // https://freesound.org/people/OwlStorm/sounds/404793/
-        sounds["death"] = game.sound.add('wilhelm'); // https://freesound.org/people/JarredGibb/sounds/219453/
-        sounds["powerup"] = game.sound.add('powerup'); // https://freesound.org/people/akelley6/sounds/453027/
-        sounds["pong"] = game.sound.add('pong'); // https://freesound.org/people/NoiseCollector/sounds/4359/
-        sounds["goal"] = game.sound.add('goal'); // https://freesound.org/people/GameAudio/sounds/220173/
-        sounds["music"] = game.sound.add('music'); // https://freesound.org/people/dAmbient/sounds/251936/
+        sounds["beep"] = game.sound.add('beep');
+        sounds["death"] = game.sound.add('wilhelm');
+        sounds["powerup"] = game.sound.add('powerup');
+        sounds["pong"] = game.sound.add('pong');
+        sounds["goal"] = game.sound.add('goal');
+        sounds["music"] = game.sound.add('music');
         sounds["music"].loop = true;
         
 
@@ -270,7 +270,6 @@ class LobbyScene extends Phaser.Scene {
             setTimeout(()=> {
             volume = volume ? 0 : 1;
                 game.sound.volume = volume;
-                console.log('volume', sounds, volume)
             }, sounds["beep"].duration + 500); // always over duration
 
         };
