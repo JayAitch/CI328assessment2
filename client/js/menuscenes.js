@@ -25,6 +25,10 @@ const textStyles = {
 const characters = {"Big":{},"Medium":{}, "Small":{}};  // probably store this somewhere more relevant
 const charactersArray = ["BIG","MEDIUM", "SMALL"]; //temp this could be constructed by the characters map or somehtign
 var HUDBaseDepth = 10;
+
+// jack audio
+sounds = {};
+
 // consider making this screens a generic class
 class LandingScene extends Phaser.Scene {
     constructor(){
@@ -59,6 +63,10 @@ class LandingScene extends Phaser.Scene {
         this.load.atlasXML('metalLeft', 'assets/sprites/images/metalLeft.png', 'assets/sprites/xml/metalLeft.xml');
         this.load.atlasXML('metalRight', 'assets/sprites/images/metalRight.png', 'assets/sprites/xml/metalRight.xml');
         this.load.atlasXML('socket', 'assets/sprites/images/socket.png', 'assets/sprites/xml/socket.xml');
+
+        // jack audio
+        this.load.audio('beep', 'assets/audio/beep.wav');
+        this.load.audio('wilhelm', 'assets/audio/wilhelm.wav');
     }
 
     createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
@@ -108,6 +116,10 @@ class LandingScene extends Phaser.Scene {
             Client.start(this.ip, this.socket);
             clientStarted = true;
         }
+
+        // jack audio
+        sounds["beep"] = game.sound.add('beep');
+        sounds["scream"] = game.sound.add('wilhelm');
 
         // error handle fained connection in lobby switch make sure this has happended
 
@@ -369,6 +381,7 @@ class ImageButton {
         //    Audio.uiClickSound.play(); // way to play sound generically with buttons
             action();
             console.log("btn-clicked");
+            sounds["beep"].play();
         });
 
         // show the player the click action will be performed on this button
@@ -376,7 +389,6 @@ class ImageButton {
             if(this.btnIcon) this.btnIcon.tint = 0xeeeeee;
             this.newBtn.tint = 0xeeeeee;
         });
-    ﻿
 
         // reset the tint to the base one, allow external control for example on settings screen
         this.newBtn.on('pointerout', (pointer) => {
