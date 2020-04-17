@@ -26,8 +26,10 @@ const characters = {"Big":{},"Medium":{}, "Small":{}};  // probably store this s
 const charactersArray = ["BIG","MEDIUM", "SMALL"]; //temp this could be constructed by the characters map or somehtign
 var HUDBaseDepth = 10;
 
-// jack audio
-sounds = {};
+// audio
+const sounds = {};
+let volume = 1;
+let tick;
 
 // consider making this screens a generic class
 class LandingScene extends Phaser.Scene {
@@ -56,6 +58,8 @@ class LandingScene extends Phaser.Scene {
         this.load.image('doodad11', 'assets/backdrops/doodad11.png');
         this.load.image('ball', 'assets/sprites/images/ball.png');
         this.load.image('eye', 'assets/sprites/images/eye.png');
+        this.load.image('tick', 'assets/sprites/images/tick.png');
+        this.load.image('untick', 'assets/sprites/images/untick.png');
         this.load.atlasXML('slimeMiddle', 'assets/sprites/images/SlimeMiddle.png', 'assets/sprites/xml/SlimeMiddle.xml');
         this.load.atlasXML('slimeLeft', 'assets/sprites/images/slimeLeft.png', 'assets/sprites/xml/slimeLeft.xml');
         this.load.atlasXML('slimeRight', 'assets/sprites/images/slimeRight.png', 'assets/sprites/xml/slimeRight.xml');
@@ -64,9 +68,13 @@ class LandingScene extends Phaser.Scene {
         this.load.atlasXML('metalRight', 'assets/sprites/images/metalRight.png', 'assets/sprites/xml/metalRight.xml');
         this.load.atlasXML('socket', 'assets/sprites/images/socket.png', 'assets/sprites/xml/socket.xml');
 
-        // jack audio
-        this.load.audio('beep', 'assets/audio/beep.wav');
-        this.load.audio('wilhelm', 'assets/audio/wilhelm.wav');
+        // audio
+        this.load.audio('beep', 'assets/audio/beep.wav'); // button press
+        this.load.audio('wilhelm', 'assets/audio/wilhelm.wav'); // player death
+        this.load.audio('powerup', 'assets/audio/power.wav'); // collect powerup
+        this.load.audio('pong', 'assets/audio/pong.wav'); // hit ball
+        this.load.audio('goal', 'assets/audio/goal.wav'); // score goal
+        this.load.audio('music', 'assets/audio/halloween.wav'); // score goal
     }
 
     createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
@@ -117,10 +125,6 @@ class LandingScene extends Phaser.Scene {
             clientStarted = true;
         }
 
-        // jack audio
-        sounds["beep"] = game.sound.add('beep');
-        sounds["scream"] = game.sound.add('wilhelm');
-
         // error handle fained connection in lobby switch make sure this has happended
 
         let playBtnAction = () => {
@@ -140,8 +144,15 @@ class LandingScene extends Phaser.Scene {
             );
         offsetByWidth(playBtn);
 
-
-
+        // add audio to global property
+        sounds["beep"] = game.sound.add('beep'); // https://freesound.org/people/OwlStorm/sounds/404793/
+        sounds["death"] = game.sound.add('wilhelm'); // https://freesound.org/people/JarredGibb/sounds/219453/
+        sounds["powerup"] = game.sound.add('powerup'); // https://freesound.org/people/akelley6/sounds/453027/
+        sounds["pong"] = game.sound.add('pong'); // https://freesound.org/people/NoiseCollector/sounds/4359/
+        sounds["goal"] = game.sound.add('goal'); // https://freesound.org/people/GameAudio/sounds/220173/
+        sounds["music"] = game.sound.add('music'); // https://freesound.org/people/dAmbient/sounds/251936/
+        sounds["music"].loop = true;
+        
 
 
 
@@ -247,6 +258,28 @@ class LobbyScene extends Phaser.Scene {
             "PLAY"
         );
         offsetByWidth(this.playBtn);
+
+        // mute audio - make checkbox sprites and button
+        let untick = this.add.sprite(game.config.width - 110, 50, 'untick').setScale(0.2);
+        tick = this.add.sprite(game.config.width - 110, 50, 'tick').setScale(0.2);
+        tick.alpha = 0; // start unticked
+        let muteBtnAction = ()=> {
+            tick.alpha = tick.alpha ? 0 : 1;
+            setTimeout(()=> {
+            volume = volume ? 0 : 1;
+                game.sound.volume = volume;
+                console.log('volume', sounds, volume)
+            }, sounds["beep"].duration + 500); // always over duration
+
+        };
+        let muteBtn = new ImageButton(
+            game.config.width - 115,
+            55,
+            undefined,
+            this,
+            muteBtnAction,
+            "             Mute" // slightly overlay checkbox sprites with this button
+        );
 
         this.createCharacterSelectionControls();
 
@@ -378,10 +411,9 @@ class ImageButton {
         // add a call to the defined action to DOM click event
         this.newBtn.on('pointerdown', () => {
             // feedback for button presses
-        //    Audio.uiClickSound.play(); // way to play sound generically with buttons
+            sounds["beep"].play();
             action();
             console.log("btn-clicked");
-            sounds["beep"].play();
         });
 
         // show the player the click action will be performed on this button

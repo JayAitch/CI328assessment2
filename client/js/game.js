@@ -49,6 +49,8 @@ class GameScene extends Phaser.Scene {
             "MEDIUM": {size: 3, eyes: 3, colour: null, type: 'metal'},
             "SMALL": {size: 1, eyes: 4, colour: 0xffff00, type: 'slime'}
         }
+
+        sounds["loop"].play();
     }
 
     spawnBall(key, x, y) {
@@ -75,6 +77,8 @@ class GameScene extends Phaser.Scene {
 
     collectPowerUp(){
         this.powerUp.destroy();
+
+        sounds["powerup"].play();
     }
 
     buildBackdrop() {
@@ -130,12 +134,16 @@ class GameScene extends Phaser.Scene {
     goalScored(id){
         let player = Game.playerMap[id];
         player.loseLife();
+
+        sounds["goal"].play();
     }
 
 
     killPlayer(id){
         let player = Game.playerMap[id];
         this.removePlayer(id);
+        
+        sounds["death"].play();
     }
 
 
@@ -179,7 +187,8 @@ class GameScene extends Phaser.Scene {
             lobbySelectionBtnAction,
             "Lobby Selection"
         );
-
+        
+        sounds["loop"].stop();
 
     }
 
@@ -203,6 +212,8 @@ class GameScene extends Phaser.Scene {
         let emitter = this.emitter;
         emitter.setPosition(ball.x,ball.y);
         emitter.emitParticle();
+
+        sounds["pong"].play();
     }
 
     moveBall(key, x, y) {
