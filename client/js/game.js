@@ -42,13 +42,14 @@ class GameScene extends Phaser.Scene {
             Client.sendStopMove();
         });
 
-        this.createEmitter();
-
         this.characters = {
             "BIG": {size: 6, eyes: 4, colour: 0x00ffff, type: 'slime'},
             "MEDIUM": {size: 3, eyes: 3, colour: null, type: 'metal'},
             "SMALL": {size: 1, eyes: 4, colour: 0xffff00, type: 'slime'}
         }
+
+        // remove leftover trails if restarted (seems to spawn an extra trail on restarts)
+        this.removeTrails();
     }
 
     spawnBall(key, x, y) {
@@ -87,23 +88,6 @@ class GameScene extends Phaser.Scene {
             randNum = parseInt(Math.random() * this.backdropItems.doodads.length);
             this.add.image(400, 400, this.backdropItems.doodads[randNum]);
         }
-    }
-
-    createEmitter(){
-        let particles = this.add.particles('ball');
-        particles.setDepth(2);
-        this.emitter = particles.createEmitter({
-            x: 300,
-            y: 300,
-            on:false,
-            speed: { min: 150, max: 250 },
-            lifespan: { min: 200, max: 300 },
-            gravityY: 250,
-            blendMode: 'ADD',
-            scale: 0.2,
-            quantity: 5,
-        });
-
     }
 
 
@@ -191,10 +175,10 @@ class GameScene extends Phaser.Scene {
     }
     // change this to remove balls
     removeTrails(){
-
-        for(let i = 0; i < this.ballTrailParticles.length; i++){
-            //cant get this to work should probably be handled ina  ball class anyway
-        }
+        this.ballTrailParticles.forEach((trail)=> {
+            if (trail) trail.emitters.first.remove();
+        });
+        this.ballTrailParticles = [];
     }
 
     onCollisionPlayerBall(ball, player) {
