@@ -25,6 +25,12 @@ const textStyles = {
 const characters = {"Big":{},"Medium":{}, "Small":{}};  // probably store this somewhere more relevant
 const charactersArray = ["BIG","MEDIUM", "SMALL"]; //temp this could be constructed by the characters map or somehtign
 var HUDBaseDepth = 10;
+
+// audio
+const sounds = {};
+let volume = 1;
+let tick;
+
 // consider making this screens a generic class
 class LandingScene extends Phaser.Scene {
     constructor(){
@@ -52,6 +58,8 @@ class LandingScene extends Phaser.Scene {
         this.load.image('doodad11', 'assets/backdrops/doodad11.png');
         this.load.image('ball', 'assets/sprites/images/ball.png');
         this.load.image('eye', 'assets/sprites/images/eye.png');
+        this.load.image('tick', 'assets/sprites/images/tick.png');
+        this.load.image('untick', 'assets/sprites/images/untick.png');
         this.load.atlasXML('slimeMiddle', 'assets/sprites/images/SlimeMiddle.png', 'assets/sprites/xml/SlimeMiddle.xml');
         this.load.atlasXML('slimeLeft', 'assets/sprites/images/slimeLeft.png', 'assets/sprites/xml/slimeLeft.xml');
         this.load.atlasXML('slimeRight', 'assets/sprites/images/slimeRight.png', 'assets/sprites/xml/slimeRight.xml');
@@ -59,6 +67,14 @@ class LandingScene extends Phaser.Scene {
         this.load.atlasXML('metalLeft', 'assets/sprites/images/metalLeft.png', 'assets/sprites/xml/metalLeft.xml');
         this.load.atlasXML('metalRight', 'assets/sprites/images/metalRight.png', 'assets/sprites/xml/metalRight.xml');
         this.load.atlasXML('socket', 'assets/sprites/images/socket.png', 'assets/sprites/xml/socket.xml');
+
+        // audio
+        this.load.audio('beep', 'assets/audio/beep.wav');       // button press    - https://freesound.org/people/OwlStorm/sounds/404793/
+        this.load.audio('wilhelm', 'assets/audio/wilhelm.wav'); // player death    - https://freesound.org/people/JarredGibb/sounds/219453/
+        this.load.audio('powerup', 'assets/audio/power.wav');   // collect powerup - https://freesound.org/people/akelley6/sounds/453027/
+        this.load.audio('pong', 'assets/audio/pong.wav');       // hit ball        - https://freesound.org/people/NoiseCollector/sounds/4359/
+        this.load.audio('goal', 'assets/audio/goal.wav');       // score goal      - https://freesound.org/people/GameAudio/sounds/220173/
+        this.load.audio('music', 'assets/audio/metal-loop.wav');   // bg music        - https://freesound.org/people/zagi2/sounds/238827/
     }
 
     createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
@@ -128,8 +144,15 @@ class LandingScene extends Phaser.Scene {
             );
         offsetByWidth(playBtn);
 
-
-
+        // add audio to global property
+        sounds["beep"] = game.sound.add('beep');
+        sounds["death"] = game.sound.add('wilhelm');
+        sounds["powerup"] = game.sound.add('powerup');
+        sounds["pong"] = game.sound.add('pong');
+        sounds["goal"] = game.sound.add('goal');
+        sounds["music"] = game.sound.add('music');
+        sounds["music"].loop = true;
+        
 
 
 
@@ -235,6 +258,27 @@ class LobbyScene extends Phaser.Scene {
             "PLAY"
         );
         offsetByWidth(this.playBtn);
+
+        // mute audio - make checkbox sprites and button
+        let untick = this.add.sprite(game.config.width - 110, 50, 'untick').setScale(0.2);
+        tick = this.add.sprite(game.config.width - 110, 50, 'tick').setScale(0.2);
+        tick.alpha = 0; // start unticked
+        let muteBtnAction = ()=> {
+            tick.alpha = tick.alpha ? 0 : 1;
+            setTimeout(()=> {
+            volume = volume ? 0 : 1;
+                game.sound.volume = volume;
+            }, sounds["beep"].duration + 500); // always over duration
+
+        };
+        let muteBtn = new ImageButton(
+            game.config.width - 115,
+            55,
+            undefined,
+            this,
+            muteBtnAction,
+            "             Mute" // slightly overlay checkbox sprites with this button
+        );
 
         this.createCharacterSelectionControls();
 
@@ -366,7 +410,7 @@ class ImageButton {
         // add a call to the defined action to DOM click event
         this.newBtn.on('pointerdown', () => {
             // feedback for button presses
-        //    Audio.uiClickSound.play(); // way to play sound generically with buttons
+            sounds["beep"].play();
             action();
             console.log("btn-clicked");
         });
@@ -376,7 +420,6 @@ class ImageButton {
             if(this.btnIcon) this.btnIcon.tint = 0xeeeeee;
             this.newBtn.tint = 0xeeeeee;
         });
-    ﻿
 
         // reset the tint to the base one, allow external control for example on settings screen
         this.newBtn.on('pointerout', (pointer) => {

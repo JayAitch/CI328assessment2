@@ -48,6 +48,8 @@ class GameScene extends Phaser.Scene {
             "SMALL": {size: 1, eyes: 4, colour: 0xffff00, type: 'slime'}
         }
 
+        sounds["music"].play();
+        
         // remove leftover trails if restarted (seems to spawn an extra trail on restarts)
         this.removeTrails();
     }
@@ -76,6 +78,8 @@ class GameScene extends Phaser.Scene {
 
     collectPowerUp(){
         this.powerUp.destroy();
+
+        sounds["powerup"].play();
     }
 
     buildBackdrop() {
@@ -114,12 +118,16 @@ class GameScene extends Phaser.Scene {
     goalScored(id){
         let player = Game.playerMap[id];
         player.loseLife();
+
+        sounds["goal"].play();
     }
 
 
     killPlayer(id){
         let player = Game.playerMap[id];
         this.removePlayer(id);
+        
+        sounds["death"].play();
     }
 
 
@@ -163,7 +171,8 @@ class GameScene extends Phaser.Scene {
             lobbySelectionBtnAction,
             "Lobby Selection"
         );
-
+        
+        sounds["music"].stop();
 
     }
 
@@ -187,6 +196,8 @@ class GameScene extends Phaser.Scene {
         let emitter = this.emitter;
         emitter.setPosition(ball.x,ball.y);
         emitter.emitParticle();
+
+        sounds["pong"].play();
     }
 
     moveBall(key, x, y) {
