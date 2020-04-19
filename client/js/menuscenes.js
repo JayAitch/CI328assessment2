@@ -262,7 +262,7 @@ class LobbyScene extends Phaser.Scene {
         // mute audio - make checkbox sprites and button
         let untick = this.add.sprite(game.config.width - 110, 50, 'untick').setScale(0.2);
         tick = this.add.sprite(game.config.width - 110, 50, 'tick').setScale(0.2);
-        tick.alpha = 0; // start unticked
+        tick.alpha = volume ? 0 : 1; // use current volume
         let muteBtnAction = ()=> {
             tick.alpha = tick.alpha ? 0 : 1;
             setTimeout(()=> {

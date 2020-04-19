@@ -222,6 +222,8 @@ class Game {
     update(){
         this.updatePlayerPositions();
         this.updateBallPositions();
+        
+        this.collisionManager.update();
     }
 
     updateBallPositions(){

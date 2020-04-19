@@ -191,12 +191,6 @@ class GameScene extends Phaser.Scene {
     }
 
     onCollisionPlayerBall(ball, player) {
-
-        // blow particles for fun
-        let emitter = this.emitter;
-        emitter.setPosition(ball.x,ball.y);
-        emitter.emitParticle();
-
         sounds["pong"].play();
     }
 
