@@ -5,6 +5,7 @@ class GameScene extends Phaser.Scene {
         super({key: 'maingame'});
         this.balls = {};
         this.ballTrailParticles = [];
+        this.firstBlood = false;
     }
 
     create() {
@@ -119,6 +120,8 @@ class GameScene extends Phaser.Scene {
         let player = Game.playerMap[id];
         player.loseLife();
 
+        if (!this.firstBlood) { this.firstBlood = true; sounds["firstblood"].play(); }
+
         sounds["goal"].play();
     }
 
@@ -126,8 +129,19 @@ class GameScene extends Phaser.Scene {
     killPlayer(id){
         let player = Game.playerMap[id];
         this.removePlayer(id);
-        
-        sounds["death"].play();
+
+        // 10% chance of wilhelm scream
+        let max = 9;
+        let min = 0;
+        let rand = Math.floor(Math.random() * (max - min + 1)) + min; // inclusive
+        if (rand > 0) {
+            // if not wilhelm, choose between others
+            max = deathSounds.length - 1;
+            min = 1;
+            rand = Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        let file = 'death' + rand;
+        sounds[file].play();
     }
 
 
@@ -191,12 +205,6 @@ class GameScene extends Phaser.Scene {
     }
 
     onCollisionPlayerBall(ball, player) {
-
-        // blow particles for fun
-        let emitter = this.emitter;
-        emitter.setPosition(ball.x,ball.y);
-        emitter.emitParticle();
-
         sounds["pong"].play();
     }
 

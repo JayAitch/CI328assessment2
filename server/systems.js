@@ -53,7 +53,6 @@ const Updater = {
 class CollisionManager {
     constructor(){
         this.colliders = [];
-        Updater.addToUpdate(this);
     }
 
     addCollision(a, b, callback) {
