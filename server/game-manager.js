@@ -88,24 +88,24 @@ class Game {
         };
         let bound = this.getBoundsFromPositions(newPlayer, gameCenter, false);
         switch (bound) {
-            case 2:
-                nearestPosts.push(this.posts[0]);
-                nearestPosts.push(this.posts[3]);
+            case 2: // screen-left
+                nearestPosts.push(this.posts[0]); // top-left
+                nearestPosts.push(this.posts[3]); // bottom-left
                 
                 break;
-            case 3:
-                nearestPosts.push(this.posts[0]);
-                nearestPosts.push(this.posts[1]);
+            case 3: // screen-top
+                nearestPosts.push(this.posts[0]); // top left
+                nearestPosts.push(this.posts[1]); // top-right
                 
                 break;
-            case 0:
-                nearestPosts.push(this.posts[1]);
-                nearestPosts.push(this.posts[2]);
+            case 0: // screen-right
+                nearestPosts.push(this.posts[1]); // top-right
+                nearestPosts.push(this.posts[2]); // bottom-right
                 
                 break;
-            case 1:
-                nearestPosts.push(this.posts[3]);
-                nearestPosts.push(this.posts[2]);
+            case 1: // screen-bottom
+                nearestPosts.push(this.posts[2]); // bottom-right
+                nearestPosts.push(this.posts[3]); // bottom-left
                 
                 break;
         }
