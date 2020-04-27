@@ -28,6 +28,7 @@ var HUDBaseDepth = 10;
 
 // audio
 const sounds = {};
+let deathSounds;
 let volume = 1;
 
 // consider making this screens a generic class
@@ -74,12 +75,17 @@ class LandingScene extends Phaser.Scene {
         this.load.atlasXML('socket', 'assets/sprites/images/socket.png', 'assets/sprites/xml/socket.xml');
 
         // audio
-        this.load.audio('beep', 'assets/audio/beep.wav');       // button press    - https://freesound.org/people/OwlStorm/sounds/404793/
-        this.load.audio('wilhelm', 'assets/audio/wilhelm.wav'); // player death    - https://freesound.org/people/JarredGibb/sounds/219453/
-        this.load.audio('powerup', 'assets/audio/power.wav');   // collect powerup - https://freesound.org/people/akelley6/sounds/453027/
-        this.load.audio('pong', 'assets/audio/pong.wav');       // hit ball        - https://freesound.org/people/NoiseCollector/sounds/4359/
-        this.load.audio('goal', 'assets/audio/goal.wav');       // score goal      - https://freesound.org/people/GameAudio/sounds/220173/
-        this.load.audio('music', 'assets/audio/metal-loop.wav');   // bg music        - https://freesound.org/people/zagi2/sounds/238827/
+        this.load.audio('beep', 'assets/audio/beep.wav');               // button press     - https://freesound.org/people/OwlStorm/sounds/404793/          (cc0)
+        this.load.audio('wilhelm', 'assets/audio/wilhelm.wav');         // player death     - https://freesound.org/people/JarredGibb/sounds/219453/        (cc0)
+        this.load.audio('powerup', 'assets/audio/powerup.wav');         // collect powerup  - https://freesound.org/people/OwlStorm/sounds/404770/          (cc0)
+        this.load.audio('pong', 'assets/audio/pong.wav');               // hit ball         - https://freesound.org/people/NoiseCollector/sounds/4359/      (by)
+        this.load.audio('goal', 'assets/audio/goal.wav');               // score goal       - https://freesound.org/people/GameAudio/sounds/220173/         (cc0)
+        this.load.audio('music', 'assets/audio/loop.wav');              // bg music         - https://freesound.org/people/Elder_Imp/sounds/233047/         (cc0)
+        this.load.audio('death1', 'assets/audio/death1.wav');           // death sound      - https://freesound.org/people/zglar/sounds/232289/             (by)
+        this.load.audio('death2', 'assets/audio/death2.wav');           // death sound      - https://freesound.org/people/Michael%20Klier/sounds/318320/   (by)
+        this.load.audio('death3', 'assets/audio/death3.wav');           // death sound      - https://freesound.org/people/bananplyte/sounds/452166/        (cc0)
+        this.load.audio('firstblood', 'assets/audio/firstblood.wav');   // firstblood       - https://freesound.org/people/snaginneb/sounds/111489/         (cc0)
+        
     }
 
     createAnimation(key, repeat, frameRate, spriteSheet, animationName, startFrame, endFrame, yoyo) {
@@ -164,9 +170,18 @@ class LandingScene extends Phaser.Scene {
             );
         offsetByWidth(playBtn);
 
+        deathSounds = [
+            {key: 'wilhelm', name: 'death0'},
+            {key: 'death1', name: 'death1'},
+            {key: 'death2', name: 'death2'},
+            {key: 'death3', name: 'death3'}
+        ];
+        deathSounds.forEach((sound)=> {
+            sounds[sound.name] = game.sound.add(sound.key);
+        })
         // add audio to global property
         sounds["beep"] = game.sound.add('beep');
-        sounds["death"] = game.sound.add('wilhelm');
+        sounds["firstblood"] = game.sound.add('firstblood');
         sounds["powerup"] = game.sound.add('powerup');
         sounds["pong"] = game.sound.add('pong');
         sounds["goal"] = game.sound.add('goal');
@@ -284,7 +299,7 @@ class LobbyScene extends Phaser.Scene {
         // mute audio - make checkbox sprites and button
         let audioUntick = this.add.sprite(game.config.width - 120, 50, 'untick').setScale(0.2);
         let audioTick = this.add.sprite(game.config.width - 120, 50, 'tick').setScale(0.2);
-        audioTick.alpha = 0; // start unticked
+        audioTick.alpha = volume ? 0 : 1; // use current volume
         let muteBtnAction = ()=> {
             audioTick.alpha = audioTick.alpha ? 0 : 1;
             setTimeout(()=> {
