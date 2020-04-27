@@ -1,8 +1,8 @@
  var Game = {};
 
 class GameScene extends Phaser.Scene {
-    init(noOfDoodads) {
-        noOfDoodads = this.doodads;
+    init(data) {
+        this.doodads = data.doodads;
     } 
     
     constructor() {

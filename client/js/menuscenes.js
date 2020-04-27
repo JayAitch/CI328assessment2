@@ -319,11 +319,11 @@ class LobbyScene extends Phaser.Scene {
 
         let doodadUntick = this.add.sprite(game.config.width - 120, 100, 'untick').setScale(0.2);
         let doodadTick = this.add.sprite(game.config.width - 120, 100, 'tick').setScale(0.2);
-        doodadTick = 1;
+        doodadTick.alpha = this.doodads ? 1 : 0;
         let doodadBtnAction = ()=> {
             doodadTick.alpha = doodadTick.alpha ? 0 : 1;
             setTimeout(()=> {
-            this.doodads = this.doodads ? 3 : 0;
+                this.doodads = doodadTick.alpha ? 3 : 0;
             }, sounds["beep"].duration + 500); // always over duration
 
         };
@@ -357,7 +357,7 @@ class LobbyScene extends Phaser.Scene {
 
     triggerGameLoad(){
         Game.triggerGame = null;
-        this.scene.start("maingame", this.doodads);
+        this.scene.start("maingame", { doodads: this.doodads });
         this.playBtn.active = false;
     }
 
